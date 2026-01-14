@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { encryptPayload } from '@/lib/crypto/encryption'
-import { validateCorporateEmail } from '@/lib/validation/email'
 import { rateLimits } from '@/lib/rate-limit'
+import { validateCorporateEmail } from '@/lib/validation/email'
 import { createIntakeSchema } from '@/lib/validation/schema'
 
 // Bot detection patterns

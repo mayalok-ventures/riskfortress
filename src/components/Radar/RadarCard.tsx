@@ -1,8 +1,9 @@
 'use client'
 
-import { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { AlertTriangle, Shield, Users, Building, Cpu, Globe, Target } from 'lucide-react'
+import { ReactNode } from 'react'
+
 import { cn } from '@/lib/utils/formatters'
 
 interface RadarCardProps {

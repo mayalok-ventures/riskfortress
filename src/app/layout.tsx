@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google'
+
 import '@/styles/globals.css'
-import { ThemeProvider } from '@/components/Layout/ThemeProvider'
-import Header from '@/components/Layout/Header'
+import { Toaster } from 'sonner'
+
 import Footer from '@/components/Layout/Footer'
+import Header from '@/components/Layout/Header'
+import { ThemeProvider } from '@/components/Layout/ThemeProvider'
+
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { Toaster } from 'sonner'
 
 const inter = Inter({
     subsets: ['latin'],

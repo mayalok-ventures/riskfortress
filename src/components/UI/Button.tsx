@@ -1,5 +1,6 @@
-import { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
+import { ButtonHTMLAttributes, ReactNode } from 'react'
+
 import { cn } from '@/lib/utils/formatters'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

@@ -1,4 +1,3 @@
-import { Metadata } from 'next'
 import {
     Shield,
     Lock,
@@ -12,6 +11,7 @@ import {
     Network,
     Zap
 } from 'lucide-react'
+import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {

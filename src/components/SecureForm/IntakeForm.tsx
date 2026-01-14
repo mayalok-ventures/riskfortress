@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { motion } from 'framer-motion'
 import { Lock, Shield, Building, User, Mail, Phone, Globe, AlertCircle } from 'lucide-react'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import EncryptionAnimation from './EncryptionAnimation'
+import { z } from 'zod'
+
 import { validateCorporateEmail } from '@/lib/validation/email'
+
+import EncryptionAnimation from './EncryptionAnimation'
 
 const intakeSchema = z.object({
     firstName: z.string().min(2, 'First name must be at least 2 characters'),

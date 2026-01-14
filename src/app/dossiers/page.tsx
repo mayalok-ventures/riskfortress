@@ -1,9 +1,10 @@
 'use client'
 
-import DossierCard from '@/components/DossierCard/DossierCard'
 import { Shield, Lock, Eye, FileText, AlertTriangle, Building, Users, Cpu, BookOpen, Newspaper, X } from 'lucide-react'
-import { useState } from 'react'
 import Image from 'next/image'
+import { useState } from 'react'
+
+import DossierCard from '@/components/DossierCard/DossierCard'
 
 const metadata = {
     title: 'Risk Intelligence Dossiers | RiskFortress',

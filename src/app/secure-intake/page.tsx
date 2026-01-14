@@ -1,6 +1,7 @@
-import { Metadata } from 'next'
-import IntakeForm from '@/components/SecureForm/IntakeForm'
 import { Lock, Shield, Key, EyeOff } from 'lucide-react'
+import { Metadata } from 'next'
+
+import IntakeForm from '@/components/SecureForm/IntakeForm'
 
 export const metadata: Metadata = {
     title: 'Secure Intelligence Intake | RiskFortress',

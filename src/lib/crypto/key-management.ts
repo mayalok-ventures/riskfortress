@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+
 import { EncryptionService } from './encryption'
 
 export interface KeyMetadata {

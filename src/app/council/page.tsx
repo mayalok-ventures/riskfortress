@@ -1,5 +1,5 @@
-import { Metadata } from 'next'
 import { Users, Shield, Award, Briefcase, Globe, Cpu, Lock, Star } from 'lucide-react'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = {
     title: 'Security Intelligence Council | RiskFortress',

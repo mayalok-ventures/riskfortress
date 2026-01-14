@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Lock, Eye, FileText, AlertTriangle, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
+
 import RedactionEffect from './RedactionEffect'
 
 interface DossierCardProps {

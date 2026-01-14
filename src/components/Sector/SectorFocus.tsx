@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Factory, Users, Cpu, ChevronRight, Shield, Lock, Target } from 'lucide-react'
+import { useState } from 'react'
 
 const sectors = [
     {

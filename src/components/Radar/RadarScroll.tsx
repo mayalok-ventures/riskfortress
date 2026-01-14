@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { AlertTriangle, Shield, Users, Building, Cpu, Globe } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+
 import RadarCard from './RadarCard'
 
 const riskData = [

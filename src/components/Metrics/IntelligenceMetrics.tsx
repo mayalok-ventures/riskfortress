@@ -1,8 +1,8 @@
 'use client'
 
 import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
 import { Shield, Users, Globe, Target } from 'lucide-react'
+import { useRef } from 'react'
 
 const metrics = [
     { icon: Shield, label: 'Enterprise Clients', value: 150, suffix: '+' },

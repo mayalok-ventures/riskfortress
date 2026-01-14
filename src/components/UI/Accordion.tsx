@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
+import { useState, ReactNode } from 'react'
+
 import { cn } from '@/lib/utils/formatters'
 
 interface AccordionItem {

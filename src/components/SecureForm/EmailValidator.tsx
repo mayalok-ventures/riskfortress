@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { validateCorporateEmail, suggestCorporateEmail } from '@/lib/validation/email'
 import { Mail, AlertCircle, Check, Building, Globe, Shield } from 'lucide-react'
+import { useState, useEffect } from 'react'
+
+import { validateCorporateEmail, suggestCorporateEmail } from '@/lib/validation/email'
 
 interface EmailValidatorProps {
     value: string

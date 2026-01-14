@@ -1,12 +1,14 @@
+import { Metadata } from 'next'
+
+import CTASection from '@/components/CTA/CTASection'
+import RiskFortressEdge from '@/components/Edge/RiskFortressEdge'
 import Hero from '@/components/Hero/HeroContent'
+import IntelligenceMetrics from '@/components/Metrics/IntelligenceMetrics'
 import RadarScroll from '@/components/Radar/RadarScroll'
 import RealityCheck from '@/components/RealityCheck/RealityCheck'
-import RiskFortressEdge from '@/components/Edge/RiskFortressEdge'
 import SectorFocus from '@/components/Sector/SectorFocus'
-import IntelligenceMetrics from '@/components/Metrics/IntelligenceMetrics'
 import Testimonials from '@/components/Testimonials/Testimonials'
-import CTASection from '@/components/CTA/CTASection'
-import { Metadata } from 'next'
+
 
 export const metadata: Metadata = {
     title: 'Deciphering Uncertainty. Protecting Sovereignty. | RiskFortress',
