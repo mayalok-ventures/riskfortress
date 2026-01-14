@@ -1,0 +1,6 @@
+{
+  "/page": "app/page.js",
+  "/secure-intake/page": "app/secure-intake/page.js",
+  "/capabilities/page": "app/capabilities/page.js",
+  "/dossiers/page": "app/dossiers/page.js"
+}

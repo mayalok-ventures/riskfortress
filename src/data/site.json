@@ -1,0 +1,124 @@
+{
+    "name": "RiskFortress Intelligence",
+    "domain": "riskfortress.com",
+    "description": "Enterprise Risk Management & Corporate Intelligence Platform for India",
+    "keywords": [
+        "Enterprise Risk Management India",
+        "Corporate Intelligence Agency",
+        "Predictive Risk Analytics",
+        "Strategic Security Consulting",
+        "Land Due Diligence India",
+        "TSCM Services India",
+        "Family Office Risk Management",
+        "HNI Executive Protection India",
+        "AI-Driven Risk Modeling",
+        "Future Threat Forecasting"
+    ],
+    "contact": {
+        "email": "intelligence@riskfortress.com",
+        "phone": "+91 22 XXXX XXXX",
+        "address": "Nariman Point, Mumbai, Maharashtra 400021, India"
+    },
+    "social": {
+        "linkedin": "https://linkedin.com/company/riskfortress",
+        "twitter": "https://twitter.com/riskfortress",
+        "instagram": "https://instagram.com/riskfortress"
+    },
+    "services": {
+        "enterpriseRisk": {
+            "title": "Enterprise Risk Management",
+            "description": "Comprehensive risk assessment for Fortune 500 companies",
+            "keywords": [
+                "Enterprise Risk Management India",
+                "Corporate Risk Framework"
+            ]
+        },
+        "landDueDiligence": {
+            "title": "Land Due Diligence",
+            "description": "End-to-end land verification for industrial projects",
+            "keywords": [
+                "Land Due Diligence India",
+                "Industrial Land Verification"
+            ]
+        },
+        "tscm": {
+            "title": "TSCM Services",
+            "description": "Technical Surveillance Counter-Measures",
+            "keywords": [
+                "TSCM Services India",
+                "Bug Sweeping"
+            ]
+        },
+        "familyOffice": {
+            "title": "Family Office Security",
+            "description": "Complete security architecture for HNIs",
+            "keywords": [
+                "Family Office Risk Management",
+                "HNI Security"
+            ]
+        }
+    },
+    "sectors": {
+        "industrial": {
+            "title": "Industrial & Manufacturing",
+            "clients": [
+                "Fortune 500 Manufacturing",
+                "Infrastructure Companies"
+            ],
+            "keywords": [
+                "Industrial Security",
+                "Supply Chain Security"
+            ]
+        },
+        "familyOffice": {
+            "title": "Family Offices & HNIs",
+            "clients": [
+                "Ultra-HNWI Families",
+                "Industrial Dynasties"
+            ],
+            "keywords": [
+                "Family Office Security",
+                "Legacy Succession"
+            ]
+        },
+        "corporate": {
+            "title": "Corporate & Technology",
+            "clients": [
+                "Technology Companies",
+                "Financial Institutions"
+            ],
+            "keywords": [
+                "Corporate Intelligence",
+                "Digital Espionage Defense"
+            ]
+        }
+    },
+    "pricing": {
+        "tiers": [
+            {
+                "name": "Enterprise Intelligence",
+                "startingPrice": "₹50,00,000",
+                "description": "For Fortune 500 companies"
+            },
+            {
+                "name": "Family Office Security",
+                "startingPrice": "₹25,00,000",
+                "description": "For ultra-HNWI families"
+            },
+            {
+                "name": "Industrial Due Diligence",
+                "startingPrice": "₹10,00,000",
+                "description": "For industrial projects"
+            }
+        ]
+    },
+    "security": {
+        "encryption": "AES-256-GCM",
+        "compliance": [
+            "ISO 27001",
+            "GDPR"
+        ],
+        "dataRetention": "72 hours",
+        "emailPolicy": "Corporate emails only"
+    }
+}

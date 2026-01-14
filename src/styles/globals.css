@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 222 47% 4%;
+        --foreground: 210 40% 98%;
+        --card: 222 47% 6%;
+        --card-foreground: 210 40% 98%;
+        --popover: 222 47% 6%;
+        --popover-foreground: 210 40% 98%;
+        --primary: 43 50% 55%;
+        --primary-foreground: 210 40% 98%;
+        --secondary: 217 33% 17%;
+        --secondary-foreground: 210 40% 98%;
+        --muted: 217 33% 17%;
+        --muted-foreground: 215 20% 65%;
+        --accent: 217 33% 17%;
+        --accent-foreground: 210 40% 98%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 217 33% 17%;
+        --input: 217 33% 17%;
+        --ring: 43 50% 55%;
+        --radius: 0.5rem;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+@layer utilities {
+    .glass-morphism {
+        @apply bg-gray-900/50 backdrop-blur-sm border border-gray-800;
+    }
+
+    .gradient-text {
+        @apply text-intelligence;
+    }
+
+    .grid-background {
+        background-image:
+            linear-gradient(to right, #1e293b 1px, transparent 1px),
+            linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    .topographic-background {
+        background-image: url("/images/topographic-bg.webp");
+        background-size: cover;
+        background-position: center;
+    }
+
+    .wireframe-background {
+        background-image: url("/images/wireframe-bg.webp");
+        background-size: cover;
+        background-position: center;
+        opacity: 0.1;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .text-balance {
+        text-wrap: balance;
+    }
+}
+
+/* Animation Classes */
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+.animate-shimmer {
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(14, 165, 233, 0.1) 50%,
+            transparent 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s linear infinite;
+}
+
+/* Focus styles for accessibility */
+.focus-visible {
+    @apply outline-none ring-2 ring-intelligence ring-offset-2 ring-offset-background;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
