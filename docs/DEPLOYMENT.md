@@ -378,7 +378,7 @@ git add .
 git commit -m "Initial commit: RiskFortress Enterprise Platform"
 
 # 2. Connect to GitHub
-git remote add origin https://github.com/yourusername/riskfortress.git
+git remote add origin https://github.com/mayalok-ventures/riskfortress.git
 git branch -M main
 git push -u origin main
 
