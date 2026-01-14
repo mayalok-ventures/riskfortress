@@ -4,7 +4,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Pages configuration
 [build]
-command = "npm run build:cloudflare"
+command = "npm run build"
 cwd = "."
 watch_dir = "src"
 

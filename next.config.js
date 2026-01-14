@@ -7,11 +7,14 @@ const nextConfig = {
         ignoreBuildErrors: true,
     },
     reactStrictMode: true,
+    output: 'export',  // <-- ADD THIS LINE HERE
     swcMinify: true,
+    // ... rest of your config remains the same
     compiler: {
         removeConsole: process.env.NODE_ENV === 'production',
     },
     images: {
+        unoptimized: true,
         formats: ['image/webp', 'image/avif'],
         remotePatterns: [
             {
