@@ -7,5 +7,5 @@ command = "npm run build"
 upload_dir = ".next"  # This should point to your build output
 
 # Cloudflare Pages specific
-[pages_build_output_dir]
-path = ".next"  # This is what Cloudflare Pages looks for
+pages_build_output_dir = ".next"
+
