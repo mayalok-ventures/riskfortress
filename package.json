@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
-        "build": "rd /s /q .next 2>nul & next build && rd /s /q .next\\cache 2>nul",
+        "build": "rm -rf .next && next build && rm -rf .next/cache",
         "start": "next start",
         "lint": "next lint",
         "format": "prettier --write .",
