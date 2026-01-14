@@ -86,6 +86,15 @@ const nextConfig = {
             },
         ];
     },
+    // Add these for Cloudflare
+    experimental: {
+        // This helps reduce bundle size
+        optimizeCss: true,
+    },
+    // Compress output
+    compress: true,
+    // Remove source maps in production
+    productionBrowserSourceMaps: false,
 };
 
 module.exports = nextConfig;

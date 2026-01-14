@@ -6,7 +6,11 @@ console.log('🚀 Building for Cloudflare Pages...')
 
 // Clean previous builds
 console.log('🧹 Cleaning previous builds...')
-execSync('rm -rf .next', { stdio: 'inherit' })
+try {
+  execSync('rmdir /s /q .next', { stdio: 'inherit' })
+} catch (e) {
+  // Directory might not exist, continue
+}
 
 // Set environment for Cloudflare
 process.env.NEXT_PUBLIC_APP_ENV = 'production'
@@ -21,21 +25,21 @@ console.log('⚙️  Creating Cloudflare configuration...')
 
 // Create _routes.json for Cloudflare Pages
 const routesConfig = {
-    version: 1,
-    include: ['/*'],
-    exclude: [
-        '/_next/*',
-        '/static/*',
-        '/api/*',
-        '/favicon.ico',
-        '/robots.txt',
-        '/sitemap.xml'
-    ]
+  version: 1,
+  include: ['/*'],
+  exclude: [
+    '/_next/*',
+    '/static/*',
+    '/api/*',
+    '/favicon.ico',
+    '/robots.txt',
+    '/sitemap.xml'
+  ]
 }
 
 fs.writeFileSync(
-    path.join('.next', '_routes.json'),
-    JSON.stringify(routesConfig, null, 2)
+  path.join('.next', '_routes.json'),
+  JSON.stringify(routesConfig, null, 2)
 )
 
 // Create _headers file for Cloudflare
@@ -59,8 +63,8 @@ const headersConfig = `
 `
 
 fs.writeFileSync(
-    path.join('.next', '_headers'),
-    headersConfig.trim()
+  path.join('.next', '_headers'),
+  headersConfig.trim()
 )
 
 // Create _redirects file
@@ -70,8 +74,8 @@ const redirectsConfig = `
 `
 
 fs.writeFileSync(
-    path.join('.next', '_redirects'),
-    redirectsConfig.trim()
+  path.join('.next', '_redirects'),
+  redirectsConfig.trim()
 )
 
 console.log('✅ Cloudflare build complete!')
