@@ -1,14 +1,10 @@
 import {
     Shield,
-    Lock,
-    Globe,
     Building,
     Users,
     Cpu,
     Target,
     BarChart3,
-    Eye,
-    Network,
     Zap
 } from 'lucide-react'
 import { Metadata } from 'next'
@@ -143,7 +139,7 @@ export default function CapabilitiesPage() {
 
                     <p className="text-xl text-gray-400 max-w-3xl mx-auto">
                         Unlike security guard agencies, we focus exclusively on strategic intelligence
-                        and risk management for India's most critical assets and private legacies.
+                        and risk management for India&apos;s most critical assets and private legacies.
                     </p>
                 </div>
 
@@ -200,11 +196,11 @@ export default function CapabilitiesPage() {
                     ))}
                 </div>
 
-                {/* What We Don't Do */}
+                {/* What We Don&apos;t Do */}
                 <div className="p-8 rounded-2xl bg-gradient-to-r from-gray-900 to-gray-950 border border-gray-800 max-w-4xl mx-auto">
                     <div className="text-center mb-8">
                         <h3 className="text-3xl font-bold text-white mb-4">
-                            What We <span className="text-red-400">Don't</span> Do
+                            What We <span className="text-red-400">Don&apos;t</span> Do
                         </h3>
                         <p className="text-gray-400">
                             To maintain our premium positioning and serve only Fortune 500 & HNI clients

@@ -240,6 +240,7 @@ export default function IntakeForm() {
                                         First Name
                                     </label>
                                     <input
+                                        id="firstName"
                                         {...register('firstName')}
                                         className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-800 text-white focus:border-intelligence focus:outline-none"
                                         placeholder="John"
@@ -255,6 +256,7 @@ export default function IntakeForm() {
                                         Last Name
                                     </label>
                                     <input
+                                        id="lastname"
                                         {...register('lastName')}
                                         className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-800 text-white focus:border-intelligence focus:outline-none"
                                         placeholder="Doe"
@@ -271,6 +273,7 @@ export default function IntakeForm() {
                                     Company
                                 </label>
                                 <input
+                                    id="company"
                                     {...register('company')}
                                     className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-800 text-white focus:border-intelligence focus:outline-none"
                                     placeholder="Your Corporation"
@@ -285,6 +288,7 @@ export default function IntakeForm() {
                                     Job Title
                                 </label>
                                 <input
+                                    id="jobTitle"
                                     {...register('jobTitle')}
                                     className="w-full px-4 py-3 rounded-lg bg-gray-900 border border-gray-800 text-white focus:border-intelligence focus:outline-none"
                                     placeholder="Chief Security Officer / Managing Director"

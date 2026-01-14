@@ -5,6 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 [build]
 command = "npm run build"
 upload_dir = ".next"
+pages_build_output_dir = ".next"
 
 [build.upload]
 format = "directory"
