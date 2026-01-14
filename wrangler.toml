@@ -4,26 +4,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [build]
 command = "npm run build"
-upload_dir = ".next"
-
-[build.upload]
-format = "directory"
-
-[site]
-bucket = ".next"
-entry-point = "workers-site"
-
-[[routes]]
-route = "https://riskfortress.com/*"
-
-# Environment-specific configurations
-[env.production]
-workers_dev = false
-zone_id = "your-zone-id"
-account_id = "your-account-id"
-
-[env.staging]
-workers_dev = true
+upload_dir = ".next"  # This should point to your build output
 
 # Cloudflare Pages specific
 [pages_build_output_dir]
