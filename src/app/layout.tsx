@@ -144,8 +144,7 @@ export const metadata: Metadata = {
         'mobile-web-app-capable': 'yes',
         'msapplication-TileColor': '#0c0a09',
         'msapplication-config': '/browserconfig.xml',
-        'theme-color': '#0c0a09', // single color
-        'msapplication-TileColor': '#0c0a09'
+        'theme-color': '#0c0a09'
     },
 }
 

@@ -239,7 +239,7 @@ export class KeyManagementService {
         const now = new Date()
         const results: Array<{ version: string; metadata: KeyMetadata; daysUntilExpiry: number }> = []
 
-        for (const [version, data] of this.keyStore.entries()) {
+        for (const [version, data] of Array.from(this.keyStore.entries())) {
             const expiryDate = new Date(data.metadata.expiresAt)
             const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 

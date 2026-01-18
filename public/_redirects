@@ -1,0 +1,10 @@
+# Cloudflare Pages redirects
+
+# Old API routes (redirect to homepage)
+/api/*  /  301
+
+# Handle trailing slashes
+/capabilities/  /capabilities  301
+/dossiers/  /dossiers  301
+/council/  /council  301
+/secure-intake/  /secure-intake  301
