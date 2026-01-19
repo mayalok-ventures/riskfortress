@@ -3,8 +3,8 @@ export const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     'name': 'RiskFortress Intelligence',
-    'url': 'https://riskfortress.com',
-    'logo': 'https://riskfortress.com/logo.png',
+    'url': 'https://riskfortress.in',
+    'logo': 'https://riskfortress.in/logo.png',
     'description': 'Enterprise intelligence and risk management platform',
     'address': {
         '@type': 'PostalAddress',

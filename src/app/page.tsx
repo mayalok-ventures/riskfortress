@@ -38,8 +38,8 @@ export default function Home() {
                         "@context": "https://schema.org",
                         "@type": "ProfessionalService",
                         "name": "RiskFortress Intelligence",
-                        "url": "https://riskfortress.com",
-                        "logo": "https://riskfortress.com/logo.svg",
+                        "url": "https://riskfortress.in",
+                        "logo": "https://riskfortress.in/logo.svg",
                         "description": "Enterprise intelligence and risk management platform specializing in predictive analytics for industrial assets and private legacies",
                         "address": {
                             "@type": "PostalAddress",
@@ -59,7 +59,7 @@ export default function Home() {
                             "contactType": "Intelligence Inquiry",
                             "telephone": "+91-22-XXXX-XXXX",
                             "availableLanguage": ["English", "Hindi"],
-                            "email": "intelligence@riskfortress.com"
+                            "email": "intelligence@riskfortress.in"
                         },
                         "serviceType": [
                             "Enterprise Risk Management",

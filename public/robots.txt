@@ -1,5 +1,5 @@
 # RiskFortress Intelligence Platform - Robots.txt
-# https://riskfortress.com
+# https://riskfortress.in
 
 User-agent: *
 Allow: /
@@ -13,8 +13,8 @@ Disallow: /dashboard/
 Crawl-delay: 1
 
 # Sitemaps
-Sitemap: https://riskfortress.com/sitemap.xml
-Sitemap: https://riskfortress.com/sitemap-index.xml
+Sitemap: https://riskfortress.in/sitemap.xml
+Sitemap: https://riskfortress.in/sitemap-index.xml
 
 # Specific bots
 User-agent: GPTBot

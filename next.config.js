@@ -11,7 +11,7 @@ const nextConfig = {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: '**.riskfortress.com',
+                hostname: '**.riskfortress.in',
             },
             {
                 protocol: 'https',

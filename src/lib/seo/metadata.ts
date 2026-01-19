@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riskfortress.com'
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riskfortress.in'
 
 // Default metadata for all pages
 export const defaultMetadata: Metadata = {
@@ -134,7 +134,7 @@ export function generateOrganizationSchema() {
             '@type': 'ContactPoint',
             contactType: 'Intelligence Inquiry',
             telephone: '+91-22-XXXX-XXXX',
-            email: 'intelligence@riskfortress.com',
+            email: 'intelligence@riskfortress.in',
             availableLanguage: ['English', 'Hindi'],
         },
         sameAs: [

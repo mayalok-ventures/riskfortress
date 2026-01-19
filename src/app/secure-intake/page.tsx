@@ -114,10 +114,10 @@ export default function SecureIntakePage() {
                                 <div className="p-6 rounded-xl bg-gray-900/50">
                                     <h4 className="font-semibold text-white mb-2">Encrypted Email</h4>
                                     <a
-                                        href="mailto:intelligence@riskfortress.com"
+                                        href="mailto:intelligence@riskfortress.in"
                                         className="text-xl text-intelligence hover:text-intelligence/80 transition-colors"
                                     >
-                                        intelligence@riskfortress.com
+                                        intelligence@riskfortress.in
                                     </a>
                                     <p className="text-sm text-gray-400 mt-2">PGP key available upon request</p>
                                 </div>

@@ -77,7 +77,7 @@ export const metadata: Metadata = {
         'Data-Backed Security Strategy',
         'Pre-emptive Threat Mitigation',
     ],
-    authors: [{ name: 'RiskFortress Intelligence', url: 'https://riskfortress.com' }],
+    authors: [{ name: 'RiskFortress Intelligence', url: 'https://riskfortress.in' }],
     creator: 'RiskFortress Intelligence Engine',
     publisher: 'RiskFortress Holdings',
     robots: {
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
             'max-snippet': -1,
         },
     },
-    metadataBase: new URL('https://riskfortress.com'),
+    metadataBase: new URL('https://riskfortress.in'),
     alternates: {
         canonical: '/',
         languages: {
@@ -101,7 +101,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: 'website',
         locale: 'en_IN',
-        url: 'https://riskfortress.com',
+        url: 'https://riskfortress.in',
         title: 'RiskFortress | Enterprise Intelligence & Risk Platform',
         description: 'Predictive Intelligence for safeguarding India\'s most critical industrial assets and private legacies.',
         siteName: 'RiskFortress',

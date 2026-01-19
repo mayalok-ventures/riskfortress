@@ -466,10 +466,12 @@ export default function IntakeForm() {
                                         className="mt-1 w-4 h-4 text-intelligence bg-gray-800 border-gray-700 rounded focus:ring-intelligence focus:ring-2"
                                     />
                                     <div>
-                                        <label className="text-sm text-gray-300">
-                                            I agree to the secure transmission of this information and understand that
-                                            this intake is protected by AES-256 encryption. I confirm that I am
-                                            authorized to request intelligence services on behalf of my organization.
+                                        <label className="text-xs text-gray-300 leading-relaxed">
+                                            I certify that I am an authorized representative of my organization and I have read, understood, and accepted the{' '}
+                                            <a href="/terms" target="_blank" className="text-intelligence underline hover:text-intelligence-light">Master Service Agreement</a>{' '}
+                                            and{' '}
+                                            <a href="/privacy" target="_blank" className="text-intelligence underline hover:text-intelligence-light">Data Sovereignty Policy</a>.
+                                            I acknowledge that this submission is protected by AES-256 encryption and that RiskFortress provides advisory services only, without guarantee of threat prevention.
                                         </label>
                                         {errors.agreeToTerms && (
                                             <p className="mt-1 text-sm text-red-400">{errors.agreeToTerms.message}</p>
