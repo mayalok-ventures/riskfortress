@@ -43,11 +43,11 @@ export default function Home() {
                         "description": "Enterprise intelligence and risk management platform specializing in predictive analytics for industrial assets and private legacies",
                         "address": {
                             "@type": "PostalAddress",
-                            "streetAddress": "Nariman Point",
-                            "addressLocality": "Mumbai",
-                            "addressRegion": "Maharashtra",
-                            "postalCode": "400021",
-                            "addressCountry": "IN"
+                            "streetAddress": "Pari Chowk",
+                            "addressLocality": "Grater Noida",
+                            "addressRegion": "Uttar Pradesh",
+                            "postalCode": "201310",
+                            "addressCountry": "INDIA"
                         },
                         "geo": {
                             "@type": "GeoCoordinates",
@@ -59,7 +59,7 @@ export default function Home() {
                             "contactType": "Intelligence Inquiry",
                             "telephone": "+91-22-XXXX-XXXX",
                             "availableLanguage": ["English", "Hindi"],
-                            "email": "intelligence@riskfortress.in"
+                            "email": "kunal@riskfortress.in"
                         },
                         "serviceType": [
                             "Enterprise Risk Management",
@@ -76,8 +76,7 @@ export default function Home() {
                         "openingHours": "Mo-Fr 09:00-18:00",
                         "priceRange": "$$$$",
                         "sameAs": [
-                            "https://linkedin.com/company/riskfortress",
-                            "https://twitter.com/riskfortress"
+                            "https://www.linkedin.com/company/riskfortress"
                         ]
                     })
                 }}
