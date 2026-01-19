@@ -76,7 +76,7 @@
         "snyk": "1.1269.0",
         "ts-jest": "29.1.2",
         "tsx": "4.7.0",
-        "webpack-bundle-analyzer": "4.10.1"
+        "webpack-bundle-analyzer": "5.1.1"
     },
     "engines": {
         "node": ">=18.17.0",
