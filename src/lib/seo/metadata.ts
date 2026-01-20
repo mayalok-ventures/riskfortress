@@ -125,10 +125,10 @@ export function generateOrganizationSchema() {
         description: defaultMetadata.description,
         address: {
             '@type': 'PostalAddress',
-            addressLocality: 'Mumbai',
-            addressRegion: 'Maharashtra',
+            addressLocality: 'Greater Noida',
+            addressRegion: 'Uttar Pradesh',
             addressCountry: 'IN',
-            postalCode: '400021',
+            postalCode: '201310',
         },
         contactPoint: {
             '@type': 'ContactPoint',

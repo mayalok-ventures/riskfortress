@@ -44,15 +44,15 @@ export default function Home() {
                         "address": {
                             "@type": "PostalAddress",
                             "streetAddress": "Pari Chowk",
-                            "addressLocality": "Grater Noida",
+                            "addressLocality": "Greater Noida",
                             "addressRegion": "Uttar Pradesh",
                             "postalCode": "201310",
-                            "addressCountry": "INDIA"
+                            "addressCountry": "IN"
                         },
                         "geo": {
                             "@type": "GeoCoordinates",
-                            "latitude": "18.9260",
-                            "longitude": "72.8246"
+                            "latitude": "28.4744",
+                            "longitude": "77.5040"
                         },
                         "contactPoint": {
                             "@type": "ContactPoint",

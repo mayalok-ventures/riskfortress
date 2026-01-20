@@ -107,12 +107,12 @@ export default function PrivacyPolicy() {
                         
                         <p className="mb-4">7.1. RiskFortress reserves the right to amend, modify, or update this Protocol at any time. Material changes shall be communicated to active Clients through registered email or secure portal notification not less than thirty (30) days prior to the effective date of such changes.</p>
                         
-                        <p className="mb-4">7.2. This Protocol shall be governed by and construed in accordance with the laws of the Republic of India. Any disputes arising hereunder shall be subject to the exclusive jurisdiction of the courts at Mumbai, Maharashtra.</p>
+                        <p className="mb-4">7.2. This Protocol shall be governed by and construed in accordance with the laws of the Republic of India. Any disputes arising hereunder shall be subject to the exclusive jurisdiction of the courts at Greater Noida, Uttar Pradesh.</p>
                     </section>
 
                     <footer className="mt-16 pt-8 border-t-2 border-gray-900 text-center text-xs">
                         <p className="mb-2">RiskFortress Intelligence Private Limited</p>
-                        <p className="mb-2">Registered Office: Nariman Point, Mumbai, Maharashtra 400021, India</p>
+                        <p className="mb-2">Registered Office: Pari Chowk, Greater Noida, Uttar Pradesh 201310, India</p>
                         <p className="mb-2">CIN: [To Be Assigned Upon Incorporation]</p>
                         <p>© {new Date().getFullYear()} RiskFortress Intelligence Private Limited. All Rights Reserved.</p>
                     </footer>

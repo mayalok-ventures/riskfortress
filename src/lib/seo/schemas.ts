@@ -8,10 +8,10 @@ export const organizationSchema = {
     'description': 'Enterprise intelligence and risk management platform',
     'address': {
         '@type': 'PostalAddress',
-        'streetAddress': 'Nariman Point',
-        'addressLocality': 'Mumbai',
-        'addressRegion': 'Maharashtra',
-        'postalCode': '400021',
+        'streetAddress': 'Pari Chowk',
+        'addressLocality': 'Greater Noida',
+        'addressRegion': 'Uttar Pradesh',
+        'postalCode': '201310',
         'addressCountry': 'IN'
     },
     'contactPoint': {
