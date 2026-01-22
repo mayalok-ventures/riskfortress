@@ -204,7 +204,6 @@ export default function AdminPage() {
 )}
 */}
 
-// Iski jagah directly 'access' se 'password' step par jaaye:
                         {authStep === 'access' && (
                             <div className="text-center">
                                 <Lock className="h-12 w-12 text-gray-500 mx-auto mb-4" />
