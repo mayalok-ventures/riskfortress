@@ -14,7 +14,7 @@ try {
 
 // Set environment for Cloudflare
 process.env.NEXT_PUBLIC_APP_ENV = 'production'
-process.env.NEXT_PUBLIC_APP_URL = 'https://riskfortress.com'
+process.env.NEXT_PUBLIC_APP_URL = 'https://riskfortress.in'
 
 // Build the application
 console.log('📦 Building Next.js application...')
