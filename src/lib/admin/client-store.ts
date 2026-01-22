@@ -119,10 +119,10 @@ export function deleteContent(id: string): boolean {
     return true
 }
 
-// OTP Generation (simulated - in production use SMS service)
+// OTP Generation - In production, integrate with SMS gateway (Twilio, MSG91, etc.)
 let currentOTP: { code: string; expiresAt: number; attempts: number } | null = null
 
-export function generateOTP(): { otp: string; phone: string } {
+export function generateOTP(): { phone: string } {
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
     
     currentOTP = {
@@ -131,11 +131,10 @@ export function generateOTP(): { otp: string; phone: string } {
         attempts: 0
     }
     
-    // In production, send via SMS
-    console.log(`[DEV] OTP for ${ADMIN_PHONE}: ${otp}`)
+    // TODO: Integrate with SMS gateway to send OTP to ADMIN_PHONE
+    // Example: await sendSMS(ADMIN_PHONE, `Your RiskFortress Admin OTP is: ${otp}`)
     
     return { 
-        otp: process.env.NODE_ENV === 'development' ? otp : '', 
         phone: ADMIN_PHONE.slice(0, 2) + '****' + ADMIN_PHONE.slice(-2) 
     }
 }

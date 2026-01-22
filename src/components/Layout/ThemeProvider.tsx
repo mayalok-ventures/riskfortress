@@ -1,15 +1,9 @@
 'use client'
 
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, type ReactNode, type ComponentProps } from 'react'
 
-type ThemeProviderProps = {
-    children: ReactNode
-    attribute?: string
-    defaultTheme?: string
-    enableSystem?: boolean
-    disableTransitionOnChange?: boolean
-}
+type ThemeProviderProps = ComponentProps<typeof NextThemesProvider>
 
 const ThemeContext = createContext<{
     theme: string
@@ -24,12 +18,6 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-    const [mounted, setMounted] = useState(false)
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-
     return (
         <NextThemesProvider
             attribute="class"

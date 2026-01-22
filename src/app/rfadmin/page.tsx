@@ -34,7 +34,6 @@ export default function AdminPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const [devOtp, setDevOtp] = useState('')
     const [maskedPhone, setMaskedPhone] = useState('')
     
     const [items, setItems] = useState<ContentItem[]>([])
@@ -60,10 +59,10 @@ export default function AdminPage() {
         try {
             const result = generateOTP()
             setMaskedPhone(result.phone)
-            if (result.otp) setDevOtp(result.otp)
             setAuthStep('otp')
-        } catch (err: any) {
-            setError(err.message || 'Failed to send OTP')
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Failed to send OTP'
+            setError(message)
         } finally {
             setLoading(false)
         }
@@ -86,8 +85,9 @@ export default function AdminPage() {
             } else {
                 setError(result.error || 'Invalid OTP')
             }
-        } catch (err: any) {
-            setError(err.message || 'Verification failed')
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Verification failed'
+            setError(message)
         } finally {
             setLoading(false)
         }
@@ -111,8 +111,9 @@ export default function AdminPage() {
                 await new Promise(resolve => setTimeout(resolve, 1000))
                 setError('Invalid password')
             }
-        } catch (err: any) {
-            setError(err.message || 'Authentication failed')
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Authentication failed'
+            setError(message)
         } finally {
             setLoading(false)
         }
@@ -124,7 +125,6 @@ export default function AdminPage() {
         setOtp('')
         setPassword('')
         setItems([])
-        setDevOtp('')
     }
 
     const handleSaveContent = (item: Partial<ContentItem>) => {
@@ -191,11 +191,6 @@ export default function AdminPage() {
                                 <p className="text-gray-400 text-center text-sm mb-4">
                                     Enter the 6-digit OTP sent to {maskedPhone}
                                 </p>
-                                {devOtp && (
-                                    <p className="text-yellow-500 text-center text-xs mb-4 font-mono">
-                                        DEV MODE OTP: {devOtp}
-                                    </p>
-                                )}
                                 <input
                                     type="text"
                                     maxLength={6}
