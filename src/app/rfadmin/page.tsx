@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react'
 
-import { 
-    Shield, Lock, Eye, EyeOff, Smartphone, Key, LogOut, 
-    FileText, BookOpen, Newspaper, Plus, Edit2, Trash2, 
-    Save, X, Image as ImageIcon, Bold, Italic, Underline, 
-    Strikethrough, List, ListOrdered, AlignLeft, AlignCenter, 
+import {
+    Shield, Lock, Eye, EyeOff, Smartphone, Key, LogOut,
+    FileText, BookOpen, Newspaper, Plus, Edit2, Trash2,
+    Save, X, Image as ImageIcon, Bold, Italic, Underline,
+    Strikethrough, List, ListOrdered, AlignLeft, AlignCenter,
     AlignRight, Link, Heading1, Heading2, Heading3, Undo, Redo,
     Upload, Building
 } from 'lucide-react'
@@ -35,7 +35,7 @@ export default function AdminPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [maskedPhone, setMaskedPhone] = useState('')
-    
+
     const [items, setItems] = useState<ContentItem[]>([])
     const [activeTab, setActiveTab] = useState<'case' | 'article' | 'blog'>('case')
     const [editingItem, setEditingItem] = useState<ContentItem | null>(null)
@@ -53,24 +53,10 @@ export default function AdminPage() {
     }
 
     const handleAccessClick = async () => {
-        setLoading(true)
-        setError('')
-        
-        try {
-            const result = await generateOTP()
-            setMaskedPhone(result.phone)
-            
-            if (result.success) {
-                setAuthStep('otp')
-            } else {
-                setError('Failed to send OTP. Please try again.')
-            }
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Failed to send OTP'
-            setError(message)
-        } finally {
-            setLoading(false)
-        }
+        // Directly move to password step, skip OTP
+        setAuthStep('password')
+        // Optional: You can still show phone masking for UI consistency
+        setMaskedPhone('91******70')
     }
 
     const handleOtpSubmit = async () => {
@@ -78,13 +64,13 @@ export default function AdminPage() {
             setError('Please enter a valid 6-digit OTP')
             return
         }
-        
+
         setLoading(true)
         setError('')
-        
+
         try {
             const result = verifyOTP(otp)
-            
+
             if (result.success) {
                 setAuthStep('password')
             } else {
@@ -103,10 +89,10 @@ export default function AdminPage() {
             setError('Please enter password')
             return
         }
-        
+
         setLoading(true)
         setError('')
-        
+
         try {
             if (verifyPassword(password)) {
                 createSession()
@@ -134,14 +120,14 @@ export default function AdminPage() {
 
     const handleSaveContent = (item: Partial<ContentItem>) => {
         setLoading(true)
-        
+
         try {
             if (item.id) {
                 updateContent(item.id, item)
             } else {
                 createContent(item as Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>)
             }
-            
+
             loadContent()
             setEditingItem(null)
             setIsCreating(false)
@@ -154,7 +140,7 @@ export default function AdminPage() {
 
     const handleDeleteContent = (id: string) => {
         if (!confirm('Are you sure you want to delete this item?')) return
-        
+
         deleteContent(id)
         loadContent()
     }
@@ -188,33 +174,52 @@ export default function AdminPage() {
                             </div>
                         )}
 
-                        {authStep === 'otp' && (
-                            <div>
-                                <div className="flex items-center justify-center mb-4">
-                                    <Smartphone className="h-8 w-8 text-intelligence" />
-                                </div>
-                                <p className="text-gray-400 text-center text-sm mb-4">
-                                    Enter the 6-digit OTP sent to {maskedPhone}
+                        {/* authStep === 'otp' wala purana section hata dein ya comment out karein */}
+                        {/* 
+{authStep === 'otp' && (
+    <div>
+        <div className="flex items-center justify-center mb-4">
+            <Smartphone className="h-8 w-8 text-intelligence" />
+        </div>
+        <p className="text-gray-400 text-center text-sm mb-4">
+            Enter the 6-digit OTP sent to {maskedPhone}
+        </p>
+        <input
+            type="text"
+            maxLength={6}
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+            placeholder="Enter OTP"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white text-center text-2xl tracking-widest focus:border-intelligence focus:outline-none mb-4"
+            autoFocus
+        />
+        <button
+            onClick={handleOtpSubmit}
+            disabled={loading || otp.length !== 6}
+            className="w-full px-6 py-3 bg-gradient-to-r from-intelligence to-industrial text-white rounded-lg font-semibold hover:shadow-intelligence transition-all disabled:opacity-50"
+        >
+            {loading ? 'Verifying...' : 'Verify OTP'}
+        </button>
+    </div>
+)}
+*/}
+
+// Iski jagah directly 'access' se 'password' step par jaaye:
+                        {authStep === 'access' && (
+                            <div className="text-center">
+                                <Lock className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                                <p className="text-gray-400 mb-6">
+                                    Click to access admin panel
                                 </p>
-                                <input
-                                    type="text"
-                                    maxLength={6}
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                                    placeholder="Enter OTP"
-                                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white text-center text-2xl tracking-widest focus:border-intelligence focus:outline-none mb-4"
-                                    autoFocus
-                                />
                                 <button
-                                    onClick={handleOtpSubmit}
-                                    disabled={loading || otp.length !== 6}
+                                    onClick={handleAccessClick}
+                                    disabled={loading}
                                     className="w-full px-6 py-3 bg-gradient-to-r from-intelligence to-industrial text-white rounded-lg font-semibold hover:shadow-intelligence transition-all disabled:opacity-50"
                                 >
-                                    {loading ? 'Verifying...' : 'Verify OTP'}
+                                    Access Admin
                                 </button>
                             </div>
                         )}
-
                         {authStep === 'password' && (
                             <div>
                                 <div className="flex items-center justify-center mb-4">
@@ -314,11 +319,10 @@ export default function AdminPage() {
                             <button
                                 key={type}
                                 onClick={() => { setActiveTab(type); setEditingItem(null); setIsCreating(false) }}
-                                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
-                                    activeTab === type 
-                                        ? 'bg-intelligence text-white' 
-                                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                                }`}
+                                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-colors ${activeTab === type
+                                    ? 'bg-intelligence text-white'
+                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                                    }`}
                             >
                                 <Icon className="h-5 w-5" />
                                 <span>{label}</span>
@@ -337,10 +341,10 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-1 space-y-4">
                         <h2 className="text-lg font-semibold text-white mb-4">
-                            {activeTab === 'case' ? 'Cases' : activeTab === 'article' ? 'Articles' : 'Blogs'} 
+                            {activeTab === 'case' ? 'Cases' : activeTab === 'article' ? 'Articles' : 'Blogs'}
                             <span className="text-gray-500 ml-2">({filteredItems.length})</span>
                         </h2>
-                        
+
                         {filteredItems.length === 0 ? (
                             <div className="p-8 text-center rounded-xl glass-morphism border border-gray-800">
                                 <FileText className="h-12 w-12 text-gray-600 mx-auto mb-3" />
@@ -348,14 +352,13 @@ export default function AdminPage() {
                             </div>
                         ) : (
                             filteredItems.map(item => (
-                                <button 
+                                <button
                                     type="button"
                                     key={item.id}
-                                    className={`w-full text-left p-4 rounded-xl glass-morphism border transition-all cursor-pointer ${
-                                        editingItem?.id === item.id 
-                                            ? 'border-intelligence' 
-                                            : 'border-gray-800 hover:border-gray-700'
-                                    }`}
+                                    className={`w-full text-left p-4 rounded-xl glass-morphism border transition-all cursor-pointer ${editingItem?.id === item.id
+                                        ? 'border-intelligence'
+                                        : 'border-gray-800 hover:border-gray-700'
+                                        }`}
                                     onClick={() => { setEditingItem(item); setIsCreating(false) }}
                                 >
                                     <div className="flex items-start justify-between">
@@ -363,22 +366,20 @@ export default function AdminPage() {
                                             <h3 className="font-semibold text-white truncate">{item.title}</h3>
                                             <p className="text-sm text-gray-400 truncate mt-1">{item.summary}</p>
                                             <div className="flex items-center space-x-2 mt-2">
-                                                <span className={`px-2 py-0.5 text-xs rounded-full ${
-                                                    item.status === 'published' 
-                                                        ? 'bg-green-500/10 text-green-400' 
-                                                        : item.status === 'draft'
+                                                <span className={`px-2 py-0.5 text-xs rounded-full ${item.status === 'published'
+                                                    ? 'bg-green-500/10 text-green-400'
+                                                    : item.status === 'draft'
                                                         ? 'bg-yellow-500/10 text-yellow-400'
                                                         : 'bg-gray-500/10 text-gray-400'
-                                                }`}>
+                                                    }`}>
                                                     {item.status}
                                                 </span>
                                                 {item.type === 'case' && item.threatLevel && (
-                                                    <span className={`px-2 py-0.5 text-xs rounded-full ${
-                                                        item.threatLevel === 'Critical' ? 'bg-red-500/10 text-red-400' :
+                                                    <span className={`px-2 py-0.5 text-xs rounded-full ${item.threatLevel === 'Critical' ? 'bg-red-500/10 text-red-400' :
                                                         item.threatLevel === 'High' ? 'bg-orange-500/10 text-orange-400' :
-                                                        item.threatLevel === 'Medium' ? 'bg-yellow-500/10 text-yellow-400' :
-                                                        'bg-green-500/10 text-green-400'
-                                                    }`}>
+                                                            item.threatLevel === 'Medium' ? 'bg-yellow-500/10 text-yellow-400' :
+                                                                'bg-green-500/10 text-green-400'
+                                                        }`}>
                                                         {item.threatLevel}
                                                     </span>
                                                 )}
@@ -398,7 +399,7 @@ export default function AdminPage() {
 
                     <div className="lg:col-span-2">
                         {currentItem ? (
-                            <ContentEditor 
+                            <ContentEditor
                                 item={currentItem as ContentItem}
                                 onSave={handleSaveContent}
                                 onCancel={() => { setEditingItem(null); setIsCreating(false) }}
@@ -420,12 +421,12 @@ export default function AdminPage() {
     )
 }
 
-function ContentEditor({ 
-    item, 
-    onSave, 
-    onCancel, 
-    loading 
-}: { 
+function ContentEditor({
+    item,
+    onSave,
+    onCancel,
+    loading
+}: {
     item: Partial<ContentItem>
     onSave: (item: Partial<ContentItem>) => void
     onCancel: () => void
@@ -555,7 +556,7 @@ function ContentEditor({
                     <ImageIcon className="h-4 w-4" />
                 </button>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
-                <select 
+                <select
                     onChange={(e) => execCommand('fontName', e.target.value)}
                     className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-sm border border-gray-700"
                 >
@@ -565,7 +566,7 @@ function ContentEditor({
                     <option value="Verdana">Verdana</option>
                     <option value="Courier New">Courier New</option>
                 </select>
-                <select 
+                <select
                     onChange={(e) => execCommand('fontSize', e.target.value)}
                     className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-sm border border-gray-700"
                 >
@@ -683,19 +684,19 @@ function ContentEditor({
                     <label className="block text-sm font-medium text-gray-400 mb-1">Thumbnail</label>
                     <div className="flex items-center space-x-4">
                         {formData.thumbnail && (
-                            <img 
-                                src={formData.thumbnail} 
-                                alt="Thumbnail" 
+                            <img
+                                src={formData.thumbnail}
+                                alt="Thumbnail"
                                 className="w-24 h-16 object-cover rounded-lg border border-gray-700"
                             />
                         )}
                         <label className="flex items-center space-x-2 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 hover:text-white cursor-pointer transition-colors">
                             <Upload className="h-4 w-4" />
                             <span>Upload Image</span>
-                            <input 
-                                type="file" 
-                                accept="image/*" 
-                                className="hidden" 
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
                                 onChange={handleThumbnailUpload}
                             />
                         </label>
@@ -706,8 +707,8 @@ function ContentEditor({
                     <label className="block text-sm font-medium text-gray-400 mb-1">Keywords</label>
                     <div className="flex flex-wrap gap-2 mb-2">
                         {formData.keywords?.map(keyword => (
-                            <span 
-                                key={keyword} 
+                            <span
+                                key={keyword}
                                 className="flex items-center space-x-1 px-3 py-1 bg-intelligence/10 text-intelligence rounded-full text-sm"
                             >
                                 <span>{keyword}</span>
