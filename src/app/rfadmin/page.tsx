@@ -57,9 +57,14 @@ export default function AdminPage() {
         setError('')
         
         try {
-            const result = generateOTP()
+            const result = await generateOTP()
             setMaskedPhone(result.phone)
-            setAuthStep('otp')
+            
+            if (result.success) {
+                setAuthStep('otp')
+            } else {
+                setError('Failed to send OTP. Please try again.')
+            }
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Failed to send OTP'
             setError(message)

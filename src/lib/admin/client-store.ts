@@ -25,10 +25,14 @@ export interface ContentItem {
 const STORAGE_KEY = 'rf-admin-content'
 const AUTH_KEY = 'rf-admin-auth'
 
-// Encrypted password hash (client-side verification is less secure but works for static sites)
-// In production, consider using a separate auth service
+// Admin credentials
 const ADMIN_PASSWORD = 'Mflica2026riskfortresspsw@'
-const ADMIN_PHONE = '8193948870'
+const ADMIN_PHONE = '918193948870' // With country code for SMS API
+
+// Mtalkz SMS API Configuration
+// Note: Update SENDER_ID with your registered sender ID from Mtalkz dashboard
+const MTALKZ_API_KEY = 'dOYA0E413khPUDKjhKBthmPPhOxn4o'
+const MTALKZ_SENDER_ID = 'MTALKZ' // Update this with your approved sender ID
 
 export function getAllContent(): ContentItem[] {
     if (typeof window === 'undefined') return []
@@ -119,10 +123,29 @@ export function deleteContent(id: string): boolean {
     return true
 }
 
-// OTP Generation - In production, integrate with SMS gateway (Twilio, MSG91, etc.)
+// OTP Generation with Mtalkz SMS API
 let currentOTP: { code: string; expiresAt: number; attempts: number } | null = null
 
-export function generateOTP(): { phone: string } {
+async function sendSMSViaMtalkz(phone: string, message: string): Promise<boolean> {
+    try {
+        const url = new URL('https://msg.mtalkz.com/V2/http-api.php')
+        url.searchParams.set('apikey', MTALKZ_API_KEY)
+        url.searchParams.set('senderid', MTALKZ_SENDER_ID)
+        url.searchParams.set('number', phone)
+        url.searchParams.set('message', message)
+        url.searchParams.set('format', 'json')
+        
+        const response = await fetch(url.toString())
+        const data = await response.json()
+        
+        return data.status === 'OK'
+    } catch (error) {
+        console.error('SMS sending failed:', error)
+        return false
+    }
+}
+
+export async function generateOTP(): Promise<{ phone: string; success: boolean }> {
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
     
     currentOTP = {
@@ -131,11 +154,13 @@ export function generateOTP(): { phone: string } {
         attempts: 0
     }
     
-    // TODO: Integrate with SMS gateway to send OTP to ADMIN_PHONE
-    // Example: await sendSMS(ADMIN_PHONE, `Your RiskFortress Admin OTP is: ${otp}`)
+    // Send OTP via Mtalkz SMS API
+    const message = `Your RiskFortress Admin OTP is: ${otp}. Valid for 5 minutes. Do not share this code.`
+    const success = await sendSMSViaMtalkz(ADMIN_PHONE, message)
     
     return { 
-        phone: ADMIN_PHONE.slice(0, 2) + '****' + ADMIN_PHONE.slice(-2) 
+        phone: ADMIN_PHONE.slice(2, 4) + '****' + ADMIN_PHONE.slice(-2),
+        success
     }
 }
 
@@ -167,14 +192,14 @@ export function verifyPassword(password: string): boolean {
     return password === ADMIN_PASSWORD
 }
 
-// Session management
+// Session management - 10 hours expiry
 export function createSession(): void {
     if (typeof window === 'undefined') return
     
     const session = {
         authenticated: true,
         createdAt: Date.now(),
-        expiresAt: Date.now() + 60 * 60 * 1000 // 1 hour
+        expiresAt: Date.now() + 10 * 60 * 60 * 1000 // 10 hours
     }
     
     sessionStorage.setItem(AUTH_KEY, JSON.stringify(session))
