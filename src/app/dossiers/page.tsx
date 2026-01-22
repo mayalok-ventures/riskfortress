@@ -6,6 +6,7 @@ import { Shield, Lock, Eye, FileText, Building, Cpu, BookOpen, Newspaper, X } fr
 import Image from 'next/image'
 
 import { getPublishedContent, type ContentItem } from '@/lib/admin/client-store'
+import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {
@@ -33,6 +34,9 @@ export default function DossiersPage() {
     const [articles, setArticles] = useState<ContentItem[]>([])
     const [blogs, setBlogs] = useState<ContentItem[]>([])
     const [loading, setLoading] = useState(true)
+    const [isVerifyingEmail, setIsVerifyingEmail] = useState(false)
+    const [requestedCaseForAccess, setRequestedCaseForAccess] = useState<string | null>(null)
+    const [hasAccess, setHasAccess] = useState(false)
 
     useEffect(() => {
         loadPublishedContent()
@@ -139,8 +143,16 @@ export default function DossiersPage() {
                                                 <button
                                                     type="button"
                                                     key={item.id}
-                                                    onClick={() => setSelectedItem(item)}
-                                                    className="group p-6 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all cursor-pointer text-left w-full"
+                                                    onClick={() => {
+                                                        if (item.type === 'case') {
+                                                            // CASE ke liye email verify karna hoga
+                                                            setRequestedCaseForAccess(item.title)
+                                                            setIsVerifyingEmail(true)
+                                                        } else {
+                                                            // ARTICLE/BLOG ke liye direct access
+                                                            setSelectedItem(item)
+                                                        }
+                                                    }} className="group p-6 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all cursor-pointer text-left w-full"
                                                 >
                                                     <div className="flex items-start justify-between mb-4">
                                                         <div className="flex items-center space-x-3">
@@ -327,6 +339,30 @@ export default function DossiersPage() {
                 )}
             </div>
 
+
+            {/* Professional Email Modal for Case Access */}
+            {isVerifyingEmail && requestedCaseForAccess && (
+                <ProfessionalEmailModal
+                    isOpen={isVerifyingEmail}
+                    onClose={() => {
+                        setIsVerifyingEmail(false)
+                        setRequestedCaseForAccess(null)
+                    }}
+                    caseTitle={requestedCaseForAccess}
+                    onSuccess={() => {
+                        // Email verify hone ke baad, pura case show karein
+                        const targetCase = cases.find(c => c.title === requestedCaseForAccess)
+                        if (targetCase) {
+                            setSelectedItem(targetCase)
+                            setHasAccess(true) // Session ke liye access store karein
+                        }
+                        setIsVerifyingEmail(false)
+                        setRequestedCaseForAccess(null)
+                    }}
+                />
+            )}
+
+
             {selectedItem && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
@@ -377,7 +413,7 @@ export default function DossiersPage() {
                                 </div>
                             </div>
 
-                            <div 
+                            <div
                                 className="prose prose-invert max-w-none"
                                 dangerouslySetInnerHTML={{ __html: selectedItem.content }}
                             />
