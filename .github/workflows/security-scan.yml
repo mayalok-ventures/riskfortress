@@ -1,12 +1,13 @@
 name: Security Scanning
 
 on:
-  schedule:
-    - cron: '0 0 * * 0' # Weekly
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:  # Manual trigger only - enable code scanning in repo settings first
+  # schedule:
+  #   - cron: '0 0 * * 0' # Weekly
+  # push:
+  #   branches: [main]
+  # pull_request:
+  #   branches: [main]
 
 jobs:
   security:
