@@ -355,7 +355,9 @@ function ContentEditor({
 }) {
     const [formData, setFormData] = useState(item)
     const [keywordInput, setKeywordInput] = useState('')
+    const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null)
     const editorRef = useRef<HTMLDivElement>(null)
+    const editorContainerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         setFormData(item)
@@ -364,13 +366,34 @@ function ContentEditor({
         }
     }, [item])
 
-    const updateField = (field: string, value: any) => {
+    useEffect(() => {
+        const handleImageClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement
+            if (target.tagName === 'IMG' && editorRef.current?.contains(target)) {
+                setSelectedImage(target as HTMLImageElement)
+            } else if (!target.closest('.image-resize-controls')) {
+                setSelectedImage(null)
+            }
+        }
+        document.addEventListener('click', handleImageClick)
+        return () => document.removeEventListener('click', handleImageClick)
+    }, [])
+
+    const updateField = (field: string, value: unknown) => {
         setFormData(prev => ({ ...prev, [field]: value }))
     }
 
     const execCommand = (command: string, value?: string) => {
-        document.execCommand(command, false, value)
-        editorRef.current?.focus()
+        const selection = window.getSelection()
+        if (!selection || selection.rangeCount === 0) {
+            editorRef.current?.focus()
+        }
+        
+        if (command === 'formatBlock' && value) {
+            document.execCommand(command, false, `<${value}>`)
+        } else {
+            document.execCommand(command, false, value)
+        }
     }
 
     const insertImage = () => {
@@ -382,12 +405,38 @@ function ContentEditor({
             if (file) {
                 const reader = new FileReader()
                 reader.onload = () => {
-                    execCommand('insertImage', reader.result as string)
+                    const img = document.createElement('img')
+                    img.src = reader.result as string
+                    img.style.maxWidth = '100%'
+                    img.style.height = 'auto'
+                    img.style.cursor = 'pointer'
+                    img.className = 'resizable-image'
+                    
+                    const selection = window.getSelection()
+                    if (selection && selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0)
+                        range.deleteContents()
+                        range.insertNode(img)
+                        range.setStartAfter(img)
+                        range.collapse(true)
+                        selection.removeAllRanges()
+                        selection.addRange(range)
+                    } else {
+                        editorRef.current?.appendChild(img)
+                    }
                 }
                 reader.readAsDataURL(file)
             }
         }
         input.click()
+    }
+
+    const resizeImage = (size: 'small' | 'medium' | 'large' | 'full') => {
+        if (!selectedImage) return
+        const sizes = { small: '25%', medium: '50%', large: '75%', full: '100%' }
+        selectedImage.style.width = sizes[size]
+        selectedImage.style.height = 'auto'
+        setSelectedImage(null)
     }
 
     const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -418,8 +467,9 @@ function ContentEditor({
     }
 
     return (
-        <div className="rounded-xl glass-morphism border border-gray-800 overflow-hidden">
-            <div className="border-b border-gray-800 p-3 flex flex-wrap items-center gap-1 bg-gray-900/50">
+        <div ref={editorContainerRef} className="rounded-xl glass-morphism border border-gray-800 overflow-hidden relative">
+            {/* Sticky Toolbar */}
+            <div className="sticky top-0 z-20 border-b border-gray-800 p-3 flex flex-wrap items-center gap-1 bg-gray-900/95 backdrop-blur-sm">
                 <button onClick={() => execCommand('undo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Undo">
                     <Undo className="h-4 w-4" />
                 </button>
@@ -436,14 +486,17 @@ function ContentEditor({
                 <button onClick={() => execCommand('formatBlock', 'h3')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Heading 3">
                     <Heading3 className="h-4 w-4" />
                 </button>
+                <button onClick={() => execCommand('formatBlock', 'p')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-xs font-bold" title="Paragraph">
+                    P
+                </button>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
-                <button onClick={() => execCommand('bold')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bold">
+                <button onClick={() => execCommand('bold')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bold (Ctrl+B)">
                     <Bold className="h-4 w-4" />
                 </button>
-                <button onClick={() => execCommand('italic')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Italic">
+                <button onClick={() => execCommand('italic')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Italic (Ctrl+I)">
                     <Italic className="h-4 w-4" />
                 </button>
-                <button onClick={() => execCommand('underline')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Underline">
+                <button onClick={() => execCommand('underline')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Underline (Ctrl+U)">
                     <Underline className="h-4 w-4" />
                 </button>
                 <button onClick={() => execCommand('strikeThrough')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Strikethrough">
@@ -478,9 +531,11 @@ function ContentEditor({
                 </button>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
                 <select
-                    onChange={(e) => execCommand('fontName', e.target.value)}
+                    onChange={(e) => { execCommand('fontName', e.target.value); e.target.value = '' }}
+                    defaultValue=""
                     className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-sm border border-gray-700"
                 >
+                    <option value="" disabled>Font</option>
                     <option value="Arial">Arial</option>
                     <option value="Times New Roman">Times New Roman</option>
                     <option value="Georgia">Georgia</option>
@@ -488,9 +543,11 @@ function ContentEditor({
                     <option value="Courier New">Courier New</option>
                 </select>
                 <select
-                    onChange={(e) => execCommand('fontSize', e.target.value)}
+                    onChange={(e) => { execCommand('fontSize', e.target.value); e.target.value = '' }}
+                    defaultValue=""
                     className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-sm border border-gray-700"
                 >
+                    <option value="" disabled>Size</option>
                     <option value="1">Small</option>
                     <option value="3">Normal</option>
                     <option value="5">Large</option>
@@ -498,8 +555,20 @@ function ContentEditor({
                 </select>
             </div>
 
+            {/* Image Resize Controls */}
+            {selectedImage && (
+                <div className="image-resize-controls sticky top-14 z-30 flex items-center justify-center gap-2 p-2 bg-intelligence/90 text-white text-sm">
+                    <span>Resize Image:</span>
+                    <button onClick={() => resizeImage('small')} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded">25%</button>
+                    <button onClick={() => resizeImage('medium')} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded">50%</button>
+                    <button onClick={() => resizeImage('large')} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded">75%</button>
+                    <button onClick={() => resizeImage('full')} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded">100%</button>
+                    <button onClick={() => setSelectedImage(null)} className="px-3 py-1 bg-red-500/50 hover:bg-red-500/70 rounded ml-2">Cancel</button>
+                </div>
+            )}
+
             <div className="p-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
                         <input
@@ -658,12 +727,13 @@ function ContentEditor({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">Content</label>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Content (Click on image to resize)</label>
                     <div
                         ref={editorRef}
                         contentEditable
-                        className="w-full min-h-[300px] p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-intelligence focus:outline-none prose prose-invert max-w-none"
-                        style={{ lineHeight: 1.6 }}
+                        suppressContentEditableWarning
+                        className="w-full min-h-[400px] max-h-[600px] overflow-y-auto p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-intelligence focus:outline-none prose prose-invert max-w-none"
+                        style={{ lineHeight: 1.8 }}
                     />
                 </div>
 
