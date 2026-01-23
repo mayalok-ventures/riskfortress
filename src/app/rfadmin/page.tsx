@@ -8,7 +8,8 @@ import {
     Save, X, Image as ImageIcon, Bold, Italic, Underline,
     Strikethrough, List, ListOrdered, AlignLeft, AlignCenter,
     AlignRight, Link, Upload, Building, Undo, Redo,
-    Heading1, Heading2, Heading3, Palette, Highlighter, Square, Circle
+    Heading1, Heading2, Heading3, Palette, Highlighter, Square, Circle,
+    Table, GripVertical, XCircle
 } from 'lucide-react'
 
 import {
@@ -356,8 +357,21 @@ function ContentEditor({
     const [formData, setFormData] = useState(item)
     const [keywordInput, setKeywordInput] = useState('')
     const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null)
+    const [showColorPicker, setShowColorPicker] = useState<'text' | 'bg' | null>(null)
+    const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 })
+    const [isDragging, setIsDragging] = useState(false)
+    const [isToolbarFloating, setIsToolbarFloating] = useState(false)
     const editorRef = useRef<HTMLDivElement>(null)
     const editorContainerRef = useRef<HTMLDivElement>(null)
+    const toolbarRef = useRef<HTMLDivElement>(null)
+    const dragOffset = useRef({ x: 0, y: 0 })
+
+    const colorPalette = [
+        '#ffffff', '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00',
+        '#ff00ff', '#00ffff', '#ffa500', '#800080', '#008000', '#000080',
+        '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dfe6e9',
+        '#a29bfe', '#fd79a8', '#636e72', '#2d3436', '#00b894', '#e17055'
+    ]
 
     useEffect(() => {
         setFormData(item)
@@ -371,13 +385,50 @@ function ContentEditor({
             const target = e.target as HTMLElement
             if (target.tagName === 'IMG' && editorRef.current?.contains(target)) {
                 setSelectedImage(target as HTMLImageElement)
-            } else if (!target.closest('.image-resize-controls')) {
+            } else if (!target.closest('.image-resize-controls') && !target.closest('.color-picker-popup')) {
                 setSelectedImage(null)
             }
         }
         document.addEventListener('click', handleImageClick)
         return () => document.removeEventListener('click', handleImageClick)
     }, [])
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (isDragging && isToolbarFloating) {
+                setToolbarPosition({
+                    x: e.clientX - dragOffset.current.x,
+                    y: e.clientY - dragOffset.current.y
+                })
+            }
+        }
+        const handleMouseUp = () => setIsDragging(false)
+        
+        if (isDragging) {
+            document.addEventListener('mousemove', handleMouseMove)
+            document.addEventListener('mouseup', handleMouseUp)
+        }
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove)
+            document.removeEventListener('mouseup', handleMouseUp)
+        }
+    }, [isDragging, isToolbarFloating])
+
+    const startDrag = (e: React.MouseEvent) => {
+        if (!isToolbarFloating) return
+        const rect = toolbarRef.current?.getBoundingClientRect()
+        if (rect) {
+            dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
+            setIsDragging(true)
+        }
+    }
+
+    const toggleFloatingToolbar = () => {
+        if (!isToolbarFloating) {
+            setToolbarPosition({ x: 100, y: 100 })
+        }
+        setIsToolbarFloating(!isToolbarFloating)
+    }
 
     const updateField = (field: string, value: unknown) => {
         setFormData(prev => ({ ...prev, [field]: value }))
@@ -474,17 +525,22 @@ function ContentEditor({
         }
     }
 
-    const applyColor = (type: 'foreColor' | 'hiliteColor') => {
-        const colors = ['#ffffff', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#800080', '#008000']
-        const colorNames = ['White', 'Red', 'Green', 'Blue', 'Yellow', 'Magenta', 'Cyan', 'Orange', 'Purple', 'Dark Green']
-        const colorList = colors.map((c, i) => `${i + 1}. ${colorNames[i]}`).join('\n')
-        const choice = prompt(`Select color (1-10):\n${colorList}`)
-        if (choice) {
-            const index = parseInt(choice) - 1
-            if (index >= 0 && index < colors.length) {
-                document.execCommand(type, false, colors[index])
-            }
+    const applyColorFromPicker = (color: string) => {
+        if (showColorPicker === 'text') {
+            document.execCommand('foreColor', false, color)
+        } else if (showColorPicker === 'bg') {
+            document.execCommand('hiliteColor', false, color)
         }
+        setShowColorPicker(null)
+    }
+
+    const removeColor = () => {
+        if (showColorPicker === 'text') {
+            document.execCommand('removeFormat', false)
+        } else if (showColorPicker === 'bg') {
+            document.execCommand('hiliteColor', false, 'transparent')
+        }
+        setShowColorPicker(null)
     }
 
     const addBorder = () => {
@@ -512,111 +568,197 @@ function ContentEditor({
         }
     }
 
-    return (
-        <div ref={editorContainerRef} className="rounded-xl glass-morphism border border-gray-800 overflow-hidden relative">
-            {/* Fixed Toolbar at Top */}
-            <div className="sticky top-0 z-50 border-b border-gray-800 p-2 md:p-3 flex flex-wrap items-center gap-1 bg-gray-950 shadow-lg">
-                {/* Row 1: Undo/Redo, Headings */}
-                <button onClick={() => execCommand('undo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Undo">
-                    <Undo className="h-4 w-4" />
-                </button>
-                <button onClick={() => execCommand('redo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Redo">
-                    <Redo className="h-4 w-4" />
-                </button>
-                <div className="w-px h-6 bg-gray-700 mx-1" />
-                <button onClick={() => applyHeading('H1')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold" title="Heading 1">
-                    H1
-                </button>
-                <button onClick={() => applyHeading('H2')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold text-sm" title="Heading 2">
-                    H2
-                </button>
-                <button onClick={() => applyHeading('H3')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold text-xs" title="Heading 3">
-                    H3
-                </button>
-                <button onClick={() => applyHeading('P')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-xs" title="Paragraph">
-                    P
-                </button>
-                <div className="w-px h-6 bg-gray-700 mx-1" />
-                {/* Text Formatting */}
-                <button onClick={() => execCommand('bold')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bold">
-                    <Bold className="h-4 w-4" />
-                </button>
-                <button onClick={() => execCommand('italic')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Italic">
-                    <Italic className="h-4 w-4" />
-                </button>
-                <button onClick={() => execCommand('underline')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Underline">
-                    <Underline className="h-4 w-4" />
-                </button>
-                <button onClick={() => execCommand('strikeThrough')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Strikethrough">
-                    <Strikethrough className="h-4 w-4" />
-                </button>
-                <div className="w-px h-6 bg-gray-700 mx-1" />
-                {/* Colors */}
-                <button onClick={() => applyColor('foreColor')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Text Color">
+    const insertTable = () => {
+        const rows = prompt('Number of rows:', '3')
+        const cols = prompt('Number of columns:', '3')
+        if (rows && cols) {
+            const r = parseInt(rows)
+            const c = parseInt(cols)
+            if (r > 0 && c > 0) {
+                let tableHtml = '<table style="border-collapse: collapse; width: 100%; margin: 10px 0;">'
+                for (let i = 0; i < r; i++) {
+                    tableHtml += '<tr>'
+                    for (let j = 0; j < c; j++) {
+                        const cellStyle = 'border: 1px solid #4a5568; padding: 8px; color: #ffffff;'
+                        if (i === 0) {
+                            tableHtml += `<th style="${cellStyle} background: #2d3748; font-weight: bold;">Header</th>`
+                        } else {
+                            tableHtml += `<td style="${cellStyle}">Cell</td>`
+                        }
+                    }
+                    tableHtml += '</tr>'
+                }
+                tableHtml += '</table><p><br></p>'
+                document.execCommand('insertHTML', false, tableHtml)
+            }
+        }
+    }
+
+    const ToolbarContent = () => (
+        <>
+            {/* Drag Handle for floating mode */}
+            {isToolbarFloating && (
+                <div 
+                    onMouseDown={startDrag}
+                    className="p-2 cursor-move text-gray-400 hover:text-white"
+                    title="Drag to move"
+                >
+                    <GripVertical className="h-4 w-4" />
+                </div>
+            )}
+            <button onClick={toggleFloatingToolbar} className={`p-2 rounded ${isToolbarFloating ? 'text-intelligence' : 'text-gray-400'} hover:text-white hover:bg-gray-700`} title={isToolbarFloating ? 'Dock Toolbar' : 'Float Toolbar'}>
+                {isToolbarFloating ? '📌' : '🔓'}
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            <button onClick={() => execCommand('undo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Undo">
+                <Undo className="h-4 w-4" />
+            </button>
+            <button onClick={() => execCommand('redo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Redo">
+                <Redo className="h-4 w-4" />
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            <button onClick={() => applyHeading('H1')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold" title="Heading 1">
+                H1
+            </button>
+            <button onClick={() => applyHeading('H2')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold text-sm" title="Heading 2">
+                H2
+            </button>
+            <button onClick={() => applyHeading('H3')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold text-xs" title="Heading 3">
+                H3
+            </button>
+            <button onClick={() => applyHeading('P')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-xs" title="Paragraph">
+                P
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            <button onClick={() => execCommand('bold')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bold">
+                <Bold className="h-4 w-4" />
+            </button>
+            <button onClick={() => execCommand('italic')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Italic">
+                <Italic className="h-4 w-4" />
+            </button>
+            <button onClick={() => execCommand('underline')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Underline">
+                <Underline className="h-4 w-4" />
+            </button>
+            <button onClick={() => execCommand('strikeThrough')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Strikethrough">
+                <Strikethrough className="h-4 w-4" />
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            {/* Colors with Picker */}
+            <div className="relative">
+                <button onClick={() => setShowColorPicker(showColorPicker === 'text' ? null : 'text')} className={`p-2 rounded ${showColorPicker === 'text' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`} title="Text Color">
                     <Palette className="h-4 w-4" />
                 </button>
-                <button onClick={() => applyColor('hiliteColor')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Background Color">
+            </div>
+            <div className="relative">
+                <button onClick={() => setShowColorPicker(showColorPicker === 'bg' ? null : 'bg')} className={`p-2 rounded ${showColorPicker === 'bg' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`} title="Background Color">
                     <Highlighter className="h-4 w-4" />
                 </button>
-                <button onClick={addBorder} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Add Border">
-                    <Square className="h-4 w-4" />
-                </button>
-                <button onClick={addRoundBox} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Round Box">
-                    <Circle className="h-4 w-4" />
-                </button>
-                <div className="w-px h-6 bg-gray-700 mx-1" />
-                {/* Lists */}
-                <button onClick={() => execCommand('insertUnorderedList')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bullet List">
-                    <List className="h-4 w-4" />
-                </button>
-                <button onClick={() => execCommand('insertOrderedList')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Numbered List">
-                    <ListOrdered className="h-4 w-4" />
-                </button>
-                <div className="w-px h-6 bg-gray-700 mx-1" />
-                {/* Alignment */}
-                <button onClick={() => execCommand('justifyLeft')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Align Left">
-                    <AlignLeft className="h-4 w-4" />
-                </button>
-                <button onClick={() => execCommand('justifyCenter')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Align Center">
-                    <AlignCenter className="h-4 w-4" />
-                </button>
-                <button onClick={() => execCommand('justifyRight')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Align Right">
-                    <AlignRight className="h-4 w-4" />
-                </button>
-                <div className="w-px h-6 bg-gray-700 mx-1" />
-                {/* Link & Image */}
-                <button onClick={() => {
-                    const url = prompt('Enter URL:')
-                    if (url) execCommand('createLink', url)
-                }} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert Link">
-                    <Link className="h-4 w-4" />
-                </button>
-                <button onClick={insertImage} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert Image">
-                    <ImageIcon className="h-4 w-4" />
-                </button>
-                <div className="w-px h-6 bg-gray-700 mx-1" />
-                {/* Font & Size */}
-                <select
-                    onChange={(e) => { if (e.target.value) { execCommand('fontName', e.target.value); e.target.selectedIndex = 0 } }}
-                    className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-xs border border-gray-700"
-                >
-                    <option value="">Font</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Times New Roman">Times</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Verdana">Verdana</option>
-                </select>
-                <select
-                    onChange={(e) => { if (e.target.value) { execCommand('fontSize', e.target.value); e.target.selectedIndex = 0 } }}
-                    className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-xs border border-gray-700"
-                >
-                    <option value="">Size</option>
-                    <option value="1">Small</option>
-                    <option value="3">Normal</option>
-                    <option value="5">Large</option>
-                    <option value="7">Huge</option>
-                </select>
             </div>
+            <button onClick={addBorder} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Add Border">
+                <Square className="h-4 w-4" />
+            </button>
+            <button onClick={addRoundBox} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Round Box">
+                <Circle className="h-4 w-4" />
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            <button onClick={() => execCommand('insertUnorderedList')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bullet List">
+                <List className="h-4 w-4" />
+            </button>
+            <button onClick={() => execCommand('insertOrderedList')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Numbered List">
+                <ListOrdered className="h-4 w-4" />
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            <button onClick={() => execCommand('justifyLeft')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Align Left">
+                <AlignLeft className="h-4 w-4" />
+            </button>
+            <button onClick={() => execCommand('justifyCenter')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Align Center">
+                <AlignCenter className="h-4 w-4" />
+            </button>
+            <button onClick={() => execCommand('justifyRight')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Align Right">
+                <AlignRight className="h-4 w-4" />
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            <button onClick={() => {
+                const url = prompt('Enter URL:')
+                if (url) execCommand('createLink', url)
+            }} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert Link">
+                <Link className="h-4 w-4" />
+            </button>
+            <button onClick={insertImage} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert Image">
+                <ImageIcon className="h-4 w-4" />
+            </button>
+            <button onClick={insertTable} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert Table">
+                <Table className="h-4 w-4" />
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            <select
+                onChange={(e) => { if (e.target.value) { execCommand('fontName', e.target.value); e.target.selectedIndex = 0 } }}
+                className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-xs border border-gray-700"
+            >
+                <option value="">Font</option>
+                <option value="Arial">Arial</option>
+                <option value="Times New Roman">Times</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Verdana">Verdana</option>
+            </select>
+            <select
+                onChange={(e) => { if (e.target.value) { execCommand('fontSize', e.target.value); e.target.selectedIndex = 0 } }}
+                className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-xs border border-gray-700"
+            >
+                <option value="">Size</option>
+                <option value="1">Small</option>
+                <option value="3">Normal</option>
+                <option value="5">Large</option>
+                <option value="7">Huge</option>
+            </select>
+        </>
+    )
+
+    return (
+        <div ref={editorContainerRef} className="rounded-xl glass-morphism border border-gray-800 overflow-hidden relative">
+            {/* Color Picker Popup */}
+            {showColorPicker && (
+                <div className="color-picker-popup fixed z-[100] bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl" style={{ top: '150px', left: '50%', transform: 'translateX(-50%)' }}>
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-white text-sm font-medium">{showColorPicker === 'text' ? 'Text Color' : 'Background Color'}</span>
+                        <button onClick={() => setShowColorPicker(null)} className="text-gray-400 hover:text-white">
+                            <XCircle className="h-4 w-4" />
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-6 gap-1 mb-2">
+                        {colorPalette.map((color) => (
+                            <button
+                                key={color}
+                                onClick={() => applyColorFromPicker(color)}
+                                className="w-6 h-6 rounded border border-gray-600 hover:scale-110 transition-transform"
+                                style={{ backgroundColor: color }}
+                                title={color}
+                            />
+                        ))}
+                    </div>
+                    <button onClick={removeColor} className="w-full text-xs text-gray-400 hover:text-white py-1 border border-gray-700 rounded">
+                        Remove Color
+                    </button>
+                </div>
+            )}
+
+            {/* Floating Toolbar */}
+            {isToolbarFloating && (
+                <div
+                    ref={toolbarRef}
+                    className="fixed z-[90] bg-gray-950 border border-gray-700 rounded-lg shadow-2xl p-2 flex flex-wrap items-center gap-1"
+                    style={{ left: toolbarPosition.x, top: toolbarPosition.y, maxWidth: '90vw' }}
+                >
+                    <ToolbarContent />
+                </div>
+            )}
+
+            {/* Static Toolbar */}
+            {!isToolbarFloating && (
+                <div className="sticky top-0 z-50 border-b border-gray-800 p-2 md:p-3 flex flex-wrap items-center gap-1 bg-gray-950 shadow-lg">
+                    <ToolbarContent />
+                </div>
+            )}
 
             {/* Image Resize Controls */}
             {selectedImage && (

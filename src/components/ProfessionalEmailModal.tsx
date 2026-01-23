@@ -51,8 +51,10 @@ export default function ProfessionalEmailModal({
         // Data to send to Formspree
         const formData = new FormData();
         formData.append('email', email);
+        formData.append('_replyto', email);
+        formData.append('user_email', email);
         formData.append('requested_case', caseTitle);
-        formData.append('_subject', `Access Request: ${caseTitle}`);
+        formData.append('_subject', `Case Study Access Request from ${email}: ${caseTitle}`);
 
         try {
             // Use your Formspree endpoint ID
