@@ -37,7 +37,7 @@ export default function DossiersPage() {
         loadPublishedContent()
     }, [])
 
-    const loadPublishedContent = async () => {
+    const loadPublishedContent = async (retryCount = 0) => {
         try {
             const allPublished = await getPublishedContent()
             setCases(allPublished.filter(i => i.type === 'case'))
@@ -45,6 +45,11 @@ export default function DossiersPage() {
             setBlogs(allPublished.filter(i => i.type === 'blog'))
         } catch {
             console.error('Failed to load content')
+            // Retry once after 1 second on failure
+            if (retryCount < 1) {
+                setTimeout(() => loadPublishedContent(retryCount + 1), 1000)
+                return
+            }
         } finally {
             setLoading(false)
         }

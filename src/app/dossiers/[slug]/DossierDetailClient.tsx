@@ -55,18 +55,29 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
         }
     }, [actualSlug])
 
-    const loadContent = async (slugToLoad: string) => {
+    const loadContent = async (slugToLoad: string, retryCount = 0) => {
         try {
             setLoading(true)
             const item = await getContentBySlug(slugToLoad)
             if (item) {
                 setContent(item)
+                setLoading(false)
             } else {
+                // Retry once on empty response (might be cold start)
+                if (retryCount < 1) {
+                    setTimeout(() => loadContent(slugToLoad, retryCount + 1), 1000)
+                    return
+                }
                 setError(true)
+                setLoading(false)
             }
         } catch {
+            // Retry once on error
+            if (retryCount < 1) {
+                setTimeout(() => loadContent(slugToLoad, retryCount + 1), 1000)
+                return
+            }
             setError(true)
-        } finally {
             setLoading(false)
         }
     }

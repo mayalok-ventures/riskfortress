@@ -94,7 +94,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                 })
             }
             return new Response(JSON.stringify(item), {
-                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Access-Control-Allow-Origin': '*',
+                    'Cache-Control': 'public, max-age=60, s-maxage=300',
+                },
             })
         }
         
@@ -107,6 +111,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
+                'Cache-Control': publishedOnly ? 'public, max-age=60, s-maxage=300' : 'no-cache',
             },
         })
     } catch (error) {
