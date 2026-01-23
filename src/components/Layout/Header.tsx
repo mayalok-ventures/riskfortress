@@ -14,6 +14,14 @@ const navigation = [
     { name: 'Advisory Council', href: '/council' },
 ]
 
+const mobileNavigation = [
+    { name: 'Home', href: '/' },
+    { name: 'Capabilities', href: '/capabilities' },
+    { name: 'Case Studies', href: '/dossiers' },
+    { name: 'Advisory Council', href: '/council' },
+    { name: 'Admin', href: '/rfadmin' },
+]
+
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
@@ -105,7 +113,7 @@ export default function Header() {
                     >
                         <div className="container mx-auto px-6 py-6">
                             <div className="space-y-4">
-                                {navigation.map((item) => (
+                                {mobileNavigation.map((item) => (
                                     <Link
                                         key={item.name}
                                         href={item.href}

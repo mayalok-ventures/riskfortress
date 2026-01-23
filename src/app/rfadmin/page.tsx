@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from 'react'
 
 import {
-    Shield, Lock, Eye, EyeOff, Smartphone, Key, LogOut,
+    Shield, Lock, Eye, EyeOff, Key, LogOut,
     FileText, BookOpen, Newspaper, Plus, Edit2, Trash2,
     Save, X, Image as ImageIcon, Bold, Italic, Underline,
     Strikethrough, List, ListOrdered, AlignLeft, AlignCenter,
-    AlignRight, Link, Heading1, Heading2, Heading3, Undo, Redo,
-    Upload, Building
+    AlignRight, Link, Upload, Building, Undo, Redo,
+    Heading1, Heading2, Heading3
 } from 'lucide-react'
 
 import {
@@ -17,24 +17,20 @@ import {
     createContent,
     updateContent,
     deleteContent,
-    generateOTP,
-    verifyOTP,
     verifyPassword,
     createSession,
     validateSession,
     clearSession
 } from '@/lib/admin/client-store'
 
-type AuthStep = 'access' | 'otp' | 'password' | 'authenticated'
+type AuthStep = 'access' | 'password' | 'authenticated'
 
 export default function AdminPage() {
     const [authStep, setAuthStep] = useState<AuthStep>('access')
-    const [otp, setOtp] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const [maskedPhone, setMaskedPhone] = useState('')
 
     const [items, setItems] = useState<ContentItem[]>([])
     const [activeTab, setActiveTab] = useState<'case' | 'article' | 'blog'>('case')
@@ -52,36 +48,8 @@ export default function AdminPage() {
         setItems(getAllContent())
     }
 
-    const handleAccessClick = async () => {
-        // Directly move to password step, skip OTP
+    const handleAccessClick = () => {
         setAuthStep('password')
-        // Optional: You can still show phone masking for UI consistency
-        setMaskedPhone('91******70')
-    }
-
-    const handleOtpSubmit = async () => {
-        if (otp.length !== 6) {
-            setError('Please enter a valid 6-digit OTP')
-            return
-        }
-
-        setLoading(true)
-        setError('')
-
-        try {
-            const result = verifyOTP(otp)
-
-            if (result.success) {
-                setAuthStep('password')
-            } else {
-                setError(result.error || 'Invalid OTP')
-            }
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Verification failed'
-            setError(message)
-        } finally {
-            setLoading(false)
-        }
     }
 
     const handlePasswordSubmit = async () => {
@@ -113,7 +81,6 @@ export default function AdminPage() {
     const handleLogout = () => {
         clearSession()
         setAuthStep('access')
-        setOtp('')
         setPassword('')
         setItems([])
     }
@@ -158,52 +125,6 @@ export default function AdminPage() {
                     </div>
 
                     <div className="p-6 rounded-2xl glass-morphism border border-gray-800">
-                        {authStep === 'access' && (
-                            <div className="text-center">
-                                <Lock className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                                <p className="text-gray-400 mb-6">
-                                    Click to request access verification
-                                </p>
-                                <button
-                                    onClick={handleAccessClick}
-                                    disabled={loading}
-                                    className="w-full px-6 py-3 bg-gradient-to-r from-intelligence to-industrial text-white rounded-lg font-semibold hover:shadow-intelligence transition-all disabled:opacity-50"
-                                >
-                                    {loading ? 'Sending OTP...' : 'Access'}
-                                </button>
-                            </div>
-                        )}
-
-                        {/* authStep === 'otp' wala purana section hata dein ya comment out karein */}
-                        {/* 
-{authStep === 'otp' && (
-    <div>
-        <div className="flex items-center justify-center mb-4">
-            <Smartphone className="h-8 w-8 text-intelligence" />
-        </div>
-        <p className="text-gray-400 text-center text-sm mb-4">
-            Enter the 6-digit OTP sent to {maskedPhone}
-        </p>
-        <input
-            type="text"
-            maxLength={6}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-            placeholder="Enter OTP"
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white text-center text-2xl tracking-widest focus:border-intelligence focus:outline-none mb-4"
-            autoFocus
-        />
-        <button
-            onClick={handleOtpSubmit}
-            disabled={loading || otp.length !== 6}
-            className="w-full px-6 py-3 bg-gradient-to-r from-intelligence to-industrial text-white rounded-lg font-semibold hover:shadow-intelligence transition-all disabled:opacity-50"
-        >
-            {loading ? 'Verifying...' : 'Verify OTP'}
-        </button>
-    </div>
-)}
-*/}
-
                         {authStep === 'access' && (
                             <div className="text-center">
                                 <Lock className="h-12 w-12 text-gray-500 mx-auto mb-4" />
