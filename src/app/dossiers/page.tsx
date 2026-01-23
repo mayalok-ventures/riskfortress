@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Shield, Lock, Eye, FileText, Building, Cpu, BookOpen, Newspaper, X } from 'lucide-react'
 import Image from 'next/image'
 
-import { getPublishedContent, type ContentItem } from '@/lib/admin/client-store'
+import { getPublishedContent, type ContentItem } from '@/lib/admin/api-store'
 import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
 
 const getIconForSector = (sector?: string) => {
@@ -42,9 +42,9 @@ export default function DossiersPage() {
         loadPublishedContent()
     }, [])
 
-    const loadPublishedContent = () => {
+    const loadPublishedContent = async () => {
         try {
-            const allPublished = getPublishedContent()
+            const allPublished = await getPublishedContent()
             setCases(allPublished.filter(i => i.type === 'case'))
             setArticles(allPublished.filter(i => i.type === 'article'))
             setBlogs(allPublished.filter(i => i.type === 'blog'))

@@ -1,0 +1,138 @@
+// API-based content storage that works across all devices
+// Uses Cloudflare KV via API endpoints
+
+export interface ContentItem {
+    id: string
+    type: 'case' | 'article' | 'blog'
+    title: string
+    content: string
+    summary: string
+    thumbnail?: string
+    images?: string[]
+    author: string
+    keywords: string[]
+    status: 'draft' | 'published' | 'archived'
+    createdAt: string
+    updatedAt: string
+    publishedAt?: string
+    sector?: string
+    threatLevel?: 'Low' | 'Medium' | 'High' | 'Critical'
+    confidence?: number
+    location?: string
+    caseStatus?: 'Active' | 'Monitoring' | 'Neutralized' | 'Resolved' | 'Ongoing'
+}
+
+const API_URL = '/api/content'
+
+export async function getAllContent(): Promise<ContentItem[]> {
+    try {
+        const response = await fetch(API_URL)
+        if (!response.ok) throw new Error('Failed to fetch')
+        return await response.json()
+    } catch (error) {
+        console.error('Failed to fetch content:', error)
+        return []
+    }
+}
+
+export async function getPublishedContent(): Promise<ContentItem[]> {
+    try {
+        const response = await fetch(`${API_URL}?published=true`)
+        if (!response.ok) throw new Error('Failed to fetch')
+        const items: ContentItem[] = await response.json()
+        return items.sort((a, b) =>
+            new Date(b.publishedAt || b.createdAt).getTime() -
+            new Date(a.publishedAt || a.createdAt).getTime()
+        )
+    } catch (error) {
+        console.error('Failed to fetch published content:', error)
+        return []
+    }
+}
+
+export async function createContent(item: Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContentItem | null> {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item),
+        })
+        if (!response.ok) throw new Error('Failed to create')
+        return await response.json()
+    } catch (error) {
+        console.error('Failed to create content:', error)
+        return null
+    }
+}
+
+export async function updateContent(id: string, updates: Partial<ContentItem>): Promise<ContentItem | null> {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, ...updates }),
+        })
+        if (!response.ok) throw new Error('Failed to update')
+        return await response.json()
+    } catch (error) {
+        console.error('Failed to update content:', error)
+        return null
+    }
+}
+
+export async function deleteContent(id: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_URL}?id=${id}`, {
+            method: 'DELETE',
+        })
+        return response.ok
+    } catch (error) {
+        console.error('Failed to delete content:', error)
+        return false
+    }
+}
+
+// Auth functions remain client-side (session-based)
+const AUTH_KEY = 'rf-admin-auth'
+const ADMIN_PASSWORD = 'Mflica2026riskfortresspsw@'
+
+export function verifyPassword(password: string): boolean {
+    return password === ADMIN_PASSWORD
+}
+
+export function createSession(): void {
+    if (typeof window === 'undefined') return
+
+    const session = {
+        authenticated: true,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 10 * 60 * 60 * 1000
+    }
+
+    sessionStorage.setItem(AUTH_KEY, JSON.stringify(session))
+}
+
+export function validateSession(): boolean {
+    if (typeof window === 'undefined') return false
+
+    try {
+        const data = sessionStorage.getItem(AUTH_KEY)
+        if (!data) return false
+
+        const session = JSON.parse(data)
+
+        if (Date.now() > session.expiresAt) {
+            sessionStorage.removeItem(AUTH_KEY)
+            return false
+        }
+
+        return session.authenticated
+    } catch {
+        return false
+    }
+}
+
+export function clearSession(): void {
+    if (typeof window === 'undefined') return
+    sessionStorage.removeItem(AUTH_KEY)
+}

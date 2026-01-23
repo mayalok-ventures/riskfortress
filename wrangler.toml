@@ -5,3 +5,12 @@ compatibility_flags = ["nodejs_compat"]
 # Cloudflare Pages configuration
 pages_build_output_dir = "out"
 
+# KV Namespace for content storage
+# You need to create this KV namespace in Cloudflare dashboard:
+# 1. Go to Workers & Pages > KV
+# 2. Create a namespace called "RF_CONTENT"
+# 3. Copy the namespace ID and paste below
+[[kv_namespaces]]
+binding = "RF_CONTENT"
+id = "YOUR_KV_NAMESPACE_ID"
+

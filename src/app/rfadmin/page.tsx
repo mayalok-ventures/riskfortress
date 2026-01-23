@@ -21,7 +21,7 @@ import {
     createSession,
     validateSession,
     clearSession
-} from '@/lib/admin/client-store'
+} from '@/lib/admin/api-store'
 
 type AuthStep = 'access' | 'password' | 'authenticated'
 
@@ -44,8 +44,9 @@ export default function AdminPage() {
         }
     }, [])
 
-    const loadContent = () => {
-        setItems(getAllContent())
+    const loadContent = async () => {
+        const content = await getAllContent()
+        setItems(content)
     }
 
     const handleAccessClick = () => {
@@ -85,17 +86,17 @@ export default function AdminPage() {
         setItems([])
     }
 
-    const handleSaveContent = (item: Partial<ContentItem>) => {
+    const handleSaveContent = async (item: Partial<ContentItem>) => {
         setLoading(true)
 
         try {
             if (item.id) {
-                updateContent(item.id, item)
+                await updateContent(item.id, item)
             } else {
-                createContent(item as Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>)
+                await createContent(item as Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>)
             }
 
-            loadContent()
+            await loadContent()
             setEditingItem(null)
             setIsCreating(false)
         } catch (err) {
@@ -105,11 +106,11 @@ export default function AdminPage() {
         }
     }
 
-    const handleDeleteContent = (id: string) => {
+    const handleDeleteContent = async (id: string) => {
         if (!confirm('Are you sure you want to delete this item?')) return
 
-        deleteContent(id)
-        loadContent()
+        await deleteContent(id)
+        await loadContent()
     }
 
     if (authStep !== 'authenticated') {
