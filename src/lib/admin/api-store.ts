@@ -5,6 +5,7 @@ export interface ContentItem {
     id: string
     type: 'case' | 'article' | 'blog'
     title: string
+    slug: string
     content: string
     summary: string
     thumbnail?: string
@@ -90,6 +91,39 @@ export async function deleteContent(id: string): Promise<boolean> {
         console.error('Failed to delete content:', error)
         return false
     }
+}
+
+export async function getContentById(id: string): Promise<ContentItem | null> {
+    try {
+        const response = await fetch(`${API_URL}?id=${id}`)
+        if (!response.ok) throw new Error('Failed to fetch')
+        const item = await response.json()
+        return item || null
+    } catch (error) {
+        console.error('Failed to fetch content by id:', error)
+        return null
+    }
+}
+
+export async function getContentBySlug(slug: string): Promise<ContentItem | null> {
+    try {
+        const response = await fetch(`${API_URL}?slug=${slug}`)
+        if (!response.ok) throw new Error('Failed to fetch')
+        const item = await response.json()
+        return item || null
+    } catch (error) {
+        console.error('Failed to fetch content by slug:', error)
+        return null
+    }
+}
+
+export function generateSlug(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
 }
 
 // Auth functions remain client-side (session-based)

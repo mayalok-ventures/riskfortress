@@ -1,12 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-
-import { Shield, Lock, Eye, FileText, Building, Cpu, BookOpen, Newspaper, X } from 'lucide-react'
+import { Shield, Lock, Eye, FileText, Building, Cpu, BookOpen, Newspaper } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 import { getPublishedContent, type ContentItem } from '@/lib/admin/api-store'
-import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {
@@ -29,14 +28,10 @@ const getThreatLevelColor = (level?: string) => {
 
 export default function DossiersPage() {
     const [activeTab, setActiveTab] = useState('cases')
-    const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null)
     const [cases, setCases] = useState<ContentItem[]>([])
     const [articles, setArticles] = useState<ContentItem[]>([])
     const [blogs, setBlogs] = useState<ContentItem[]>([])
     const [loading, setLoading] = useState(true)
-    const [isVerifyingEmail, setIsVerifyingEmail] = useState(false)
-    const [requestedCaseForAccess, setRequestedCaseForAccess] = useState<string | null>(null)
-    const [hasAccess, setHasAccess] = useState(false)
 
     useEffect(() => {
         loadPublishedContent()
@@ -140,19 +135,10 @@ export default function DossiersPage() {
                                         {cases.map((item) => {
                                             const Icon = getIconForSector(item.sector)
                                             return (
-                                                <button
-                                                    type="button"
+                                                <Link
+                                                    href={`/dossiers/${item.slug}/`}
                                                     key={item.id}
-                                                    onClick={() => {
-                                                        if (item.type === 'case') {
-                                                            // CASE ke liye email verify karna hoga
-                                                            setRequestedCaseForAccess(item.title)
-                                                            setIsVerifyingEmail(true)
-                                                        } else {
-                                                            // ARTICLE/BLOG ke liye direct access
-                                                            setSelectedItem(item)
-                                                        }
-                                                    }} className="group p-6 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all cursor-pointer text-left w-full"
+                                                    className="group p-6 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all cursor-pointer text-left w-full block"
                                                 >
                                                     <div className="flex items-start justify-between mb-4">
                                                         <div className="flex items-center space-x-3">
@@ -205,7 +191,7 @@ export default function DossiersPage() {
                                                             ))}
                                                         </div>
                                                     )}
-                                                </button>
+                                                </Link>
                                             )
                                         })}
                                     </div>
@@ -251,7 +237,7 @@ export default function DossiersPage() {
                                 ) : (
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
                                         {articles.map((article) => (
-                                            <div key={article.id} className="group p-8 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all">
+                                            <Link href={`/dossiers/${article.slug}/`} key={article.id} className="group p-8 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all block">
                                                 {article.thumbnail && (
                                                     <Image
                                                         src={article.thumbnail}
@@ -280,13 +266,10 @@ export default function DossiersPage() {
                                                         </span>
                                                     ))}
                                                 </div>
-                                                <button
-                                                    onClick={() => setSelectedItem(article)}
-                                                    className="text-intelligence hover:text-intelligence/80 transition-colors font-semibold"
-                                                >
+                                                <span className="text-intelligence hover:text-intelligence/80 transition-colors font-semibold">
                                                     Read Full Article →
-                                                </button>
-                                            </div>
+                                                </span>
+                                            </Link>
                                         ))}
                                     </div>
                                 )}
@@ -304,7 +287,7 @@ export default function DossiersPage() {
                                 ) : (
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
                                         {blogs.map((blog) => (
-                                            <div key={blog.id} className="group p-8 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all">
+                                            <Link href={`/dossiers/${blog.slug}/`} key={blog.id} className="group p-8 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all block">
                                                 {blog.thumbnail && (
                                                     <Image
                                                         src={blog.thumbnail}
@@ -323,13 +306,10 @@ export default function DossiersPage() {
                                                     {blog.title}
                                                 </h3>
                                                 <p className="text-gray-400 mb-4">{blog.summary}</p>
-                                                <button
-                                                    onClick={() => setSelectedItem(blog)}
-                                                    className="text-intelligence hover:text-intelligence/80 transition-colors font-semibold"
-                                                >
+                                                <span className="text-intelligence hover:text-intelligence/80 transition-colors font-semibold">
                                                     Read More →
-                                                </button>
-                                            </div>
+                                                </span>
+                                            </Link>
                                         ))}
                                     </div>
                                 )}
@@ -338,90 +318,6 @@ export default function DossiersPage() {
                     </>
                 )}
             </div>
-
-
-            {/* Professional Email Modal for Case Access */}
-            {isVerifyingEmail && requestedCaseForAccess && (
-                <ProfessionalEmailModal
-                    isOpen={isVerifyingEmail}
-                    onClose={() => {
-                        setIsVerifyingEmail(false)
-                        setRequestedCaseForAccess(null)
-                    }}
-                    caseTitle={requestedCaseForAccess}
-                    onSuccess={() => {
-                        // Email verify hone ke baad, pura case show karein
-                        const targetCase = cases.find(c => c.title === requestedCaseForAccess)
-                        if (targetCase) {
-                            setSelectedItem(targetCase)
-                            setHasAccess(true) // Session ke liye access store karein
-                        }
-                        setIsVerifyingEmail(false)
-                        setRequestedCaseForAccess(null)
-                    }}
-                />
-            )}
-
-
-            {selectedItem && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-gray-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
-                        <button
-                            onClick={() => setSelectedItem(null)}
-                            className="absolute top-4 right-4 p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors z-10"
-                        >
-                            <X className="h-6 w-6 text-gray-400 hover:text-white" />
-                        </button>
-
-                        <div className="p-8">
-                            {selectedItem.thumbnail && (
-                                <div className="mb-6">
-                                    <Image
-                                        src={selectedItem.thumbnail}
-                                        alt={selectedItem.title}
-                                        width={800}
-                                        height={400}
-                                        className="w-full h-64 object-cover rounded-xl"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="mb-6">
-                                <div className="flex items-center text-sm text-gray-400 mb-4">
-                                    <span>{new Date(selectedItem.publishedAt || selectedItem.createdAt).toLocaleDateString()}</span>
-                                    <span className="mx-2">•</span>
-                                    <span>{selectedItem.author || 'RiskFortress Intelligence Team'}</span>
-                                    {selectedItem.type === 'case' && selectedItem.threatLevel && (
-                                        <>
-                                            <span className="mx-2">•</span>
-                                            <span className={`px-2 py-0.5 rounded-full text-xs ${getThreatLevelColor(selectedItem.threatLevel)}`}>
-                                                {selectedItem.threatLevel} Threat
-                                            </span>
-                                        </>
-                                    )}
-                                </div>
-                                <h2 className="text-3xl font-bold text-white mb-4">{selectedItem.title}</h2>
-                                <div className="flex flex-wrap gap-2 mb-6">
-                                    {selectedItem.keywords?.map((keyword) => (
-                                        <span
-                                            key={keyword}
-                                            className="px-3 py-1 text-xs rounded-full bg-intelligence/10 text-intelligence border border-intelligence/20"
-                                        >
-                                            {keyword}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div
-                                className="prose prose-invert max-w-none text-white"
-                                style={{ color: '#ffffff' }}
-                                dangerouslySetInnerHTML={{ __html: selectedItem.content }}
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

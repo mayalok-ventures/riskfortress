@@ -5,6 +5,7 @@ export interface ContentItem {
     id: string
     type: 'case' | 'article' | 'blog'
     title: string
+    slug: string
     content: string
     summary: string
     thumbnail?: string

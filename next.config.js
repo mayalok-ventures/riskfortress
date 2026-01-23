@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    output: process.env.NODE_ENV === 'production' ? 'export' : undefined,  // Static export for Cloudflare Pages
+    output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
+    trailingSlash: true,
     compiler: {
         removeConsole: process.env.NODE_ENV === 'production',
     },

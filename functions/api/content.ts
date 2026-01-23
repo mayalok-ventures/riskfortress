@@ -8,6 +8,7 @@ interface ContentItem {
     id: string
     type: 'case' | 'article' | 'blog'
     title: string
+    slug: string
     content: string
     summary: string
     thumbnail?: string
@@ -25,15 +26,77 @@ interface ContentItem {
     caseStatus?: 'Active' | 'Monitoring' | 'Neutralized' | 'Resolved' | 'Ongoing'
 }
 
+function generateSlug(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
+}
+
 const CONTENT_KEY = 'rf-content-items'
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
     try {
         const data = await context.env.RF_CONTENT.get(CONTENT_KEY)
-        const items: ContentItem[] = data ? JSON.parse(data) : []
+        let items: ContentItem[] = data ? JSON.parse(data) : []
+        
+        // Auto-migrate: assign slugs to items that don't have one
+        let needsSave = false
+        const usedSlugs = new Set(items.filter(i => i.slug).map(i => i.slug))
+        
+        for (const item of items) {
+            if (!item.slug) {
+                let baseSlug = generateSlug(item.title || 'untitled')
+                let slug = baseSlug
+                let counter = 1
+                while (usedSlugs.has(slug)) {
+                    slug = `${baseSlug}-${counter}`
+                    counter++
+                }
+                item.slug = slug
+                usedSlugs.add(slug)
+                needsSave = true
+            }
+        }
+        
+        if (needsSave) {
+            await context.env.RF_CONTENT.put(CONTENT_KEY, JSON.stringify(items))
+        }
         
         const url = new URL(context.request.url)
         const publishedOnly = url.searchParams.get('published') === 'true'
+        const id = url.searchParams.get('id')
+        const slug = url.searchParams.get('slug')
+        
+        // Return single item by ID
+        if (id) {
+            const item = items.find(i => i.id === id)
+            if (!item) {
+                return new Response(JSON.stringify({ error: 'Content not found' }), {
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                })
+            }
+            return new Response(JSON.stringify(item), {
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            })
+        }
+        
+        // Return single item by slug
+        if (slug) {
+            const item = items.find(i => i.slug === slug && i.status === 'published')
+            if (!item) {
+                return new Response(JSON.stringify({ error: 'Content not found' }), {
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                })
+            }
+            return new Response(JSON.stringify(item), {
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            })
+        }
         
         let result = items
         if (publishedOnly) {
@@ -60,9 +123,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const data = await context.env.RF_CONTENT.get(CONTENT_KEY)
         const items: ContentItem[] = data ? JSON.parse(data) : []
         
+        const baseSlug = generateSlug(body.title || 'untitled')
+        let slug = baseSlug
+        let counter = 1
+        while (items.some(i => i.slug === slug)) {
+            slug = `${baseSlug}-${counter}`
+            counter++
+        }
+        
         const newItem: ContentItem = {
             ...body as ContentItem,
             id: `rf-${body.type}-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`,
+            slug,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             publishedAt: body.status === 'published' ? new Date().toISOString() : undefined,
