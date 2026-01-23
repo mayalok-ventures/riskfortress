@@ -12,5 +12,5 @@ pages_build_output_dir = "out"
 # 3. Copy the namespace ID and paste below
 [[kv_namespaces]]
 binding = "RF_CONTENT"
-id = "YOUR_KV_NAMESPACE_ID"
+id = "9c4eb8cc1d654491a5b0c28fbac47897"
 
