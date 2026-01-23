@@ -1,18 +1,13 @@
 {
   "version": 1,
-  "include": ["/*"],
-  "exclude": [
+  "include": [
     "/api/*",
-    "/_next/static/*",
-    "/icons/*",
-    "/images/*",
-    "/logos/*",
-    "/uploads/*",
-    "/*.png",
-    "/*.ico",
-    "/*.svg",
-    "/*.json",
-    "/*.txt",
-    "/*.xml"
+    "/dossiers/*"
+  ],
+  "exclude": [
+    "/dossiers/",
+    "/_next/*",
+    "/*.js",
+    "/*.css"
   ]
 }
