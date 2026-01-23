@@ -8,7 +8,7 @@ import {
     Save, X, Image as ImageIcon, Bold, Italic, Underline,
     Strikethrough, List, ListOrdered, AlignLeft, AlignCenter,
     AlignRight, Link, Upload, Building, Undo, Redo,
-    Heading1, Heading2, Heading3
+    Heading1, Heading2, Heading3, Palette, Highlighter, Square, Circle
 } from 'lucide-react'
 
 import {
@@ -466,10 +466,57 @@ function ContentEditor({
         onSave({ ...formData, content })
     }
 
+    const applyHeading = (tag: string) => {
+        editorRef.current?.focus()
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            document.execCommand('formatBlock', false, tag)
+        }
+    }
+
+    const applyColor = (type: 'foreColor' | 'hiliteColor') => {
+        const colors = ['#ffffff', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#800080', '#008000']
+        const colorNames = ['White', 'Red', 'Green', 'Blue', 'Yellow', 'Magenta', 'Cyan', 'Orange', 'Purple', 'Dark Green']
+        const colorList = colors.map((c, i) => `${i + 1}. ${colorNames[i]}`).join('\n')
+        const choice = prompt(`Select color (1-10):\n${colorList}`)
+        if (choice) {
+            const index = parseInt(choice) - 1
+            if (index >= 0 && index < colors.length) {
+                document.execCommand(type, false, colors[index])
+            }
+        }
+    }
+
+    const addBorder = () => {
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const span = document.createElement('span')
+            span.style.border = '1px solid #ffffff'
+            span.style.padding = '2px 6px'
+            span.style.borderRadius = '4px'
+            range.surroundContents(span)
+        }
+    }
+
+    const addRoundBox = () => {
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const span = document.createElement('span')
+            span.style.border = '2px solid #00d4ff'
+            span.style.padding = '4px 12px'
+            span.style.borderRadius = '20px'
+            span.style.display = 'inline-block'
+            range.surroundContents(span)
+        }
+    }
+
     return (
         <div ref={editorContainerRef} className="rounded-xl glass-morphism border border-gray-800 overflow-hidden relative">
-            {/* Sticky Toolbar */}
-            <div className="sticky top-0 z-20 border-b border-gray-800 p-3 flex flex-wrap items-center gap-1 bg-gray-900/95 backdrop-blur-sm">
+            {/* Fixed Toolbar at Top */}
+            <div className="sticky top-0 z-50 border-b border-gray-800 p-2 md:p-3 flex flex-wrap items-center gap-1 bg-gray-950 shadow-lg">
+                {/* Row 1: Undo/Redo, Headings */}
                 <button onClick={() => execCommand('undo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Undo">
                     <Undo className="h-4 w-4" />
                 </button>
@@ -477,32 +524,48 @@ function ContentEditor({
                     <Redo className="h-4 w-4" />
                 </button>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
-                <button onClick={() => execCommand('formatBlock', 'h1')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Heading 1">
-                    <Heading1 className="h-4 w-4" />
+                <button onClick={() => applyHeading('H1')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold" title="Heading 1">
+                    H1
                 </button>
-                <button onClick={() => execCommand('formatBlock', 'h2')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Heading 2">
-                    <Heading2 className="h-4 w-4" />
+                <button onClick={() => applyHeading('H2')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold text-sm" title="Heading 2">
+                    H2
                 </button>
-                <button onClick={() => execCommand('formatBlock', 'h3')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Heading 3">
-                    <Heading3 className="h-4 w-4" />
+                <button onClick={() => applyHeading('H3')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold text-xs" title="Heading 3">
+                    H3
                 </button>
-                <button onClick={() => execCommand('formatBlock', 'p')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-xs font-bold" title="Paragraph">
+                <button onClick={() => applyHeading('P')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-xs" title="Paragraph">
                     P
                 </button>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
-                <button onClick={() => execCommand('bold')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bold (Ctrl+B)">
+                {/* Text Formatting */}
+                <button onClick={() => execCommand('bold')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bold">
                     <Bold className="h-4 w-4" />
                 </button>
-                <button onClick={() => execCommand('italic')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Italic (Ctrl+I)">
+                <button onClick={() => execCommand('italic')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Italic">
                     <Italic className="h-4 w-4" />
                 </button>
-                <button onClick={() => execCommand('underline')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Underline (Ctrl+U)">
+                <button onClick={() => execCommand('underline')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Underline">
                     <Underline className="h-4 w-4" />
                 </button>
                 <button onClick={() => execCommand('strikeThrough')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Strikethrough">
                     <Strikethrough className="h-4 w-4" />
                 </button>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
+                {/* Colors */}
+                <button onClick={() => applyColor('foreColor')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Text Color">
+                    <Palette className="h-4 w-4" />
+                </button>
+                <button onClick={() => applyColor('hiliteColor')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Background Color">
+                    <Highlighter className="h-4 w-4" />
+                </button>
+                <button onClick={addBorder} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Add Border">
+                    <Square className="h-4 w-4" />
+                </button>
+                <button onClick={addRoundBox} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Round Box">
+                    <Circle className="h-4 w-4" />
+                </button>
+                <div className="w-px h-6 bg-gray-700 mx-1" />
+                {/* Lists */}
                 <button onClick={() => execCommand('insertUnorderedList')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bullet List">
                     <List className="h-4 w-4" />
                 </button>
@@ -510,6 +573,7 @@ function ContentEditor({
                     <ListOrdered className="h-4 w-4" />
                 </button>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
+                {/* Alignment */}
                 <button onClick={() => execCommand('justifyLeft')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Align Left">
                     <AlignLeft className="h-4 w-4" />
                 </button>
@@ -520,6 +584,7 @@ function ContentEditor({
                     <AlignRight className="h-4 w-4" />
                 </button>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
+                {/* Link & Image */}
                 <button onClick={() => {
                     const url = prompt('Enter URL:')
                     if (url) execCommand('createLink', url)
@@ -530,24 +595,22 @@ function ContentEditor({
                     <ImageIcon className="h-4 w-4" />
                 </button>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
+                {/* Font & Size */}
                 <select
-                    onChange={(e) => { execCommand('fontName', e.target.value); e.target.value = '' }}
-                    defaultValue=""
-                    className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-sm border border-gray-700"
+                    onChange={(e) => { if (e.target.value) { execCommand('fontName', e.target.value); e.target.selectedIndex = 0 } }}
+                    className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-xs border border-gray-700"
                 >
-                    <option value="" disabled>Font</option>
+                    <option value="">Font</option>
                     <option value="Arial">Arial</option>
-                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Times New Roman">Times</option>
                     <option value="Georgia">Georgia</option>
                     <option value="Verdana">Verdana</option>
-                    <option value="Courier New">Courier New</option>
                 </select>
                 <select
-                    onChange={(e) => { execCommand('fontSize', e.target.value); e.target.value = '' }}
-                    defaultValue=""
-                    className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-sm border border-gray-700"
+                    onChange={(e) => { if (e.target.value) { execCommand('fontSize', e.target.value); e.target.selectedIndex = 0 } }}
+                    className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-xs border border-gray-700"
                 >
-                    <option value="" disabled>Size</option>
+                    <option value="">Size</option>
                     <option value="1">Small</option>
                     <option value="3">Normal</option>
                     <option value="5">Large</option>
@@ -557,13 +620,13 @@ function ContentEditor({
 
             {/* Image Resize Controls */}
             {selectedImage && (
-                <div className="image-resize-controls sticky top-14 z-30 flex items-center justify-center gap-2 p-2 bg-intelligence/90 text-white text-sm">
-                    <span>Resize Image:</span>
+                <div className="image-resize-controls sticky top-16 z-40 flex items-center justify-center gap-2 p-2 bg-intelligence text-white text-sm">
+                    <span>Resize:</span>
                     <button onClick={() => resizeImage('small')} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded">25%</button>
                     <button onClick={() => resizeImage('medium')} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded">50%</button>
                     <button onClick={() => resizeImage('large')} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded">75%</button>
                     <button onClick={() => resizeImage('full')} className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded">100%</button>
-                    <button onClick={() => setSelectedImage(null)} className="px-3 py-1 bg-red-500/50 hover:bg-red-500/70 rounded ml-2">Cancel</button>
+                    <button onClick={() => setSelectedImage(null)} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded ml-2">✕</button>
                 </div>
             )}
 
@@ -732,8 +795,8 @@ function ContentEditor({
                         ref={editorRef}
                         contentEditable
                         suppressContentEditableWarning
-                        className="w-full min-h-[400px] max-h-[600px] overflow-y-auto p-4 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-intelligence focus:outline-none prose prose-invert max-w-none"
-                        style={{ lineHeight: 1.8 }}
+                        className="w-full min-h-[400px] max-h-[600px] overflow-y-auto p-4 bg-gray-900 border border-gray-700 rounded-lg focus:border-intelligence focus:outline-none prose prose-invert max-w-none"
+                        style={{ lineHeight: 1.8, color: '#ffffff' }}
                     />
                 </div>
 

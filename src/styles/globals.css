@@ -125,3 +125,49 @@
         display: none !important;
     }
 }
+
+/* Prose content styling for dark theme */
+.prose-invert {
+    color: #ffffff !important;
+}
+
+.prose-invert p,
+.prose-invert li,
+.prose-invert span,
+.prose-invert div {
+    color: inherit;
+}
+
+.prose-invert h1,
+.prose-invert h2,
+.prose-invert h3,
+.prose-invert h4 {
+    color: #ffffff !important;
+}
+
+/* Content editor styles */
+[contenteditable] {
+    color: #ffffff;
+}
+
+[contenteditable] * {
+    color: inherit;
+}
+
+[contenteditable] h1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0.5em 0;
+}
+
+[contenteditable] h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0.5em 0;
+}
+
+[contenteditable] h3 {
+    font-size: 1.25em;
+    font-weight: bold;
+    margin: 0.5em 0;
+}

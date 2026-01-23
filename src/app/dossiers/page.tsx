@@ -414,7 +414,8 @@ export default function DossiersPage() {
                             </div>
 
                             <div
-                                className="prose prose-invert max-w-none"
+                                className="prose prose-invert max-w-none text-white"
+                                style={{ color: '#ffffff' }}
                                 dangerouslySetInnerHTML={{ __html: selectedItem.content }}
                             />
                         </div>
