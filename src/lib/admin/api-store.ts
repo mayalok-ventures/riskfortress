@@ -58,7 +58,11 @@ export async function createContent(item: Omit<ContentItem, 'id' | 'createdAt' |
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(item),
         })
-        if (!response.ok) throw new Error('Failed to create')
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            console.error('Create failed:', response.status, errorData)
+            throw new Error(errorData.details || errorData.error || 'Failed to create')
+        }
         return await response.json()
     } catch (error) {
         console.error('Failed to create content:', error)
@@ -73,7 +77,11 @@ export async function updateContent(id: string, updates: Partial<ContentItem>): 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, ...updates }),
         })
-        if (!response.ok) throw new Error('Failed to update')
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            console.error('Update failed:', response.status, errorData)
+            throw new Error(errorData.details || errorData.error || 'Failed to update')
+        }
         return await response.json()
     } catch (error) {
         console.error('Failed to update content:', error)

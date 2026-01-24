@@ -89,19 +89,27 @@ export default function AdminPage() {
 
     const handleSaveContent = async (item: Partial<ContentItem>) => {
         setLoading(true)
+        setError('')
 
         try {
+            let result
             if (item.id) {
-                await updateContent(item.id, item)
+                result = await updateContent(item.id, item)
             } else {
-                await createContent(item as Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>)
+                result = await createContent(item as Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>)
+            }
+
+            if (!result) {
+                setError('Failed to save content. Please check your connection and try again.')
+                return
             }
 
             await loadContent()
             setEditingItem(null)
             setIsCreating(false)
         } catch (err) {
-            setError('Failed to save content')
+            console.error('Save error:', err)
+            setError('Failed to save content: ' + (err instanceof Error ? err.message : 'Unknown error'))
         } finally {
             setLoading(false)
         }

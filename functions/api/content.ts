@@ -89,29 +89,34 @@ const corsHeaders = {
 
 // Initialize database table if not exists
 async function initDB(db: D1Database) {
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS content (
-            id TEXT PRIMARY KEY,
-            type TEXT NOT NULL CHECK(type IN ('case', 'article', 'blog')),
-            title TEXT NOT NULL,
-            slug TEXT NOT NULL UNIQUE,
-            content TEXT NOT NULL DEFAULT '',
-            summary TEXT NOT NULL DEFAULT '',
-            thumbnail TEXT,
-            images TEXT,
-            author TEXT NOT NULL DEFAULT 'RiskFortress Intelligence Team',
-            keywords TEXT,
-            status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft', 'published', 'archived')),
-            created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL,
-            published_at TEXT,
-            sector TEXT,
-            threat_level TEXT,
-            confidence INTEGER,
-            location TEXT,
-            case_status TEXT
-        )
-    `)
+    try {
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS content (
+                id TEXT PRIMARY KEY,
+                type TEXT NOT NULL,
+                title TEXT NOT NULL,
+                slug TEXT NOT NULL UNIQUE,
+                content TEXT NOT NULL DEFAULT '',
+                summary TEXT NOT NULL DEFAULT '',
+                thumbnail TEXT,
+                images TEXT,
+                author TEXT NOT NULL DEFAULT 'RiskFortress Intelligence Team',
+                keywords TEXT,
+                status TEXT NOT NULL DEFAULT 'draft',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                published_at TEXT,
+                sector TEXT,
+                threat_level TEXT,
+                confidence INTEGER,
+                location TEXT,
+                case_status TEXT
+            )
+        `).run()
+    } catch (e) {
+        // Table might already exist, which is fine
+        console.log('initDB:', e)
+    }
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
