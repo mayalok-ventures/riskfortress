@@ -43,7 +43,9 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
     const [error, setError] = useState(false)
 
     // Extract actual slug from pathname (handles both SSG placeholder and real URLs)
-    const actualSlug = pathname?.split('/').filter(Boolean).pop() || initialSlug
+    // Remove trailing slash and get the last segment
+    const cleanPath = pathname?.replace(/\/$/, '') || ''
+    const actualSlug = cleanPath.split('/').filter(Boolean).pop() || initialSlug
 
     useEffect(() => {
         if (actualSlug && actualSlug !== '_placeholder') {

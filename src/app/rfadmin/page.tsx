@@ -375,10 +375,23 @@ function ContentEditor({
     const dragOffset = useRef({ x: 0, y: 0 })
 
     const colorPalette = [
+        // Basic colors
         '#ffffff', '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00',
         '#ff00ff', '#00ffff', '#ffa500', '#800080', '#008000', '#000080',
+        // Modern palette
         '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dfe6e9',
-        '#a29bfe', '#fd79a8', '#636e72', '#2d3436', '#00b894', '#e17055'
+        '#a29bfe', '#fd79a8', '#636e72', '#2d3436', '#00b894', '#e17055',
+        // Extended colors
+        '#1abc9c', '#2ecc71', '#3498db', '#9b59b6', '#34495e', '#16a085',
+        '#27ae60', '#2980b9', '#8e44ad', '#2c3e50', '#f1c40f', '#e67e22',
+        '#e74c3c', '#ecf0f1', '#95a5a6', '#f39c12', '#d35400', '#c0392b',
+        // Pastels
+        '#fab1a0', '#81ecec', '#74b9ff', '#a29bfe', '#ffeaa7', '#55efc4',
+        '#ff7675', '#fdcb6e', '#00cec9', '#6c5ce7', '#b2bec3', '#dfe6e9',
+        // Dark shades
+        '#1e272e', '#485460', '#0a3d62', '#3c6382', '#60a3bc', '#079992',
+        // Neon
+        '#00ff88', '#ff0055', '#00d4ff', '#ffcc00', '#ff6600', '#cc00ff'
     ]
 
     useEffect(() => {
@@ -443,16 +456,21 @@ function ContentEditor({
     }
 
     const execCommand = (command: string, value?: string) => {
-        const selection = window.getSelection()
-        if (!selection || selection.rangeCount === 0) {
-            editorRef.current?.focus()
-        }
+        // Ensure editor has focus before executing command
+        editorRef.current?.focus()
         
-        if (command === 'formatBlock' && value) {
-            document.execCommand(command, false, `<${value}>`)
-        } else {
-            document.execCommand(command, false, value)
-        }
+        // Small delay to ensure focus is set
+        setTimeout(() => {
+            try {
+                if (command === 'formatBlock' && value) {
+                    document.execCommand(command, false, `<${value}>`)
+                } else {
+                    document.execCommand(command, false, value || '')
+                }
+            } catch (e) {
+                console.error('execCommand failed:', e)
+            }
+        }, 10)
     }
 
     const insertImage = () => {
@@ -527,28 +545,45 @@ function ContentEditor({
 
     const applyHeading = (tag: string) => {
         editorRef.current?.focus()
-        const selection = window.getSelection()
-        if (selection && selection.rangeCount > 0) {
-            document.execCommand('formatBlock', false, tag)
-        }
+        setTimeout(() => {
+            try {
+                document.execCommand('formatBlock', false, `<${tag}>`)
+            } catch (e) {
+                console.error('applyHeading failed:', e)
+            }
+        }, 10)
     }
 
     const applyColorFromPicker = (color: string) => {
-        if (showColorPicker === 'text') {
-            document.execCommand('foreColor', false, color)
-        } else if (showColorPicker === 'bg') {
-            document.execCommand('hiliteColor', false, color)
-        }
-        setShowColorPicker(null)
+        editorRef.current?.focus()
+        setTimeout(() => {
+            try {
+                if (showColorPicker === 'text') {
+                    document.execCommand('foreColor', false, color)
+                } else if (showColorPicker === 'bg') {
+                    document.execCommand('hiliteColor', false, color)
+                }
+            } catch (e) {
+                console.error('applyColor failed:', e)
+            }
+            setShowColorPicker(null)
+        }, 10)
     }
 
     const removeColor = () => {
-        if (showColorPicker === 'text') {
-            document.execCommand('removeFormat', false)
-        } else if (showColorPicker === 'bg') {
-            document.execCommand('hiliteColor', false, 'transparent')
-        }
-        setShowColorPicker(null)
+        editorRef.current?.focus()
+        setTimeout(() => {
+            try {
+                if (showColorPicker === 'text') {
+                    document.execCommand('removeFormat', false, '')
+                } else if (showColorPicker === 'bg') {
+                    document.execCommand('hiliteColor', false, 'transparent')
+                }
+            } catch (e) {
+                console.error('removeColor failed:', e)
+            }
+            setShowColorPicker(null)
+        }, 10)
     }
 
     const addBorder = () => {
@@ -726,27 +761,35 @@ function ContentEditor({
         <div ref={editorContainerRef} className="rounded-xl glass-morphism border border-gray-800 overflow-hidden relative">
             {/* Color Picker Popup */}
             {showColorPicker && (
-                <div className="color-picker-popup fixed z-[100] bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl" style={{ top: '150px', left: '50%', transform: 'translateX(-50%)' }}>
-                    <div className="flex items-center justify-between mb-2">
+                <div className="color-picker-popup fixed z-[100] bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-xl" style={{ top: '150px', left: '50%', transform: 'translateX(-50%)', maxWidth: '320px' }}>
+                    <div className="flex items-center justify-between mb-3">
                         <span className="text-white text-sm font-medium">{showColorPicker === 'text' ? 'Text Color' : 'Background Color'}</span>
                         <button onClick={() => setShowColorPicker(null)} className="text-gray-400 hover:text-white">
                             <XCircle className="h-4 w-4" />
                         </button>
                     </div>
-                    <div className="grid grid-cols-6 gap-1 mb-2">
-                        {colorPalette.map((color) => (
+                    <div className="grid grid-cols-12 gap-1 mb-3">
+                        {colorPalette.map((color, index) => (
                             <button
-                                key={color}
+                                key={`${color}-${index}`}
                                 onClick={() => applyColorFromPicker(color)}
-                                className="w-6 h-6 rounded border border-gray-600 hover:scale-110 transition-transform"
+                                className="w-5 h-5 rounded border border-gray-600 hover:scale-125 hover:z-10 transition-transform"
                                 style={{ backgroundColor: color }}
                                 title={color}
                             />
                         ))}
                     </div>
-                    <button onClick={removeColor} className="w-full text-xs text-gray-400 hover:text-white py-1 border border-gray-700 rounded">
-                        Remove Color
-                    </button>
+                    <div className="flex gap-2">
+                        <input
+                            type="color"
+                            onChange={(e) => applyColorFromPicker(e.target.value)}
+                            className="w-8 h-8 rounded cursor-pointer border-0"
+                            title="Custom color"
+                        />
+                        <button onClick={removeColor} className="flex-1 text-xs text-gray-400 hover:text-white py-1 border border-gray-700 rounded hover:bg-gray-800">
+                            Remove Color
+                        </button>
+                    </div>
                 </div>
             )}
 
