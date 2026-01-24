@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google'
+import Script from 'next/script'
 
 import '@/styles/globals.css'
 import { Toaster } from 'sonner'
@@ -10,6 +11,8 @@ import { ThemeProvider } from '@/components/Layout/ThemeProvider'
 
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+
+const GA_MEASUREMENT_ID = 'G-0NB75DBBJP'
 
 const inter = Inter({
     subsets: ['latin'],
@@ -169,6 +172,22 @@ export default function RootLayout({
             <head>
                 <link rel="manifest" href="/manifest.json" />
                 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+                
+                {/* Google Analytics */}
+                <Script
+                    src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+                    strategy="afterInteractive"
+                />
+                <Script id="google-analytics" strategy="afterInteractive">
+                    {`
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                        gtag('config', '${GA_MEASUREMENT_ID}', {
+                            page_path: window.location.pathname,
+                        });
+                    `}
+                </Script>
             </head>
             <body className="bg-gray-950 text-gray-100 antialiased selection:bg-intelligence/30">
                 <ThemeProvider>

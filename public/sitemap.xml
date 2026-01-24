@@ -1,117 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   
-  <!-- Home Page -->
+  <!-- ========== PRIMARY PAGES ========== -->
+  
+  <!-- Home Page - Highest Priority -->
   <url>
-    <loc>https://riskfortress.in</loc>
-    <lastmod>2024-01-15</lastmod>
+    <loc>https://riskfortress.in/</loc>
+    <lastmod>2026-01-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://riskfortress.in"/>
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://riskfortress.in"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://riskfortress.in/"/>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://riskfortress.in/"/>
+    <image:image>
+      <image:loc>https://riskfortress.in/og-image.png</image:loc>
+      <image:title>RiskFortress - Enterprise Risk Management India</image:title>
+    </image:image>
   </url>
   
-  <!-- Core Pages -->
+  <!-- Capabilities - Core Service Overview -->
   <url>
-    <loc>https://riskfortress.in/capabilities</loc>
-    <lastmod>2024-01-15</lastmod>
+    <loc>https://riskfortress.in/capabilities/</loc>
+    <lastmod>2026-01-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   
+  <!-- Case Studies / Dossiers - Dynamic Content -->
   <url>
-    <loc>https://riskfortress.in/dossiers</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://riskfortress.in/dossiers/</loc>
+    <lastmod>2026-01-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Advisory Council -->
+  <url>
+    <loc>https://riskfortress.in/council/</loc>
+    <lastmod>2026-01-24</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
+  <!-- Contact / Secure Intake -->
   <url>
-    <loc>https://riskfortress.in/council</loc>
-    <lastmod>2024-01-15</lastmod>
+    <loc>https://riskfortress.in/secure-intake/</loc>
+    <lastmod>2026-01-24</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <url>
-    <loc>https://riskfortress.in/secure-intake</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <!-- Service Pages -->
-  <url>
-    <loc>https://riskfortress.in/services/enterprise-risk-management</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   
-  <url>
-    <loc>https://riskfortress.in/services/land-due-diligence</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
+  <!-- ========== LEGAL PAGES ========== -->
   
   <url>
-    <loc>https://riskfortress.in/services/tscm-services</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <url>
-    <loc>https://riskfortress.in/services/family-office-security</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- Industry Pages -->
-  <url>
-    <loc>https://riskfortress.in/industries/heavy-industry</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <url>
-    <loc>https://riskfortress.in/industries/family-offices</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <url>
-    <loc>https://riskfortress.in/industries/corporate</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  
-  <!-- Legal Pages -->
-  <url>
-    <loc>https://riskfortress.in/privacy</loc>
-    <lastmod>2024-01-15</lastmod>
+    <loc>https://riskfortress.in/privacy/</loc>
+    <lastmod>2026-01-24</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   
   <url>
-    <loc>https://riskfortress.in/terms</loc>
-    <lastmod>2024-01-15</lastmod>
+    <loc>https://riskfortress.in/terms/</loc>
+    <lastmod>2026-01-24</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
-  
-  <url>
-    <loc>https://riskfortress.in/security</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  
+
 </urlset>

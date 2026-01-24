@@ -4,17 +4,18 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /rfadmin/
 Disallow: /admin/
 Disallow: /secure-intake/submit/
 Disallow: /private/
 Disallow: /dashboard/
+Disallow: /dossiers/_placeholder/
 
 # Crawl delay
 Crawl-delay: 1
 
-# Sitemaps
+# Sitemap
 Sitemap: https://riskfortress.in/sitemap.xml
-Sitemap: https://riskfortress.in/sitemap-index.xml
 
 # Specific bots
 User-agent: GPTBot

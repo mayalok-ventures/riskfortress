@@ -117,7 +117,7 @@ export default function SecureIntakePage() {
                                         href="mailto:intelligence@riskfortress.in"
                                         className="text-xl text-intelligence hover:text-intelligence/80 transition-colors"
                                     >
-                                        intelligence@riskfortress.in
+                                        kunal@riskfortress.in
                                     </a>
                                     <p className="text-sm text-gray-400 mt-2">PGP key available upon request</p>
                                 </div>
