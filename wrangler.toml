@@ -5,12 +5,8 @@ compatibility_flags = ["nodejs_compat"]
 # Cloudflare Pages configuration
 pages_build_output_dir = "out"
 
-# KV Namespace for content storage
-# You need to create this KV namespace in Cloudflare dashboard:
-# 1. Go to Workers & Pages > KV
-# 2. Create a namespace called "RF_CONTENT"
-# 3. Copy the namespace ID and paste below
-[[kv_namespaces]]
-binding = "RF_CONTENT"
-id = "9c4eb8cc1d654491a5b0c28fbac47897"
-
+# D1 Database for content storage
+[[d1_databases]]
+binding = "RF_DB"
+database_name = "rf-blog-db"
+database_id = "962a0d42-8f11-45aa-b8d6-3a88370b06e3"
