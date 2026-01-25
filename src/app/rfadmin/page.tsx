@@ -417,9 +417,15 @@ function ContentEditor({
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (isDragging && isToolbarFloating) {
+                e.preventDefault()
+                const newX = e.clientX - dragOffset.current.x
+                const newY = e.clientY - dragOffset.current.y
+                // Keep toolbar within viewport bounds
+                const maxX = window.innerWidth - 100
+                const maxY = window.innerHeight - 50
                 setToolbarPosition({
-                    x: e.clientX - dragOffset.current.x,
-                    y: e.clientY - dragOffset.current.y
+                    x: Math.max(0, Math.min(newX, maxX)),
+                    y: Math.max(0, Math.min(newY, maxY))
                 })
             }
         }
@@ -437,6 +443,7 @@ function ContentEditor({
 
     const startDrag = (e: React.MouseEvent) => {
         if (!isToolbarFloating) return
+        e.preventDefault()
         const rect = toolbarRef.current?.getBoundingClientRect()
         if (rect) {
             dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
@@ -446,7 +453,8 @@ function ContentEditor({
 
     const toggleFloatingToolbar = () => {
         if (!isToolbarFloating) {
-            setToolbarPosition({ x: 100, y: 100 })
+            // Center the toolbar initially
+            setToolbarPosition({ x: 50, y: 150 })
         }
         setIsToolbarFloating(!isToolbarFloating)
     }
@@ -757,11 +765,42 @@ function ContentEditor({
         </>
     )
 
+    // Calculate color picker position based on toolbar
+    const getColorPickerStyle = () => {
+        if (isToolbarFloating) {
+            return {
+                left: toolbarPosition.x,
+                top: toolbarPosition.y + 60,
+                maxWidth: '320px'
+            }
+        }
+        return {
+            left: '50%',
+            top: '200px',
+            transform: 'translateX(-50%)',
+            maxWidth: '320px'
+        }
+    }
+
     return (
         <div ref={editorContainerRef} className="rounded-xl glass-morphism border border-gray-800 overflow-hidden relative">
-            {/* Color Picker Popup */}
+            {/* Floating Toolbar - Higher z-index */}
+            {isToolbarFloating && (
+                <div
+                    ref={toolbarRef}
+                    className="fixed z-[200] bg-gray-950 border border-gray-700 rounded-lg shadow-2xl p-2 flex flex-wrap items-center gap-1"
+                    style={{ left: toolbarPosition.x, top: toolbarPosition.y, maxWidth: '90vw', cursor: isDragging ? 'grabbing' : 'default' }}
+                >
+                    <ToolbarContent />
+                </div>
+            )}
+
+            {/* Color Picker Popup - Below toolbar */}
             {showColorPicker && (
-                <div className="color-picker-popup fixed z-[100] bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-xl" style={{ top: '150px', left: '50%', transform: 'translateX(-50%)', maxWidth: '320px' }}>
+                <div 
+                    className="color-picker-popup fixed z-[250] bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-xl" 
+                    style={getColorPickerStyle()}
+                >
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-white text-sm font-medium">{showColorPicker === 'text' ? 'Text Color' : 'Background Color'}</span>
                         <button onClick={() => setShowColorPicker(null)} className="text-gray-400 hover:text-white">
@@ -793,18 +832,7 @@ function ContentEditor({
                 </div>
             )}
 
-            {/* Floating Toolbar */}
-            {isToolbarFloating && (
-                <div
-                    ref={toolbarRef}
-                    className="fixed z-[90] bg-gray-950 border border-gray-700 rounded-lg shadow-2xl p-2 flex flex-wrap items-center gap-1"
-                    style={{ left: toolbarPosition.x, top: toolbarPosition.y, maxWidth: '90vw' }}
-                >
-                    <ToolbarContent />
-                </div>
-            )}
-
-            {/* Static Toolbar */}
+            {/* Static Toolbar - when not floating */}
             {!isToolbarFloating && (
                 <div className="sticky top-0 z-50 border-b border-gray-800 p-2 md:p-3 flex flex-wrap items-center gap-1 bg-gray-950 shadow-lg">
                     <ToolbarContent />
