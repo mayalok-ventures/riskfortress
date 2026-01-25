@@ -7,6 +7,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { getContentBySlug, type ContentItem } from '@/lib/admin/api-store'
+import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
+
+const VERIFIED_EMAIL_KEY = 'rf-verified-email'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {
@@ -41,17 +44,29 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
     const [content, setContent] = useState<ContentItem | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
+    
+    // Email verification state for cases
+    const [showEmailModal, setShowEmailModal] = useState(false)
+    const [isEmailVerified, setIsEmailVerified] = useState(false)
+    const [checkingEmail, setCheckingEmail] = useState(true)
 
-    // Extract actual slug from pathname (handles both SSG placeholder and real URLs)
-    // Remove trailing slash and get the last segment
+    // Extract actual slug from pathname
     const cleanPath = pathname?.replace(/\/$/, '') || ''
     const actualSlug = cleanPath.split('/').filter(Boolean).pop() || initialSlug
+
+    // Check email verification status on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const verified = sessionStorage.getItem(VERIFIED_EMAIL_KEY)
+            setIsEmailVerified(!!verified)
+        }
+        setCheckingEmail(false)
+    }, [])
 
     useEffect(() => {
         if (actualSlug && actualSlug !== '_placeholder') {
             loadContent(actualSlug)
         } else if (actualSlug === '_placeholder') {
-            // If somehow we landed on placeholder directly, show error
             setError(true)
             setLoading(false)
         }
@@ -65,7 +80,6 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                 setContent(item)
                 setLoading(false)
             } else {
-                // Retry once on empty response (might be cold start)
                 if (retryCount < 1) {
                     setTimeout(() => loadContent(slugToLoad, retryCount + 1), 1000)
                     return
@@ -74,7 +88,6 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                 setLoading(false)
             }
         } catch {
-            // Retry once on error
             if (retryCount < 1) {
                 setTimeout(() => loadContent(slugToLoad, retryCount + 1), 1000)
                 return
@@ -84,7 +97,16 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
         }
     }
 
-    if (loading) {
+    const handleEmailVerified = () => {
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem(VERIFIED_EMAIL_KEY, 'true')
+        }
+        setIsEmailVerified(true)
+        setShowEmailModal(false)
+    }
+
+    // Loading state
+    if (loading || checkingEmail) {
         return (
             <div className="min-h-screen py-32">
                 <div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950" />
@@ -96,6 +118,7 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
         )
     }
 
+    // Error state
     if (error || !content) {
         return (
             <div className="min-h-screen py-32">
@@ -116,6 +139,78 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
         )
     }
 
+    // For CASE type: Require email verification before showing content
+    // Articles and blogs are open access
+    const requiresEmailVerification = content.type === 'case'
+    const canViewContent = !requiresEmailVerification || isEmailVerified
+
+    // If case and not verified, show verification gate
+    if (requiresEmailVerification && !canViewContent) {
+        return (
+            <div className="min-h-screen py-32">
+                <div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-grid-pattern" />
+                    </div>
+                </div>
+
+                <div className="container relative z-10 mx-auto px-6 max-w-2xl">
+                    <Link
+                        href="/dossiers/"
+                        className="inline-flex items-center space-x-2 text-gray-400 hover:text-intelligence transition-colors mb-8"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                        <span>Back to Dossiers</span>
+                    </Link>
+
+                    <div className="p-8 rounded-2xl glass-morphism border border-intelligence/20 text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-intelligence/10 border border-intelligence/20 mb-6">
+                            <Lock className="h-8 w-8 text-intelligence" />
+                        </div>
+
+                        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                            Access Restricted
+                        </h1>
+
+                        <p className="text-gray-400 mb-2">
+                            This intelligence dossier requires professional verification.
+                        </p>
+                        
+                        <h2 className="text-xl font-semibold text-intelligence mb-6">
+                            &quot;{content.title}&quot;
+                        </h2>
+
+                        <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700 mb-6">
+                            <p className="text-sm text-gray-400">
+                                To access confidential case studies, please verify your professional email address. 
+                                This helps us ensure our intelligence reports reach authorized professionals only.
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() => setShowEmailModal(true)}
+                            className="px-8 py-3 bg-gradient-to-r from-intelligence to-industrial text-white rounded-lg font-semibold hover:shadow-intelligence transition-all"
+                        >
+                            Verify Professional Email
+                        </button>
+
+                        <p className="text-xs text-gray-500 mt-4">
+                            Personal email domains (Gmail, Yahoo, etc.) are not supported.
+                        </p>
+                    </div>
+                </div>
+
+                <ProfessionalEmailModal
+                    isOpen={showEmailModal}
+                    onClose={() => setShowEmailModal(false)}
+                    caseTitle={content.title}
+                    onSuccess={handleEmailVerified}
+                />
+            </div>
+        )
+    }
+
+    // Full content view (for verified cases, articles, and blogs)
     const Icon = getIconForSector(content.sector)
 
     return (
