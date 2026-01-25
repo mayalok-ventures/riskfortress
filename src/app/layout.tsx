@@ -11,6 +11,7 @@ import { ThemeProvider } from '@/components/Layout/ThemeProvider'
 
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import AnalyticsTracker from '@/components/AnalyticsTracker'
 
 const GA_MEASUREMENT_ID = 'G-0NB75DBBJP'
 
@@ -196,6 +197,7 @@ export default function RootLayout({
                         <main className="flex-1">{children}</main>
                         <Footer />
                     </div>
+                    <AnalyticsTracker />
                     <Analytics />
                     <SpeedInsights />
                     <Toaster

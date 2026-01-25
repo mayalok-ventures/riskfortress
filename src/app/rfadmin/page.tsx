@@ -9,8 +9,10 @@ import {
     Strikethrough, List, ListOrdered, AlignLeft, AlignCenter,
     AlignRight, Link, Upload, Building, Undo, Redo,
     Heading1, Heading2, Heading3, Palette, Highlighter, Square, Circle,
-    Table, GripVertical, XCircle
+    Table, GripVertical, XCircle, BarChart3
 } from 'lucide-react'
+
+import AdminDashboard from '@/components/AdminDashboard'
 
 import {
     type ContentItem,
@@ -25,6 +27,7 @@ import {
 } from '@/lib/admin/api-store'
 
 type AuthStep = 'access' | 'password' | 'authenticated'
+type AdminView = 'dashboard' | 'content'
 
 interface UploadProgress {
     current: number
@@ -40,6 +43,7 @@ export default function AdminPage() {
     const [error, setError] = useState('')
     const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null)
 
+    const [adminView, setAdminView] = useState<AdminView>('dashboard')
     const [items, setItems] = useState<ContentItem[]>([])
     const [activeTab, setActiveTab] = useState<'case' | 'article' | 'blog'>('case')
     const [editingItem, setEditingItem] = useState<ContentItem | null>(null)
@@ -248,129 +252,168 @@ export default function AdminPage() {
                         <Shield className="h-8 w-8 text-intelligence" />
                         <div>
                             <h1 className="text-xl font-bold text-white">RiskFortress Admin</h1>
-                            <p className="text-xs text-gray-400">Content Management System</p>
+                            <p className="text-xs text-gray-400">
+                                {adminView === 'dashboard' ? 'Analytics Dashboard' : 'Content Management System'}
+                            </p>
                         </div>
                     </div>
-                    <button
-                        onClick={handleLogout}
-                        className="flex items-center space-x-2 px-4 py-2 text-gray-400 hover:text-white transition-colors"
-                    >
-                        <LogOut className="h-5 w-5" />
-                        <span>Logout</span>
-                    </button>
+                    <div className="flex items-center space-x-4">
+                        {/* Main Navigation */}
+                        <div className="flex rounded-lg overflow-hidden border border-gray-700">
+                            <button
+                                onClick={() => setAdminView('dashboard')}
+                                className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors ${
+                                    adminView === 'dashboard' 
+                                        ? 'bg-intelligence text-white' 
+                                        : 'bg-gray-800 text-gray-400 hover:text-white'
+                                }`}
+                            >
+                                <BarChart3 className="h-4 w-4" />
+                                <span>Dashboard</span>
+                            </button>
+                            <button
+                                onClick={() => setAdminView('content')}
+                                className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors ${
+                                    adminView === 'content' 
+                                        ? 'bg-intelligence text-white' 
+                                        : 'bg-gray-800 text-gray-400 hover:text-white'
+                                }`}
+                            >
+                                <FileText className="h-4 w-4" />
+                                <span>Content</span>
+                            </button>
+                        </div>
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center space-x-2 px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                        >
+                            <LogOut className="h-5 w-5" />
+                            <span>Logout</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div className="container mx-auto px-6 py-8">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex space-x-2">
-                        {[
-                            { type: 'case' as const, label: 'Cases', icon: Building },
-                            { type: 'article' as const, label: 'Articles', icon: BookOpen },
-                            { type: 'blog' as const, label: 'Blogs', icon: Newspaper }
-                        ].map(({ type, label, icon: Icon }) => (
+                {/* Dashboard View */}
+                {adminView === 'dashboard' && (
+                    <AdminDashboard />
+                )}
+
+                {/* Content Management View */}
+                {adminView === 'content' && (
+                    <>
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex space-x-2">
+                                {[
+                                    { type: 'case' as const, label: 'Cases', icon: Building },
+                                    { type: 'article' as const, label: 'Articles', icon: BookOpen },
+                                    { type: 'blog' as const, label: 'Blogs', icon: Newspaper }
+                                ].map(({ type, label, icon: Icon }) => (
+                                    <button
+                                        key={type}
+                                        onClick={() => { setActiveTab(type); setEditingItem(null); setIsCreating(false) }}
+                                        className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-colors ${activeTab === type
+                                            ? 'bg-intelligence text-white'
+                                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        <Icon className="h-5 w-5" />
+                                        <span>{label}</span>
+                                    </button>
+                                ))}
+                            </div>
                             <button
-                                key={type}
-                                onClick={() => { setActiveTab(type); setEditingItem(null); setIsCreating(false) }}
-                                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-colors ${activeTab === type
-                                    ? 'bg-intelligence text-white'
-                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                                    }`}
+                                onClick={() => { setIsCreating(true); setEditingItem(null) }}
+                                className="flex items-center space-x-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-lg font-semibold transition-colors"
                             >
-                                <Icon className="h-5 w-5" />
-                                <span>{label}</span>
+                                <Plus className="h-5 w-5" />
+                                <span>New {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
                             </button>
-                        ))}
-                    </div>
-                    <button
-                        onClick={() => { setIsCreating(true); setEditingItem(null) }}
-                        className="flex items-center space-x-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-lg font-semibold transition-colors"
-                    >
-                        <Plus className="h-5 w-5" />
-                        <span>New {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</span>
-                    </button>
-                </div>
+                        </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-1 space-y-4">
-                        <h2 className="text-lg font-semibold text-white mb-4">
-                            {activeTab === 'case' ? 'Cases' : activeTab === 'article' ? 'Articles' : 'Blogs'}
-                            <span className="text-gray-500 ml-2">({filteredItems.length})</span>
-                        </h2>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-1 space-y-4">
+                                <h2 className="text-lg font-semibold text-white mb-4">
+                                    {activeTab === 'case' ? 'Cases' : activeTab === 'article' ? 'Articles' : 'Blogs'}
+                                    <span className="text-gray-500 ml-2">({filteredItems.length})</span>
+                                </h2>
 
-                        {filteredItems.length === 0 ? (
-                            <div className="p-8 text-center rounded-xl glass-morphism border border-gray-800">
-                                <FileText className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-                                <p className="text-gray-400">No {activeTab}s yet</p>
-                            </div>
-                        ) : (
-                            filteredItems.map(item => (
-                                <button
-                                    type="button"
-                                    key={item.id}
-                                    className={`w-full text-left p-4 rounded-xl glass-morphism border transition-all cursor-pointer ${editingItem?.id === item.id
-                                        ? 'border-intelligence'
-                                        : 'border-gray-800 hover:border-gray-700'
-                                        }`}
-                                    onClick={() => { setEditingItem(item); setIsCreating(false) }}
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="font-semibold text-white truncate">{item.title}</h3>
-                                            <p className="text-sm text-gray-400 truncate mt-1">{item.summary}</p>
-                                            <div className="flex items-center space-x-2 mt-2">
-                                                <span className={`px-2 py-0.5 text-xs rounded-full ${item.status === 'published'
-                                                    ? 'bg-green-500/10 text-green-400'
-                                                    : item.status === 'draft'
-                                                        ? 'bg-yellow-500/10 text-yellow-400'
-                                                        : 'bg-gray-500/10 text-gray-400'
-                                                    }`}>
-                                                    {item.status}
-                                                </span>
-                                                {item.type === 'case' && item.threatLevel && (
-                                                    <span className={`px-2 py-0.5 text-xs rounded-full ${item.threatLevel === 'Critical' ? 'bg-red-500/10 text-red-400' :
-                                                        item.threatLevel === 'High' ? 'bg-orange-500/10 text-orange-400' :
-                                                            item.threatLevel === 'Medium' ? 'bg-yellow-500/10 text-yellow-400' :
-                                                                'bg-green-500/10 text-green-400'
-                                                        }`}>
-                                                        {item.threatLevel}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleDeleteContent(item.id) }}
-                                            className="p-2 text-gray-500 hover:text-red-400 transition-colors"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
+                                {filteredItems.length === 0 ? (
+                                    <div className="p-8 text-center rounded-xl glass-morphism border border-gray-800">
+                                        <FileText className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+                                        <p className="text-gray-400">No {activeTab}s yet</p>
                                     </div>
-                                </button>
-                            ))
-                        )}
-                    </div>
-
-                    <div className="lg:col-span-2">
-                        {currentItem ? (
-                            <ContentEditor
-                                item={currentItem as ContentItem}
-                                onSave={handleSaveContent}
-                                onCancel={() => { setEditingItem(null); setIsCreating(false); setError(''); setUploadProgress(null) }}
-                                loading={loading}
-                                uploadProgress={uploadProgress}
-                                error={error}
-                            />
-                        ) : (
-                            <div className="p-12 text-center rounded-xl glass-morphism border border-gray-800">
-                                <Edit2 className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                                <h3 className="text-xl font-semibold text-white mb-2">Select or Create Content</h3>
-                                <p className="text-gray-400">
-                                    Select an item from the list to edit, or click &quot;New&quot; to create
-                                </p>
+                                ) : (
+                                    filteredItems.map(item => (
+                                        <button
+                                            type="button"
+                                            key={item.id}
+                                            className={`w-full text-left p-4 rounded-xl glass-morphism border transition-all cursor-pointer ${editingItem?.id === item.id
+                                                ? 'border-intelligence'
+                                                : 'border-gray-800 hover:border-gray-700'
+                                                }`}
+                                            onClick={() => { setEditingItem(item); setIsCreating(false) }}
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-semibold text-white truncate">{item.title}</h3>
+                                                    <p className="text-sm text-gray-400 truncate mt-1">{item.summary}</p>
+                                                    <div className="flex items-center space-x-2 mt-2">
+                                                        <span className={`px-2 py-0.5 text-xs rounded-full ${item.status === 'published'
+                                                            ? 'bg-green-500/10 text-green-400'
+                                                            : item.status === 'draft'
+                                                                ? 'bg-yellow-500/10 text-yellow-400'
+                                                                : 'bg-gray-500/10 text-gray-400'
+                                                            }`}>
+                                                            {item.status}
+                                                        </span>
+                                                        {item.type === 'case' && item.threatLevel && (
+                                                            <span className={`px-2 py-0.5 text-xs rounded-full ${item.threatLevel === 'Critical' ? 'bg-red-500/10 text-red-400' :
+                                                                item.threatLevel === 'High' ? 'bg-orange-500/10 text-orange-400' :
+                                                                    item.threatLevel === 'Medium' ? 'bg-yellow-500/10 text-yellow-400' :
+                                                                        'bg-green-500/10 text-green-400'
+                                                                }`}>
+                                                                {item.threatLevel}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDeleteContent(item.id) }}
+                                                    className="p-2 text-gray-500 hover:text-red-400 transition-colors"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </button>
+                                    ))
+                                )}
                             </div>
-                        )}
-                    </div>
-                </div>
+
+                            <div className="lg:col-span-2">
+                                {currentItem ? (
+                                    <ContentEditor
+                                        item={currentItem as ContentItem}
+                                        onSave={handleSaveContent}
+                                        onCancel={() => { setEditingItem(null); setIsCreating(false); setError(''); setUploadProgress(null) }}
+                                        loading={loading}
+                                        uploadProgress={uploadProgress}
+                                        error={error}
+                                    />
+                                ) : (
+                                    <div className="p-12 text-center rounded-xl glass-morphism border border-gray-800">
+                                        <Edit2 className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                                        <h3 className="text-xl font-semibold text-white mb-2">Select or Create Content</h3>
+                                        <p className="text-gray-400">
+                                            Select an item from the list to edit, or click &quot;New&quot; to create
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     )
