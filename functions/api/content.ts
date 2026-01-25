@@ -130,12 +130,12 @@ async function ensureDBInit(db: D1Database): Promise<void> {
     await initDB(db)
 }
 
-// Maximum size for inline content (200KB - safe margin under request limits)
-const MAX_INLINE_CONTENT_SIZE = 200 * 1024
-// Chunk size for large content (150KB - leaves room for JSON overhead)
-const CHUNK_SIZE = 150 * 1024
-// Maximum request body size (Cloudflare limit is ~1MB, we use 900KB for safety)
-const MAX_REQUEST_SIZE = 900 * 1024
+// Maximum size for inline content (150KB - safe margin under request limits)
+const MAX_INLINE_CONTENT_SIZE = 150 * 1024
+// Chunk size for large content (50KB characters - conservative for server-side chunking)
+const CHUNK_SIZE = 50 * 1024
+// Maximum request body size (Cloudflare limit is ~1MB, we use 500KB for safety with JSON overhead)
+const MAX_REQUEST_SIZE = 500 * 1024
 
 // Initialize database tables
 async function initDB(db: D1Database) {

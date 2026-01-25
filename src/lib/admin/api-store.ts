@@ -32,10 +32,13 @@ interface ChunkUploadProgress {
 
 const API_URL = '/api/content'
 
-// Chunk size for client-side chunking (150KB - safe margin under Cloudflare limits)
-const CHUNK_SIZE = 150 * 1024
-// Threshold for using chunked upload (500KB - content larger than this uses chunking)
-const CHUNKED_UPLOAD_THRESHOLD = 500 * 1024
+// Chunk size for client-side chunking (50KB characters - conservative to handle base64 images)
+// Using character count, not bytes, to avoid UTF-8 boundary issues
+const CHUNK_SIZE_CHARS = 50 * 1024
+// Threshold for using chunked upload (300KB - content larger than this uses chunking)
+const CHUNKED_UPLOAD_THRESHOLD = 300 * 1024
+// Delay between chunk uploads to avoid rate limiting (ms)
+const CHUNK_UPLOAD_DELAY = 100
 
 export async function getAllContent(): Promise<ContentItem[]> {
     try {
@@ -69,32 +72,15 @@ function needsChunkedUpload(content: string): boolean {
     return contentSize > CHUNKED_UPLOAD_THRESHOLD
 }
 
-// Split content into chunks (UTF-8 safe using streaming decoder)
+// Split content into chunks using character-based splitting (simpler, no UTF-8 issues)
 function splitIntoChunks(content: string): string[] {
-    const encoder = new TextEncoder()
-    const bytes = encoder.encode(content)
-    
-    // Use a single streaming decoder to handle multi-byte character boundaries correctly
-    const decoder = new TextDecoder()
     const chunks: string[] = []
     
-    for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
-        const slice = bytes.subarray(i, i + CHUNK_SIZE)
-        // stream: true keeps partial bytes buffered for next decode
-        chunks.push(decoder.decode(slice, { stream: true }))
+    for (let i = 0; i < content.length; i += CHUNK_SIZE_CHARS) {
+        chunks.push(content.slice(i, i + CHUNK_SIZE_CHARS))
     }
     
-    // Flush any remaining buffered bytes (incomplete characters)
-    const tail = decoder.decode()
-    if (tail) {
-        if (chunks.length === 0) {
-            chunks.push(tail)
-        } else {
-            chunks[chunks.length - 1] += tail
-        }
-    }
-    
-    return chunks
+    return chunks.filter(chunk => chunk.length > 0)
 }
 
 // Upload a single chunk with retry and better error handling
@@ -208,25 +194,34 @@ export async function createContent(
             const created = await createResponse.json()
             const id = created.id
             
-            // Step 2: Upload content in chunks
+            // Step 2: Upload content in chunks with delay between each
             const chunks = splitIntoChunks(content)
             const totalChunks = chunks.length
             
+            console.log(`[Create] Starting chunked upload: ${totalChunks} chunks for ID ${id}`)
             onProgress?.({ current: 0, total: totalChunks, message: 'Starting upload...' })
             
             for (let i = 0; i < chunks.length; i++) {
+                // Add small delay between chunks to avoid rate limiting
+                if (i > 0) {
+                    await new Promise(resolve => setTimeout(resolve, CHUNK_UPLOAD_DELAY))
+                }
+                
                 await uploadChunk(id, i, totalChunks, chunks[i])
                 onProgress?.({ 
                     current: i + 1, 
                     total: totalChunks, 
-                    message: `Uploading ${i + 1}/${totalChunks}...` 
+                    message: `Uploading chunk ${i + 1} of ${totalChunks}...` 
                 })
             }
+            
+            console.log(`[Create] All ${totalChunks} chunks uploaded, committing...`)
             
             // Step 3: Commit and get final result
             const contentPreview = content.slice(0, 500).replace(/<[^>]*>/g, '').slice(0, 200)
             const result = await commitChunks(id, totalChunks, contentPreview)
             
+            console.log(`[Create] Content saved successfully`)
             onProgress?.({ current: totalChunks, total: totalChunks, message: 'Saved!' })
             
             // Return with full content for client
@@ -284,25 +279,34 @@ export async function updateContent(
                 throw new Error(errorData.details || errorData.error || 'Failed to update content')
             }
             
-            // Step 2: Upload content in chunks
+            // Step 2: Upload content in chunks with delay between each
             const chunks = splitIntoChunks(content)
             const totalChunks = chunks.length
             
+            console.log(`[Update] Starting chunked upload: ${totalChunks} chunks for ID ${id}`)
             onProgress?.({ current: 0, total: totalChunks, message: 'Starting upload...' })
             
             for (let i = 0; i < chunks.length; i++) {
+                // Add small delay between chunks to avoid rate limiting
+                if (i > 0) {
+                    await new Promise(resolve => setTimeout(resolve, CHUNK_UPLOAD_DELAY))
+                }
+                
                 await uploadChunk(id, i, totalChunks, chunks[i])
                 onProgress?.({ 
                     current: i + 1, 
                     total: totalChunks, 
-                    message: `Uploading ${i + 1}/${totalChunks}...` 
+                    message: `Uploading chunk ${i + 1} of ${totalChunks}...` 
                 })
             }
+            
+            console.log(`[Update] All ${totalChunks} chunks uploaded, committing...`)
             
             // Step 3: Commit and get final result
             const contentPreview = content.slice(0, 500).replace(/<[^>]*>/g, '').slice(0, 200)
             const result = await commitChunks(id, totalChunks, contentPreview)
             
+            console.log(`[Update] Content saved successfully`)
             onProgress?.({ current: totalChunks, total: totalChunks, message: 'Saved!' })
             
             // Return with full content for client
