@@ -5,8 +5,13 @@ compatibility_flags = ["nodejs_compat"]
 # Cloudflare Pages configuration
 pages_build_output_dir = "out"
 
-# D1 Database for content storage
+# D1 Database for metadata storage
 [[d1_databases]]
 binding = "RF_DB"
 database_name = "rf-blog-db"
 database_id = "962a0d42-8f11-45aa-b8d6-3a88370b06e3"
+
+# KV Namespace for large content storage (up to 25MB per item)
+[[kv_namespaces]]
+binding = "RF_CONTENT"
+id = "9c4eb8cc1d654491a5b0c28fbac47897"

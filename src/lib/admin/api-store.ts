@@ -1,6 +1,5 @@
-// API-based content storage that works across all devices
-// Uses Cloudflare D1 via API endpoints
-// Supports chunked uploads for large content (cases/reports with images)
+// API-based content storage
+// Uses Cloudflare KV for content (up to 25MB) + D1 for metadata
 
 export interface ContentItem {
     id: string
@@ -24,21 +23,13 @@ export interface ContentItem {
     caseStatus?: 'Active' | 'Monitoring' | 'Neutralized' | 'Resolved' | 'Ongoing'
 }
 
-interface ChunkUploadProgress {
+interface UploadProgress {
     current: number
     total: number
     message: string
 }
 
 const API_URL = '/api/content'
-
-// Very conservative chunk size - 15KB characters to handle base64 images safely
-// After JSON encoding and base64, this stays well under D1's ~100KB SQL limit
-const CHUNK_SIZE_CHARS = 15 * 1024
-// Threshold for using chunked upload (100KB bytes)
-const CHUNKED_UPLOAD_THRESHOLD = 100 * 1024
-// Delay between chunk uploads (ms)
-const CHUNK_UPLOAD_DELAY = 150
 
 export async function getAllContent(): Promise<ContentItem[]> {
     try {
@@ -66,169 +57,15 @@ export async function getPublishedContent(): Promise<ContentItem[]> {
     }
 }
 
-// Check if content needs chunked upload
-function needsChunkedUpload(content: string): boolean {
-    const contentSize = new TextEncoder().encode(content).length
-    return contentSize > CHUNKED_UPLOAD_THRESHOLD
-}
-
-// Split content into small chunks using character-based splitting
-function splitIntoChunks(content: string): string[] {
-    const chunks: string[] = []
-    
-    for (let i = 0; i < content.length; i += CHUNK_SIZE_CHARS) {
-        chunks.push(content.slice(i, i + CHUNK_SIZE_CHARS))
-    }
-    
-    return chunks.filter(chunk => chunk.length > 0)
-}
-
-// Upload a single chunk with retry
-async function uploadChunk(
-    id: string, 
-    chunkIndex: number, 
-    totalChunks: number, 
-    data: string,
-    retries = 3
-): Promise<boolean> {
-    for (let attempt = 0; attempt < retries; attempt++) {
-        try {
-            if (!data || typeof data !== 'string') {
-                throw new Error('Invalid chunk data')
-            }
-            
-            const controller = new AbortController()
-            const timeoutId = setTimeout(() => controller.abort(), 60000) // 60s timeout
-            
-            const response = await fetch(`${API_URL}?action=chunk`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, chunkIndex, totalChunks, data }),
-                signal: controller.signal
-            })
-            
-            clearTimeout(timeoutId)
-            
-            if (response.ok) {
-                return true
-            }
-            
-            const errorData = await response.json().catch(() => ({}))
-            console.warn(`Chunk ${chunkIndex + 1}/${totalChunks} attempt ${attempt + 1} failed:`, errorData)
-            
-            // Don't retry on 4xx errors except timeout/rate limit
-            if (response.status >= 400 && response.status < 500 && 
-                response.status !== 408 && response.status !== 429) {
-                throw new Error(errorData.error || `Failed with status ${response.status}`)
-            }
-        } catch (error) {
-            console.warn(`Chunk ${chunkIndex + 1}/${totalChunks} attempt ${attempt + 1} error:`, error)
-            
-            if (attempt === retries - 1) {
-                throw new Error(`Failed to save chunk ${chunkIndex + 1}/${totalChunks}`)
-            }
-            // Wait before retry
-            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
-        }
-    }
-    return false
-}
-
-// Commit chunked upload
-async function commitChunks(id: string, totalChunks: number, contentPreview: string): Promise<ContentItem | null> {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 60000)
-    
-    try {
-        const response = await fetch(`${API_URL}?action=commit`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, totalChunks, contentPreview }),
-            signal: controller.signal
-        })
-        
-        clearTimeout(timeoutId)
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            throw new Error(errorData.message || errorData.error || 'Failed to finalize save')
-        }
-        
-        const result = await response.json()
-        return result.item || result
-    } catch (error) {
-        clearTimeout(timeoutId)
-        throw error
-    }
-}
-
-// Progress callback type
-type ProgressCallback = (progress: ChunkUploadProgress) => void
+type ProgressCallback = (progress: UploadProgress) => void
 
 export async function createContent(
     item: Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>,
     onProgress?: ProgressCallback
 ): Promise<ContentItem | null> {
     try {
-        const content = item.content || ''
+        onProgress?.({ current: 0, total: 1, message: 'Saving content...' })
         
-        // Check if we need chunked upload
-        if (needsChunkedUpload(content)) {
-            // Step 1: Create content record without full content
-            const { content: _, ...metadata } = item
-            
-            onProgress?.({ current: 0, total: 1, message: 'Creating record...' })
-            
-            const createResponse = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...metadata, content: '', chunkedUpload: true }),
-            })
-            
-            if (!createResponse.ok) {
-                const errorData = await createResponse.json().catch(() => ({}))
-                throw new Error(errorData.details || errorData.error || 'Failed to create record')
-            }
-            
-            const created = await createResponse.json()
-            const id = created.id
-            
-            // Step 2: Upload content in chunks
-            const chunks = splitIntoChunks(content)
-            const totalChunks = chunks.length
-            
-            console.log(`[Create] Uploading ${totalChunks} chunks for ID ${id}`)
-            
-            for (let i = 0; i < chunks.length; i++) {
-                // Delay between chunks
-                if (i > 0) {
-                    await new Promise(resolve => setTimeout(resolve, CHUNK_UPLOAD_DELAY))
-                }
-                
-                onProgress?.({ 
-                    current: i, 
-                    total: totalChunks, 
-                    message: `Saving part ${i + 1} of ${totalChunks}...` 
-                })
-                
-                await uploadChunk(id, i, totalChunks, chunks[i])
-            }
-            
-            onProgress?.({ current: totalChunks, total: totalChunks, message: 'Finalizing...' })
-            
-            // Step 3: Commit
-            const contentPreview = content.slice(0, 500).replace(/<[^>]*>/g, '').slice(0, 200)
-            const result = await commitChunks(id, totalChunks, contentPreview)
-            
-            onProgress?.({ current: totalChunks, total: totalChunks, message: 'Saved!' })
-            
-            if (result) {
-                return { ...result, content }
-            }
-            return result
-        }
-        
-        // Regular upload for small content
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -237,14 +74,10 @@ export async function createContent(
         
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}))
-            
-            // If server suggests chunked upload, retry with chunking
-            if (errorData.useChunkedUpload) {
-                return createContent(item, onProgress)
-            }
-            
             throw new Error(errorData.details || errorData.error || 'Failed to create')
         }
+        
+        onProgress?.({ current: 1, total: 1, message: 'Saved!' })
         return await response.json()
     } catch (error) {
         console.error('Failed to create content:', error)
@@ -258,62 +91,8 @@ export async function updateContent(
     onProgress?: ProgressCallback
 ): Promise<ContentItem | null> {
     try {
-        const content = updates.content
+        onProgress?.({ current: 0, total: 1, message: 'Saving changes...' })
         
-        // Check if we need chunked upload
-        if (content && needsChunkedUpload(content)) {
-            // Step 1: Update metadata and signal chunked upload
-            const { content: _, ...metadata } = updates
-            
-            onProgress?.({ current: 0, total: 1, message: 'Updating record...' })
-            
-            const updateResponse = await fetch(API_URL, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, ...metadata, chunkedUpload: true }),
-            })
-            
-            if (!updateResponse.ok) {
-                const errorData = await updateResponse.json().catch(() => ({}))
-                throw new Error(errorData.details || errorData.error || 'Failed to update record')
-            }
-            
-            // Step 2: Upload content in chunks
-            const chunks = splitIntoChunks(content)
-            const totalChunks = chunks.length
-            
-            console.log(`[Update] Uploading ${totalChunks} chunks for ID ${id}`)
-            
-            for (let i = 0; i < chunks.length; i++) {
-                // Delay between chunks
-                if (i > 0) {
-                    await new Promise(resolve => setTimeout(resolve, CHUNK_UPLOAD_DELAY))
-                }
-                
-                onProgress?.({ 
-                    current: i, 
-                    total: totalChunks, 
-                    message: `Saving part ${i + 1} of ${totalChunks}...` 
-                })
-                
-                await uploadChunk(id, i, totalChunks, chunks[i])
-            }
-            
-            onProgress?.({ current: totalChunks, total: totalChunks, message: 'Finalizing...' })
-            
-            // Step 3: Commit
-            const contentPreview = content.slice(0, 500).replace(/<[^>]*>/g, '').slice(0, 200)
-            const result = await commitChunks(id, totalChunks, contentPreview)
-            
-            onProgress?.({ current: totalChunks, total: totalChunks, message: 'Saved!' })
-            
-            if (result) {
-                return { ...result, content }
-            }
-            return result
-        }
-        
-        // Regular update for small content
         const response = await fetch(API_URL, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -322,14 +101,10 @@ export async function updateContent(
         
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}))
-            
-            // If server suggests chunked upload, retry with chunking
-            if (errorData.useChunkedUpload && content) {
-                return updateContent(id, updates, onProgress)
-            }
-            
             throw new Error(errorData.details || errorData.error || 'Failed to update')
         }
+        
+        onProgress?.({ current: 1, total: 1, message: 'Saved!' })
         return await response.json()
     } catch (error) {
         console.error('Failed to update content:', error)
@@ -353,8 +128,7 @@ export async function getContentById(id: string): Promise<ContentItem | null> {
     try {
         const response = await fetch(`${API_URL}?id=${id}`)
         if (!response.ok) throw new Error('Failed to fetch')
-        const item = await response.json()
-        return item || null
+        return await response.json()
     } catch (error) {
         console.error('Failed to fetch content by id:', error)
         return null
@@ -365,8 +139,7 @@ export async function getContentBySlug(slug: string): Promise<ContentItem | null
     try {
         const response = await fetch(`${API_URL}?slug=${slug}`)
         if (!response.ok) throw new Error('Failed to fetch')
-        const item = await response.json()
-        return item || null
+        return await response.json()
     } catch (error) {
         console.error('Failed to fetch content by slug:', error)
         return null
@@ -382,7 +155,7 @@ export function generateSlug(title: string): string {
         .trim()
 }
 
-// Auth functions remain client-side (session-based)
+// Auth functions (client-side session)
 const AUTH_KEY = 'rf-admin-auth'
 const ADMIN_PASSWORD = 'Mflica2026riskfortresspsw@'
 
@@ -392,30 +165,24 @@ export function verifyPassword(password: string): boolean {
 
 export function createSession(): void {
     if (typeof window === 'undefined') return
-
     const session = {
         authenticated: true,
         createdAt: Date.now(),
         expiresAt: Date.now() + 10 * 60 * 60 * 1000
     }
-
     sessionStorage.setItem(AUTH_KEY, JSON.stringify(session))
 }
 
 export function validateSession(): boolean {
     if (typeof window === 'undefined') return false
-
     try {
         const data = sessionStorage.getItem(AUTH_KEY)
         if (!data) return false
-
         const session = JSON.parse(data)
-
         if (Date.now() > session.expiresAt) {
             sessionStorage.removeItem(AUTH_KEY)
             return false
         }
-
         return session.authenticated
     } catch {
         return false
