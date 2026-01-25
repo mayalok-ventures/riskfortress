@@ -110,6 +110,26 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'Content-Type, X-Chunk-Upload',
 }
 
+// Helper function to create consistent JSON responses with CORS headers
+function jsonResponse(data: unknown, init: ResponseInit = {}): Response {
+    return new Response(JSON.stringify(data), {
+        ...init,
+        headers: { 
+            'Content-Type': 'application/json', 
+            ...corsHeaders, 
+            ...(init.headers || {}) 
+        },
+    })
+}
+
+// Memoize database initialization per isolate to avoid repeated calls
+let dbInitialized = false
+async function ensureDBInit(db: D1Database): Promise<void> {
+    if (dbInitialized) return
+    dbInitialized = true
+    await initDB(db)
+}
+
 // Maximum size for inline content (200KB - safe margin under request limits)
 const MAX_INLINE_CONTENT_SIZE = 200 * 1024
 // Chunk size for large content (150KB - leaves room for JSON overhead)
@@ -246,54 +266,53 @@ async function handleChunkUpload(db: D1Database, body: ChunkUploadRequest): Prom
     
     // Validate request
     if (!id || chunkIndex === undefined || !totalChunks || !data) {
-        return new Response(JSON.stringify({ 
+        return jsonResponse({ 
             error: 'Invalid chunk upload request',
             required: ['id', 'chunkIndex', 'totalChunks', 'data']
-        }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        }, { status: 400 })
     }
     
     if (chunkIndex < 0 || chunkIndex >= totalChunks) {
-        return new Response(JSON.stringify({ 
+        return jsonResponse({ 
             error: 'Invalid chunk index',
             chunkIndex,
             totalChunks
-        }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        }, { status: 400 })
     }
     
     // Verify content exists
     const existing = await db.prepare('SELECT id FROM content WHERE id = ?').bind(id).first()
     if (!existing) {
-        return new Response(JSON.stringify({ error: 'Content not found. Create content first.' }), {
-            status: 404,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        return jsonResponse({ error: 'Content not found. Create content first.' }, { status: 404 })
     }
     
-    // Insert or replace chunk (idempotent for retries)
-    const chunkId = `${id}-chunk-${chunkIndex}`
-    await db.prepare(
-        'INSERT OR REPLACE INTO content_chunks (id, content_id, chunk_index, chunk_data) VALUES (?, ?, ?, ?)'
-    ).bind(chunkId, id, chunkIndex, data).run()
-    
-    // Update total_chunks in content table
-    await db.prepare(
-        'UPDATE content SET is_chunked = 1, total_chunks = ?, updated_at = ? WHERE id = ?'
-    ).bind(totalChunks, new Date().toISOString(), id).run()
-    
-    return new Response(JSON.stringify({ 
-        success: true, 
-        chunkIndex,
-        totalChunks,
-        message: `Chunk ${chunkIndex + 1}/${totalChunks} saved`
-    }), {
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-    })
+    try {
+        // Insert or replace chunk (idempotent for retries)
+        const chunkId = `${id}-chunk-${chunkIndex}`
+        await db.prepare(
+            'INSERT OR REPLACE INTO content_chunks (id, content_id, chunk_index, chunk_data) VALUES (?, ?, ?, ?)'
+        ).bind(chunkId, id, chunkIndex, data).run()
+        
+        // Update total_chunks in content table
+        await db.prepare(
+            'UPDATE content SET is_chunked = 1, total_chunks = ?, updated_at = ? WHERE id = ?'
+        ).bind(totalChunks, new Date().toISOString(), id).run()
+        
+        return jsonResponse({ 
+            success: true, 
+            chunkIndex,
+            totalChunks,
+            message: `Chunk ${chunkIndex + 1}/${totalChunks} saved`
+        })
+    } catch (error) {
+        console.error(`Chunk ${chunkIndex} upload error:`, error)
+        return jsonResponse({ 
+            error: 'Chunk save failed', 
+            details: error instanceof Error ? error.message : String(error),
+            chunkIndex,
+            totalChunks
+        }, { status: 500 })
+    }
 }
 
 // Commit chunks and finalize content
@@ -301,59 +320,56 @@ async function handleChunkCommit(db: D1Database, body: ChunkCommitRequest): Prom
     const { id, totalChunks, contentPreview } = body
     
     if (!id || !totalChunks) {
-        return new Response(JSON.stringify({ error: 'Missing id or totalChunks' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        return jsonResponse({ error: 'Missing id or totalChunks' }, { status: 400 })
     }
     
-    // Verify all chunks exist
-    const chunkCount = await db.prepare(
-        'SELECT COUNT(*) as count FROM content_chunks WHERE content_id = ?'
-    ).bind(id).first<{ count: number }>()
-    
-    if (!chunkCount || chunkCount.count !== totalChunks) {
-        return new Response(JSON.stringify({ 
-            error: 'Incomplete upload',
-            expected: totalChunks,
-            received: chunkCount?.count || 0,
-            message: 'Some chunks are missing. Please retry the upload.'
-        }), {
-            status: 409,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    try {
+        // Verify all chunks exist
+        const chunkCount = await db.prepare(
+            'SELECT COUNT(*) as count FROM content_chunks WHERE content_id = ?'
+        ).bind(id).first<{ count: number }>()
+        
+        if (!chunkCount || chunkCount.count !== totalChunks) {
+            return jsonResponse({ 
+                error: 'Incomplete upload',
+                expected: totalChunks,
+                received: chunkCount?.count || 0,
+                message: 'Some chunks are missing. Please retry the upload.'
+            }, { status: 409 })
+        }
+        
+        // Update content record with preview and mark as complete
+        const preview = contentPreview || '[Chunked content]'
+        await db.prepare(
+            'UPDATE content SET content = ?, is_chunked = 1, total_chunks = ?, updated_at = ? WHERE id = ?'
+        ).bind(preview, totalChunks, new Date().toISOString(), id).run()
+        
+        // Fetch and return the complete item
+        const updated = await db.prepare('SELECT * FROM content WHERE id = ?').bind(id).first<DBRow>()
+        if (!updated) {
+            return jsonResponse({ error: 'Content not found after commit' }, { status: 404 })
+        }
+        
+        const fullItem = await getFullContent(db, updated)
+        
+        return jsonResponse({ 
+            success: true,
+            item: fullItem,
+            message: `Content saved with ${totalChunks} chunks`
         })
+    } catch (error) {
+        console.error('Chunk commit error:', error)
+        return jsonResponse({ 
+            error: 'Commit failed', 
+            details: error instanceof Error ? error.message : String(error)
+        }, { status: 500 })
     }
-    
-    // Update content record with preview and mark as complete
-    const preview = contentPreview || '[Chunked content]'
-    await db.prepare(
-        'UPDATE content SET content = ?, is_chunked = 1, total_chunks = ?, updated_at = ? WHERE id = ?'
-    ).bind(preview, totalChunks, new Date().toISOString(), id).run()
-    
-    // Fetch and return the complete item
-    const updated = await db.prepare('SELECT * FROM content WHERE id = ?').bind(id).first<DBRow>()
-    if (!updated) {
-        return new Response(JSON.stringify({ error: 'Content not found after commit' }), {
-            status: 404,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
-    }
-    
-    const fullItem = await getFullContent(db, updated)
-    
-    return new Response(JSON.stringify({ 
-        success: true,
-        item: fullItem,
-        message: `Content saved with ${totalChunks} chunks`
-    }), {
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-    })
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
     try {
         const db = context.env.RF_DB
-        await initDB(db)
+        await ensureDBInit(db)
         
         const url = new URL(context.request.url)
         const publishedOnly = url.searchParams.get('published') === 'true'
@@ -364,15 +380,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         if (id) {
             const result = await db.prepare('SELECT * FROM content WHERE id = ?').bind(id).first<DBRow & { is_chunked: number }>()
             if (!result) {
-                return new Response(JSON.stringify({ error: 'Content not found' }), {
-                    status: 404,
-                    headers: { 'Content-Type': 'application/json', ...corsHeaders },
-                })
+                return jsonResponse({ error: 'Content not found' }, { status: 404 })
             }
             const fullItem = await getFullContent(db, result)
-            return new Response(JSON.stringify(fullItem), {
-                headers: { 'Content-Type': 'application/json', ...corsHeaders },
-            })
+            return jsonResponse(fullItem)
         }
         
         // Return single item by slug (published only)
@@ -381,18 +392,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                 .bind(slug, 'published')
                 .first<DBRow & { is_chunked: number }>()
             if (!result) {
-                return new Response(JSON.stringify({ error: 'Content not found' }), {
-                    status: 404,
-                    headers: { 'Content-Type': 'application/json', ...corsHeaders },
-                })
+                return jsonResponse({ error: 'Content not found' }, { status: 404 })
             }
             const fullItem = await getFullContent(db, result)
-            return new Response(JSON.stringify(fullItem), {
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'Cache-Control': 'public, max-age=60, s-maxage=300',
-                    ...corsHeaders,
-                },
+            return jsonResponse(fullItem, {
+                headers: { 'Cache-Control': 'public, max-age=60, s-maxage=300' }
             })
         }
         
@@ -415,40 +419,30 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             }
         }
         
-        return new Response(JSON.stringify(items), {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cache-Control': publishedOnly ? 'public, max-age=60, s-maxage=300' : 'no-cache',
-                ...corsHeaders,
-            },
+        return jsonResponse(items, {
+            headers: { 'Cache-Control': publishedOnly ? 'public, max-age=60, s-maxage=300' : 'no-cache' }
         })
     } catch (error) {
         console.error('GET error:', error)
-        return new Response(JSON.stringify({ error: 'Failed to fetch content', details: String(error) }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        return jsonResponse({ error: 'Failed to fetch content', details: String(error) }, { status: 500 })
     }
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
     try {
         const db = context.env.RF_DB
-        await initDB(db)
+        await ensureDBInit(db)
         
         // Check content-length header for early rejection of oversized requests
         const contentLength = context.request.headers.get('content-length')
         if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
-            return new Response(JSON.stringify({ 
+            return jsonResponse({ 
                 error: 'Request too large',
                 details: 'Content exceeds maximum size. Use chunked upload for large content.',
                 maxSize: MAX_REQUEST_SIZE,
                 receivedSize: parseInt(contentLength),
                 useChunkedUpload: true
-            }), {
-                status: 413,
-                headers: { 'Content-Type': 'application/json', ...corsHeaders },
-            })
+            }, { status: 413 })
         }
         
         const body = await context.request.json() as Partial<ContentItem> & { chunkedUpload?: boolean }
@@ -482,16 +476,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             // Check if content is too large for inline storage
             const contentSize = new TextEncoder().encode(body.content).length
             if (contentSize > MAX_REQUEST_SIZE * 0.8) {
-                return new Response(JSON.stringify({ 
+                return jsonResponse({ 
                     error: 'Content too large for single request',
                     details: 'Use chunked upload for content larger than 700KB.',
                     contentSize,
                     maxInlineSize: MAX_REQUEST_SIZE * 0.8,
                     useChunkedUpload: true
-                }), {
-                    status: 413,
-                    headers: { 'Content-Type': 'application/json', ...corsHeaders },
-                })
+                }, { status: 413 })
             }
             
             // Handle content with chunking if needed
@@ -552,11 +543,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             totalChunks
         ).run()
         
-        return new Response(JSON.stringify({
+        return jsonResponse({
             ...newItem,
             chunkedUpload: isChunkedUpload
-        }), {
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
         })
     } catch (error) {
         console.error('POST error:', error)
@@ -565,29 +554,24 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         // Check for size-related errors
         if (errorMessage.includes('too large') || errorMessage.includes('SQLITE_TOOBIG') || 
             errorMessage.includes('Body exceeded') || errorMessage.includes('payload')) {
-            return new Response(JSON.stringify({ 
+            return jsonResponse({ 
                 error: 'Content too large', 
                 details: 'The content is too large to save in a single request. Use chunked upload.',
                 useChunkedUpload: true,
                 originalError: errorMessage
-            }), {
-                status: 413,
-                headers: { 'Content-Type': 'application/json', ...corsHeaders },
-            })
+            }, { status: 413 })
         }
         
-        return new Response(JSON.stringify({ error: 'Failed to create content', details: errorMessage }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        return jsonResponse({ error: 'Failed to create content', details: errorMessage }, { status: 500 })
     }
 }
 
-// PATCH handler for chunk uploads
+// PATCH handler for chunk uploads - uses memoized DB init for performance
 export const onRequestPatch: PagesFunction<Env> = async (context) => {
     try {
         const db = context.env.RF_DB
-        await initDB(db)
+        // Use memoized init to avoid repeated table creation on every chunk
+        await ensureDBInit(db)
         
         const url = new URL(context.request.url)
         const action = url.searchParams.get('action')
@@ -600,40 +584,34 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
             return await handleChunkCommit(db, body as ChunkCommitRequest)
         }
         
-        return new Response(JSON.stringify({ 
+        return jsonResponse({ 
             error: 'Invalid action',
             validActions: ['chunk', 'commit']
-        }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        }, { status: 400 })
     } catch (error) {
         console.error('PATCH error:', error)
-        return new Response(JSON.stringify({ error: 'Chunk upload failed', details: String(error) }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        return jsonResponse({ 
+            error: 'Chunk upload failed', 
+            details: error instanceof Error ? error.message : String(error) 
+        }, { status: 500 })
     }
 }
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
     try {
         const db = context.env.RF_DB
-        await initDB(db)
+        await ensureDBInit(db)
         
         // Check content-length header for early rejection
         const contentLength = context.request.headers.get('content-length')
         if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
-            return new Response(JSON.stringify({ 
+            return jsonResponse({ 
                 error: 'Request too large',
                 details: 'Content exceeds maximum size. Use chunked upload for large content.',
                 maxSize: MAX_REQUEST_SIZE,
                 receivedSize: parseInt(contentLength),
                 useChunkedUpload: true
-            }), {
-                status: 413,
-                headers: { 'Content-Type': 'application/json', ...corsHeaders },
-            })
+            }, { status: 413 })
         }
         
         const body = await context.request.json() as { id: string; chunkedUpload?: boolean } & Partial<ContentItem>
@@ -641,10 +619,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         // Get existing item
         const existing = await db.prepare('SELECT * FROM content WHERE id = ?').bind(body.id).first<DBRow>()
         if (!existing) {
-            return new Response(JSON.stringify({ error: 'Content not found' }), {
-                status: 404,
-                headers: { 'Content-Type': 'application/json', ...corsHeaders },
-            })
+            return jsonResponse({ error: 'Content not found' }, { status: 404 })
         }
         
         const now = new Date().toISOString()
@@ -668,16 +643,13 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
             // Check if content is too large for inline storage
             const contentSize = new TextEncoder().encode(body.content).length
             if (contentSize > MAX_REQUEST_SIZE * 0.8) {
-                return new Response(JSON.stringify({ 
+                return jsonResponse({ 
                     error: 'Content too large for single request',
                     details: 'Use chunked upload for content larger than 700KB.',
                     contentSize,
                     maxInlineSize: MAX_REQUEST_SIZE * 0.8,
                     useChunkedUpload: true
-                }), {
-                    status: 413,
-                    headers: { 'Content-Type': 'application/json', ...corsHeaders },
-                })
+                }, { status: 413 })
             }
             
             const result = await saveContentWithChunks(db, body.id, body.content, true)
@@ -715,12 +687,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         
         // For chunked upload, return minimal response (content comes later)
         if (isChunkedUpload) {
-            return new Response(JSON.stringify({ 
+            return jsonResponse({ 
                 id: body.id,
                 chunkedUpload: true,
                 message: 'Metadata updated. Upload content chunks now.'
-            }), {
-                headers: { 'Content-Type': 'application/json', ...corsHeaders },
             })
         }
         
@@ -728,45 +698,35 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         const updated = await db.prepare('SELECT * FROM content WHERE id = ?').bind(body.id).first<DBRow>()
         const fullItem = await getFullContent(db, updated!)
         
-        return new Response(JSON.stringify(fullItem), {
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        return jsonResponse(fullItem)
     } catch (error) {
         console.error('PUT error:', error)
         const errorMessage = error instanceof Error ? error.message : String(error)
         
         if (errorMessage.includes('too large') || errorMessage.includes('SQLITE_TOOBIG') ||
             errorMessage.includes('Body exceeded') || errorMessage.includes('payload')) {
-            return new Response(JSON.stringify({ 
+            return jsonResponse({ 
                 error: 'Content too large', 
                 details: 'The content is too large to save in a single request. Use chunked upload.',
                 useChunkedUpload: true,
                 originalError: errorMessage
-            }), {
-                status: 413,
-                headers: { 'Content-Type': 'application/json', ...corsHeaders },
-            })
+            }, { status: 413 })
         }
         
-        return new Response(JSON.stringify({ error: 'Failed to update content', details: errorMessage }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        return jsonResponse({ error: 'Failed to update content', details: errorMessage }, { status: 500 })
     }
 }
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
     try {
         const db = context.env.RF_DB
+        await ensureDBInit(db)
         
         const url = new URL(context.request.url)
         const id = url.searchParams.get('id')
         
         if (!id) {
-            return new Response(JSON.stringify({ error: 'ID required' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json', ...corsHeaders },
-            })
+            return jsonResponse({ error: 'ID required' }, { status: 400 })
         }
         
         // Delete chunks first
@@ -774,15 +734,10 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
         // Delete main content
         await db.prepare('DELETE FROM content WHERE id = ?').bind(id).run()
         
-        return new Response(JSON.stringify({ success: true }), {
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        return jsonResponse({ success: true })
     } catch (error) {
         console.error('DELETE error:', error)
-        return new Response(JSON.stringify({ error: 'Failed to delete content', details: String(error) }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        })
+        return jsonResponse({ error: 'Failed to delete content', details: String(error) }, { status: 500 })
     }
 }
 

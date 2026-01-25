@@ -69,52 +69,95 @@ function needsChunkedUpload(content: string): boolean {
     return contentSize > CHUNKED_UPLOAD_THRESHOLD
 }
 
-// Split content into chunks
+// Split content into chunks (UTF-8 safe using streaming decoder)
 function splitIntoChunks(content: string): string[] {
-    const chunks: string[] = []
     const encoder = new TextEncoder()
     const bytes = encoder.encode(content)
     
+    // Use a single streaming decoder to handle multi-byte character boundaries correctly
+    const decoder = new TextDecoder()
+    const chunks: string[] = []
+    
     for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
-        const chunkBytes = bytes.slice(i, i + CHUNK_SIZE)
-        const decoder = new TextDecoder()
-        chunks.push(decoder.decode(chunkBytes))
+        const slice = bytes.subarray(i, i + CHUNK_SIZE)
+        // stream: true keeps partial bytes buffered for next decode
+        chunks.push(decoder.decode(slice, { stream: true }))
+    }
+    
+    // Flush any remaining buffered bytes (incomplete characters)
+    const tail = decoder.decode()
+    if (tail) {
+        if (chunks.length === 0) {
+            chunks.push(tail)
+        } else {
+            chunks[chunks.length - 1] += tail
+        }
     }
     
     return chunks
 }
 
-// Upload a single chunk with retry
+// Upload a single chunk with retry and better error handling
 async function uploadChunk(
     id: string, 
     chunkIndex: number, 
     totalChunks: number, 
     data: string,
-    retries = 3
+    retries = 5
 ): Promise<boolean> {
     for (let attempt = 0; attempt < retries; attempt++) {
         try {
+            // Validate data before sending
+            if (!data || typeof data !== 'string') {
+                console.error(`Invalid chunk data for ${chunkIndex}/${totalChunks}`)
+                throw new Error('Invalid chunk data')
+            }
+            
+            const controller = new AbortController()
+            // 30 second timeout per chunk
+            const timeoutId = setTimeout(() => controller.abort(), 30000)
+            
             const response = await fetch(`${API_URL}?action=chunk`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id, chunkIndex, totalChunks, data }),
+                signal: controller.signal
             })
+            
+            clearTimeout(timeoutId)
             
             if (response.ok) {
                 return true
             }
             
             const errorData = await response.json().catch(() => ({}))
-            console.warn(`Chunk ${chunkIndex + 1}/${totalChunks} upload attempt ${attempt + 1} failed:`, errorData)
+            console.warn(`Chunk ${chunkIndex + 1}/${totalChunks} attempt ${attempt + 1} failed:`, {
+                status: response.status,
+                error: errorData
+            })
             
-            // Don't retry on 4xx errors (client errors)
-            if (response.status >= 400 && response.status < 500) {
-                throw new Error(errorData.error || 'Chunk upload failed')
+            // Don't retry on 4xx errors (client errors) except 408/429
+            if (response.status >= 400 && response.status < 500 && 
+                response.status !== 408 && response.status !== 429) {
+                throw new Error(errorData.error || `Chunk upload failed with status ${response.status}`)
             }
         } catch (error) {
-            if (attempt === retries - 1) throw error
-            // Wait before retry with exponential backoff
-            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)))
+            const isAbort = error instanceof Error && error.name === 'AbortError'
+            const isNetworkError = error instanceof TypeError && error.message.includes('fetch')
+            
+            console.warn(`Chunk ${chunkIndex + 1}/${totalChunks} attempt ${attempt + 1} error:`, {
+                name: error instanceof Error ? error.name : 'Unknown',
+                message: error instanceof Error ? error.message : String(error),
+                isAbort,
+                isNetworkError
+            })
+            
+            if (attempt === retries - 1) {
+                throw new Error(`Failed to upload chunk ${chunkIndex + 1}/${totalChunks} after ${retries} attempts`)
+            }
+            // Exponential backoff with jitter
+            const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 500, 10000)
+            await new Promise(resolve => setTimeout(resolve, delay))
         }
     }
     return false
