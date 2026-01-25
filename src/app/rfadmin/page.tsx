@@ -26,12 +26,19 @@ import {
 
 type AuthStep = 'access' | 'password' | 'authenticated'
 
+interface UploadProgress {
+    current: number
+    total: number
+    message: string
+}
+
 export default function AdminPage() {
     const [authStep, setAuthStep] = useState<AuthStep>('access')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null)
 
     const [items, setItems] = useState<ContentItem[]>([])
     const [activeTab, setActiveTab] = useState<'case' | 'article' | 'blog'>('case')
@@ -90,13 +97,19 @@ export default function AdminPage() {
     const handleSaveContent = async (item: Partial<ContentItem>) => {
         setLoading(true)
         setError('')
+        setUploadProgress(null)
+
+        // Progress callback for chunked uploads
+        const onProgress = (progress: UploadProgress) => {
+            setUploadProgress(progress)
+        }
 
         try {
             let result
             if (item.id) {
-                result = await updateContent(item.id, item)
+                result = await updateContent(item.id, item, onProgress)
             } else {
-                result = await createContent(item as Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>)
+                result = await createContent(item as Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>, onProgress)
             }
 
             if (!result) {
@@ -107,9 +120,19 @@ export default function AdminPage() {
             await loadContent()
             setEditingItem(null)
             setIsCreating(false)
+            setUploadProgress(null)
         } catch (err) {
             console.error('Save error:', err)
-            setError('Failed to save content: ' + (err instanceof Error ? err.message : 'Unknown error'))
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+            
+            // Provide helpful error messages for size-related issues
+            if (errorMessage.includes('too large') || errorMessage.includes('413')) {
+                setError('Content is very large. If saving fails, try reducing embedded images or splitting into smaller sections.')
+            } else if (errorMessage.includes('chunk') || errorMessage.includes('upload')) {
+                setError('Upload interrupted. Please try saving again. Your content will resume from where it stopped.')
+            } else {
+                setError('Failed to save content: ' + errorMessage)
+            }
         } finally {
             setLoading(false)
         }
@@ -332,8 +355,10 @@ export default function AdminPage() {
                             <ContentEditor
                                 item={currentItem as ContentItem}
                                 onSave={handleSaveContent}
-                                onCancel={() => { setEditingItem(null); setIsCreating(false) }}
+                                onCancel={() => { setEditingItem(null); setIsCreating(false); setError(''); setUploadProgress(null) }}
                                 loading={loading}
+                                uploadProgress={uploadProgress}
+                                error={error}
                             />
                         ) : (
                             <div className="p-12 text-center rounded-xl glass-morphism border border-gray-800">
@@ -355,12 +380,16 @@ function ContentEditor({
     item,
     onSave,
     onCancel,
-    loading
+    loading,
+    uploadProgress,
+    error
 }: {
     item: Partial<ContentItem>
     onSave: (item: Partial<ContentItem>) => void
     onCancel: () => void
     loading: boolean
+    uploadProgress: UploadProgress | null
+    error: string
 }) {
     const [formData, setFormData] = useState(item)
     const [keywordInput, setKeywordInput] = useState('')
@@ -1021,10 +1050,38 @@ function ContentEditor({
                     />
                 </div>
 
+                {/* Upload Progress Indicator */}
+                {uploadProgress && (
+                    <div className="mb-4 p-4 rounded-lg bg-intelligence/10 border border-intelligence/20">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-intelligence text-sm font-medium">
+                                {uploadProgress.message}
+                            </span>
+                            <span className="text-intelligence text-sm">
+                                {uploadProgress.current}/{uploadProgress.total}
+                            </span>
+                        </div>
+                        <div className="w-full bg-gray-700 rounded-full h-2">
+                            <div 
+                                className="bg-intelligence h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Error Display */}
+                {error && (
+                    <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                        <p className="text-red-400 text-sm">{error}</p>
+                    </div>
+                )}
+
                 <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-800">
                     <button
                         onClick={onCancel}
-                        className="px-6 py-2 text-gray-400 hover:text-white transition-colors"
+                        disabled={loading}
+                        className="px-6 py-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
                     >
                         Cancel
                     </button>
@@ -1034,7 +1091,11 @@ function ContentEditor({
                         className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-intelligence to-industrial text-white rounded-lg font-semibold hover:shadow-intelligence transition-all disabled:opacity-50"
                     >
                         <Save className="h-4 w-4" />
-                        <span>{loading ? 'Saving...' : 'Save'}</span>
+                        <span>
+                            {loading 
+                                ? (uploadProgress ? `Uploading ${uploadProgress.current}/${uploadProgress.total}...` : 'Saving...') 
+                                : 'Save'}
+                        </span>
                     </button>
                 </div>
             </div>
