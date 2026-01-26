@@ -9,7 +9,8 @@ import {
     Strikethrough, List, ListOrdered, AlignLeft, AlignCenter,
     AlignRight, Link, Upload, Building, Undo, Redo,
     Heading1, Heading2, Heading3, Palette, Highlighter, Square, Circle,
-    Table, GripVertical, XCircle, BarChart3
+    Table, GripVertical, XCircle, BarChart3, Code, Quote, Minus, 
+    Subscript, Superscript, RemoveFormatting, LinkIcon, Type, Unlink
 } from 'lucide-react'
 
 import AdminDashboard from '@/components/AdminDashboard'
@@ -438,13 +439,17 @@ function ContentEditor({
     const [keywordInput, setKeywordInput] = useState('')
     const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null)
     const [showColorPicker, setShowColorPicker] = useState<'text' | 'bg' | null>(null)
-    const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 })
+    const [toolbarPosition, setToolbarPosition] = useState({ x: 100, y: 100 })
     const [isDragging, setIsDragging] = useState(false)
     const [isToolbarFloating, setIsToolbarFloating] = useState(false)
+    const [showLinkModal, setShowLinkModal] = useState(false)
+    const [linkUrl, setLinkUrl] = useState('')
+    const [linkText, setLinkText] = useState('')
+    const [savedSelection, setSavedSelection] = useState<Range | null>(null)
     const editorRef = useRef<HTMLDivElement>(null)
     const editorContainerRef = useRef<HTMLDivElement>(null)
     const toolbarRef = useRef<HTMLDivElement>(null)
-    const dragOffset = useRef({ x: 0, y: 0 })
+    const dragStartPos = useRef({ x: 0, y: 0, toolbarX: 0, toolbarY: 0 })
 
     const colorPalette = [
         // Basic colors
@@ -490,43 +495,68 @@ function ContentEditor({
         const handleMouseMove = (e: MouseEvent) => {
             if (isDragging && isToolbarFloating) {
                 e.preventDefault()
-                const newX = e.clientX - dragOffset.current.x
-                const newY = e.clientY - dragOffset.current.y
-                // Keep toolbar within viewport bounds
-                const maxX = window.innerWidth - 100
-                const maxY = window.innerHeight - 50
+                e.stopPropagation()
+                
+                const deltaX = e.clientX - dragStartPos.current.x
+                const deltaY = e.clientY - dragStartPos.current.y
+                
+                const newX = dragStartPos.current.toolbarX + deltaX
+                const newY = dragStartPos.current.toolbarY + deltaY
+                
+                const toolbarWidth = toolbarRef.current?.offsetWidth || 400
+                const toolbarHeight = toolbarRef.current?.offsetHeight || 50
+                
+                const maxX = window.innerWidth - toolbarWidth - 10
+                const maxY = window.innerHeight - toolbarHeight - 10
+                
                 setToolbarPosition({
-                    x: Math.max(0, Math.min(newX, maxX)),
-                    y: Math.max(0, Math.min(newY, maxY))
+                    x: Math.max(10, Math.min(newX, maxX)),
+                    y: Math.max(10, Math.min(newY, maxY))
                 })
             }
         }
-        const handleMouseUp = () => setIsDragging(false)
+        
+        const handleMouseUp = () => {
+            setIsDragging(false)
+            document.body.style.userSelect = ''
+            document.body.style.cursor = ''
+        }
         
         if (isDragging) {
-            document.addEventListener('mousemove', handleMouseMove)
-            document.addEventListener('mouseup', handleMouseUp)
+            document.body.style.userSelect = 'none'
+            document.body.style.cursor = 'grabbing'
+            document.addEventListener('mousemove', handleMouseMove, true)
+            document.addEventListener('mouseup', handleMouseUp, true)
         }
+        
         return () => {
-            document.removeEventListener('mousemove', handleMouseMove)
-            document.removeEventListener('mouseup', handleMouseUp)
+            document.removeEventListener('mousemove', handleMouseMove, true)
+            document.removeEventListener('mouseup', handleMouseUp, true)
         }
     }, [isDragging, isToolbarFloating])
 
     const startDrag = (e: React.MouseEvent) => {
         if (!isToolbarFloating) return
         e.preventDefault()
-        const rect = toolbarRef.current?.getBoundingClientRect()
-        if (rect) {
-            dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
-            setIsDragging(true)
+        e.stopPropagation()
+        
+        dragStartPos.current = {
+            x: e.clientX,
+            y: e.clientY,
+            toolbarX: toolbarPosition.x,
+            toolbarY: toolbarPosition.y
         }
+        setIsDragging(true)
     }
 
     const toggleFloatingToolbar = () => {
         if (!isToolbarFloating) {
-            // Center the toolbar initially
-            setToolbarPosition({ x: 50, y: 150 })
+            const viewportWidth = window.innerWidth
+            const toolbarWidth = 600
+            setToolbarPosition({ 
+                x: Math.max(10, (viewportWidth - toolbarWidth) / 2), 
+                y: 120 
+            })
         }
         setIsToolbarFloating(!isToolbarFloating)
     }
@@ -717,29 +747,163 @@ function ContentEditor({
         }
     }
 
+    const openLinkModal = () => {
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            setSavedSelection(range.cloneRange())
+            setLinkText(selection.toString() || '')
+        }
+        setLinkUrl('')
+        setShowLinkModal(true)
+    }
+
+    const insertLink = () => {
+        if (!linkUrl) return
+        
+        let finalUrl = linkUrl.trim()
+        if (finalUrl && !finalUrl.match(/^(https?:\/\/|mailto:|tel:|#)/i)) {
+            finalUrl = 'https://' + finalUrl
+        }
+        
+        editorRef.current?.focus()
+        
+        if (savedSelection) {
+            const selection = window.getSelection()
+            selection?.removeAllRanges()
+            selection?.addRange(savedSelection)
+        }
+        
+        setTimeout(() => {
+            const selection = window.getSelection()
+            if (selection && selection.rangeCount > 0) {
+                if (linkText && selection.toString() !== linkText) {
+                    const range = selection.getRangeAt(0)
+                    range.deleteContents()
+                    const textNode = document.createTextNode(linkText)
+                    range.insertNode(textNode)
+                    range.selectNodeContents(textNode)
+                    selection.removeAllRanges()
+                    selection.addRange(range)
+                }
+                
+                const anchor = document.createElement('a')
+                anchor.href = finalUrl
+                anchor.target = '_blank'
+                anchor.rel = 'noopener noreferrer'
+                anchor.style.color = '#00d4ff'
+                anchor.style.textDecoration = 'underline'
+                
+                const range = selection.getRangeAt(0)
+                const content = range.extractContents()
+                anchor.appendChild(content)
+                range.insertNode(anchor)
+                
+                range.setStartAfter(anchor)
+                range.collapse(true)
+                selection.removeAllRanges()
+                selection.addRange(range)
+            }
+            
+            setShowLinkModal(false)
+            setLinkUrl('')
+            setLinkText('')
+            setSavedSelection(null)
+        }, 10)
+    }
+
+    const removeLink = () => {
+        editorRef.current?.focus()
+        document.execCommand('unlink', false)
+    }
+
+    const insertHorizontalRule = () => {
+        editorRef.current?.focus()
+        document.execCommand('insertHTML', false, '<hr style="border: none; border-top: 1px solid #4a5568; margin: 16px 0;"/>')
+    }
+
+    const insertBlockquote = () => {
+        editorRef.current?.focus()
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const selectedText = range.toString() || 'Quote text here'
+            const quote = `<blockquote style="border-left: 4px solid #00d4ff; padding-left: 16px; margin: 16px 0; font-style: italic; color: #9ca3af;">${selectedText}</blockquote>`
+            document.execCommand('insertHTML', false, quote)
+        }
+    }
+
+    const insertCodeBlock = () => {
+        editorRef.current?.focus()
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const selectedText = range.toString() || 'code here'
+            const code = `<pre style="background: #1a1a2e; padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; color: #00d4ff; margin: 16px 0;"><code>${selectedText}</code></pre>`
+            document.execCommand('insertHTML', false, code)
+        }
+    }
+
+    const insertCTAButton = () => {
+        const url = prompt('Enter button link URL (e.g., https://youtube.com/video):')
+        if (!url) return
+        
+        const buttonText = prompt('Enter button text:', 'Click Here')
+        if (!buttonText) return
+        
+        let finalUrl = url.trim()
+        if (!finalUrl.match(/^(https?:\/\/|mailto:|tel:|#)/i)) {
+            finalUrl = 'https://' + finalUrl
+        }
+        
+        const buttonHtml = `<a href="${finalUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin: 8px 4px; cursor: pointer;">${buttonText}</a>&nbsp;`
+        
+        editorRef.current?.focus()
+        document.execCommand('insertHTML', false, buttonHtml)
+    }
+
+    const clearFormatting = () => {
+        editorRef.current?.focus()
+        document.execCommand('removeFormat', false)
+    }
+
+    const applySubscript = () => {
+        editorRef.current?.focus()
+        document.execCommand('subscript', false)
+    }
+
+    const applySuperscript = () => {
+        editorRef.current?.focus()
+        document.execCommand('superscript', false)
+    }
+
     const ToolbarContent = () => (
         <>
             {/* Drag Handle for floating mode */}
             {isToolbarFloating && (
                 <div 
                     onMouseDown={startDrag}
-                    className="p-2 cursor-move text-gray-400 hover:text-white"
-                    title="Drag to move"
+                    className="p-2 cursor-grab active:cursor-grabbing text-gray-400 hover:text-white bg-gray-800 rounded"
+                    title="Drag to move toolbar"
                 >
                     <GripVertical className="h-4 w-4" />
                 </div>
             )}
-            <button onClick={toggleFloatingToolbar} className={`p-2 rounded ${isToolbarFloating ? 'text-intelligence' : 'text-gray-400'} hover:text-white hover:bg-gray-700`} title={isToolbarFloating ? 'Dock Toolbar' : 'Float Toolbar'}>
+            <button onClick={toggleFloatingToolbar} className={`p-2 rounded ${isToolbarFloating ? 'text-intelligence bg-gray-700' : 'text-gray-400'} hover:text-white hover:bg-gray-700`} title={isToolbarFloating ? 'Dock Toolbar' : 'Float Toolbar'}>
                 {isToolbarFloating ? '📌' : '🔓'}
             </button>
             <div className="w-px h-6 bg-gray-700 mx-1" />
-            <button onClick={() => execCommand('undo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Undo">
+            
+            {/* Undo/Redo */}
+            <button onClick={() => execCommand('undo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Undo (Ctrl+Z)">
                 <Undo className="h-4 w-4" />
             </button>
-            <button onClick={() => execCommand('redo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Redo">
+            <button onClick={() => execCommand('redo')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Redo (Ctrl+Y)">
                 <Redo className="h-4 w-4" />
             </button>
             <div className="w-px h-6 bg-gray-700 mx-1" />
+            
+            {/* Headings */}
             <button onClick={() => applyHeading('H1')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded font-bold" title="Heading 1">
                 H1
             </button>
@@ -753,37 +917,45 @@ function ContentEditor({
                 P
             </button>
             <div className="w-px h-6 bg-gray-700 mx-1" />
-            <button onClick={() => execCommand('bold')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bold">
+            
+            {/* Text Formatting */}
+            <button onClick={() => execCommand('bold')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bold (Ctrl+B)">
                 <Bold className="h-4 w-4" />
             </button>
-            <button onClick={() => execCommand('italic')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Italic">
+            <button onClick={() => execCommand('italic')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Italic (Ctrl+I)">
                 <Italic className="h-4 w-4" />
             </button>
-            <button onClick={() => execCommand('underline')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Underline">
+            <button onClick={() => execCommand('underline')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Underline (Ctrl+U)">
                 <Underline className="h-4 w-4" />
             </button>
             <button onClick={() => execCommand('strikeThrough')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Strikethrough">
                 <Strikethrough className="h-4 w-4" />
             </button>
+            <button onClick={applySubscript} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-xs" title="Subscript">
+                X₂
+            </button>
+            <button onClick={applySuperscript} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded text-xs" title="Superscript">
+                X²
+            </button>
             <div className="w-px h-6 bg-gray-700 mx-1" />
-            {/* Colors with Picker */}
+            
+            {/* Colors */}
             <div className="relative">
                 <button onClick={() => setShowColorPicker(showColorPicker === 'text' ? null : 'text')} className={`p-2 rounded ${showColorPicker === 'text' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`} title="Text Color">
                     <Palette className="h-4 w-4" />
                 </button>
             </div>
             <div className="relative">
-                <button onClick={() => setShowColorPicker(showColorPicker === 'bg' ? null : 'bg')} className={`p-2 rounded ${showColorPicker === 'bg' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`} title="Background Color">
+                <button onClick={() => setShowColorPicker(showColorPicker === 'bg' ? null : 'bg')} className={`p-2 rounded ${showColorPicker === 'bg' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-700'}`} title="Highlight/Background Color">
                     <Highlighter className="h-4 w-4" />
                 </button>
             </div>
-            <button onClick={addBorder} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Add Border">
-                <Square className="h-4 w-4" />
-            </button>
-            <button onClick={addRoundBox} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Round Box">
-                <Circle className="h-4 w-4" />
+            <button onClick={clearFormatting} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Clear Formatting">
+                <X className="h-4 w-4" />
             </button>
             <div className="w-px h-6 bg-gray-700 mx-1" />
+            
+            {/* Lists */}
             <button onClick={() => execCommand('insertUnorderedList')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Bullet List">
                 <List className="h-4 w-4" />
             </button>
@@ -791,6 +963,8 @@ function ContentEditor({
                 <ListOrdered className="h-4 w-4" />
             </button>
             <div className="w-px h-6 bg-gray-700 mx-1" />
+            
+            {/* Alignment */}
             <button onClick={() => execCommand('justifyLeft')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Align Left">
                 <AlignLeft className="h-4 w-4" />
             </button>
@@ -801,38 +975,83 @@ function ContentEditor({
                 <AlignRight className="h-4 w-4" />
             </button>
             <div className="w-px h-6 bg-gray-700 mx-1" />
-            <button onClick={() => {
-                const url = prompt('Enter URL:')
-                if (url) execCommand('createLink', url)
-            }} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert Link">
+            
+            {/* Links */}
+            <button onClick={openLinkModal} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert Link (Opens in new tab)">
                 <Link className="h-4 w-4" />
             </button>
+            <button onClick={removeLink} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Remove Link">
+                <Unlink className="h-4 w-4" />
+            </button>
+            <button onClick={insertCTAButton} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert CTA Button">
+                <span className="text-xs font-bold">CTA</span>
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            
+            {/* Insert Elements */}
             <button onClick={insertImage} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert Image">
                 <ImageIcon className="h-4 w-4" />
             </button>
             <button onClick={insertTable} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Insert Table">
                 <Table className="h-4 w-4" />
             </button>
+            <button onClick={insertHorizontalRule} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Horizontal Line">
+                <Minus className="h-4 w-4" />
+            </button>
+            <button onClick={insertBlockquote} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Blockquote">
+                <Quote className="h-4 w-4" />
+            </button>
+            <button onClick={insertCodeBlock} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Code Block">
+                <Code className="h-4 w-4" />
+            </button>
             <div className="w-px h-6 bg-gray-700 mx-1" />
+            
+            {/* Shapes */}
+            <button onClick={addBorder} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Add Border Box">
+                <Square className="h-4 w-4" />
+            </button>
+            <button onClick={addRoundBox} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded" title="Round Pill Box">
+                <Circle className="h-4 w-4" />
+            </button>
+            <div className="w-px h-6 bg-gray-700 mx-1" />
+            
+            {/* Font Selection */}
             <select
                 onChange={(e) => { if (e.target.value) { execCommand('fontName', e.target.value); e.target.selectedIndex = 0 } }}
-                className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-xs border border-gray-700"
+                className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-xs border border-gray-700 max-w-[100px]"
             >
                 <option value="">Font</option>
-                <option value="Arial">Arial</option>
-                <option value="Times New Roman">Times</option>
-                <option value="Georgia">Georgia</option>
-                <option value="Verdana">Verdana</option>
+                <option value="Arial" style={{ fontFamily: 'Arial' }}>Arial</option>
+                <option value="Arial Black" style={{ fontFamily: 'Arial Black' }}>Arial Black</option>
+                <option value="Times New Roman" style={{ fontFamily: 'Times New Roman' }}>Times New Roman</option>
+                <option value="Georgia" style={{ fontFamily: 'Georgia' }}>Georgia</option>
+                <option value="Verdana" style={{ fontFamily: 'Verdana' }}>Verdana</option>
+                <option value="Tahoma" style={{ fontFamily: 'Tahoma' }}>Tahoma</option>
+                <option value="Trebuchet MS" style={{ fontFamily: 'Trebuchet MS' }}>Trebuchet MS</option>
+                <option value="Courier New" style={{ fontFamily: 'Courier New' }}>Courier New</option>
+                <option value="Lucida Console" style={{ fontFamily: 'Lucida Console' }}>Lucida Console</option>
+                <option value="Impact" style={{ fontFamily: 'Impact' }}>Impact</option>
+                <option value="Comic Sans MS" style={{ fontFamily: 'Comic Sans MS' }}>Comic Sans</option>
+                <option value="Palatino Linotype" style={{ fontFamily: 'Palatino Linotype' }}>Palatino</option>
+                <option value="Garamond" style={{ fontFamily: 'Garamond' }}>Garamond</option>
+                <option value="Book Antiqua" style={{ fontFamily: 'Book Antiqua' }}>Book Antiqua</option>
+                <option value="Helvetica" style={{ fontFamily: 'Helvetica' }}>Helvetica</option>
+                <option value="Century Gothic" style={{ fontFamily: 'Century Gothic' }}>Century Gothic</option>
             </select>
+            
+            {/* Font Size */}
             <select
                 onChange={(e) => { if (e.target.value) { execCommand('fontSize', e.target.value); e.target.selectedIndex = 0 } }}
                 className="bg-gray-800 text-gray-300 rounded px-2 py-1 text-xs border border-gray-700"
             >
                 <option value="">Size</option>
-                <option value="1">Small</option>
-                <option value="3">Normal</option>
-                <option value="5">Large</option>
-                <option value="7">Huge</option>
+                <option value="1">Tiny (8pt)</option>
+                <option value="2">Small (10pt)</option>
+                <option value="3">Normal (12pt)</option>
+                <option value="4">Medium (14pt)</option>
+                <option value="5">Large (18pt)</option>
+                <option value="6">X-Large (24pt)</option>
+                <option value="7">Huge (36pt)</option>
             </select>
         </>
     )
@@ -856,14 +1075,83 @@ function ContentEditor({
 
     return (
         <div ref={editorContainerRef} className="rounded-xl glass-morphism border border-gray-800 overflow-hidden relative">
-            {/* Floating Toolbar - Higher z-index */}
+            {/* Floating Toolbar - Always visible on screen */}
             {isToolbarFloating && (
                 <div
                     ref={toolbarRef}
-                    className="fixed z-[200] bg-gray-950 border border-gray-700 rounded-lg shadow-2xl p-2 flex flex-wrap items-center gap-1"
-                    style={{ left: toolbarPosition.x, top: toolbarPosition.y, maxWidth: '90vw', cursor: isDragging ? 'grabbing' : 'default' }}
+                    className="fixed z-[200] bg-gray-950/95 backdrop-blur-sm border border-gray-600 rounded-lg shadow-2xl p-2 flex flex-wrap items-center gap-1"
+                    style={{ 
+                        left: `${toolbarPosition.x}px`, 
+                        top: `${toolbarPosition.y}px`, 
+                        maxWidth: 'calc(100vw - 40px)',
+                        minWidth: '300px'
+                    }}
                 >
                     <ToolbarContent />
+                </div>
+            )}
+
+            {/* Link Modal */}
+            {showLinkModal && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                                <Link className="h-5 w-5 text-intelligence" />
+                                Insert Link
+                            </h3>
+                            <button 
+                                onClick={() => { setShowLinkModal(false); setLinkUrl(''); setLinkText(''); setSavedSelection(null) }}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <XCircle className="h-5 w-5" />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Link Text</label>
+                                <input
+                                    type="text"
+                                    value={linkText}
+                                    onChange={(e) => setLinkText(e.target.value)}
+                                    placeholder="Enter display text..."
+                                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-intelligence focus:outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">URL</label>
+                                <input
+                                    type="text"
+                                    value={linkUrl}
+                                    onChange={(e) => setLinkUrl(e.target.value)}
+                                    placeholder="https://youtube.com/video or youtube.com/video"
+                                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-intelligence focus:outline-none"
+                                    onKeyDown={(e) => e.key === 'Enter' && insertLink()}
+                                    autoFocus
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Enter full URL (https:// will be added if missing). Link opens in new tab.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button
+                                onClick={() => { setShowLinkModal(false); setLinkUrl(''); setLinkText(''); setSavedSelection(null) }}
+                                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={insertLink}
+                                disabled={!linkUrl}
+                                className="px-6 py-2 bg-intelligence text-white rounded-lg font-semibold hover:bg-intelligence/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Insert Link
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -906,7 +1194,7 @@ function ContentEditor({
 
             {/* Static Toolbar - when not floating */}
             {!isToolbarFloating && (
-                <div className="sticky top-0 z-50 border-b border-gray-800 p-2 md:p-3 flex flex-wrap items-center gap-1 bg-gray-950 shadow-lg">
+                <div className="sticky top-0 z-50 border-b border-gray-800 p-2 md:p-3 flex flex-wrap items-center gap-1 bg-gray-950 shadow-lg overflow-x-auto">
                     <ToolbarContent />
                 </div>
             )}
