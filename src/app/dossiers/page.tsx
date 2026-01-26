@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Shield, Lock, Eye, FileText, Building, Cpu, BookOpen, Newspaper } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Shield, Lock, Eye, FileText, Building, Cpu, BookOpen, Newspaper, Search, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -42,6 +42,30 @@ export default function DossiersPage() {
     const [showEmailModal, setShowEmailModal] = useState(false)
     const [selectedCase, setSelectedCase] = useState<ContentItem | null>(null)
     const [isEmailVerified, setIsEmailVerified] = useState(false)
+    
+    // Search state for each section
+    const [casesSearch, setCasesSearch] = useState('')
+    const [articlesSearch, setArticlesSearch] = useState('')
+    const [blogsSearch, setBlogsSearch] = useState('')
+
+    // Filter function for searching by title, keywords, summary
+    const filterContent = (items: ContentItem[], searchTerm: string) => {
+        if (!searchTerm.trim()) return items
+        const term = searchTerm.toLowerCase().trim()
+        return items.filter(item => 
+            item.title.toLowerCase().includes(term) ||
+            item.summary?.toLowerCase().includes(term) ||
+            item.keywords?.some(k => k.toLowerCase().includes(term)) ||
+            item.sector?.toLowerCase().includes(term) ||
+            item.location?.toLowerCase().includes(term) ||
+            item.author?.toLowerCase().includes(term)
+        )
+    }
+
+    // Memoized filtered results
+    const filteredCases = useMemo(() => filterContent(cases, casesSearch), [cases, casesSearch])
+    const filteredArticles = useMemo(() => filterContent(articles, articlesSearch), [articles, articlesSearch])
+    const filteredBlogs = useMemo(() => filterContent(blogs, blogsSearch), [blogs, blogsSearch])
 
     useEffect(() => {
         loadPublishedContent()
@@ -152,7 +176,7 @@ export default function DossiersPage() {
                     <>
                         {activeTab === 'cases' && (
                             <>
-                                <div className="max-w-3xl mx-auto mb-12">
+                                <div className="max-w-3xl mx-auto mb-8">
                                     <div className="p-6 rounded-2xl glass-morphism border border-intelligence/20">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center space-x-3">
@@ -169,15 +193,54 @@ export default function DossiersPage() {
                                     </div>
                                 </div>
 
+                                {/* Cases Search Bar */}
+                                <div className="max-w-2xl mx-auto mb-12">
+                                    <div className="relative">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            value={casesSearch}
+                                            onChange={(e) => setCasesSearch(e.target.value)}
+                                            placeholder="Search cases by title, keyword, sector, location..."
+                                            className="w-full pl-12 pr-12 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-intelligence focus:outline-none focus:ring-1 focus:ring-intelligence transition-all"
+                                        />
+                                        {casesSearch && (
+                                            <button
+                                                onClick={() => setCasesSearch('')}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                                            >
+                                                <X className="h-5 w-5" />
+                                            </button>
+                                        )}
+                                    </div>
+                                    {casesSearch && (
+                                        <p className="text-sm text-gray-400 mt-2 text-center">
+                                            Found {filteredCases.length} result{filteredCases.length !== 1 ? 's' : ''} for &quot;{casesSearch}&quot;
+                                        </p>
+                                    )}
+                                </div>
+
                                 {cases.length === 0 ? (
                                     <div className="text-center py-20">
                                         <Building className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                                         <h3 className="text-2xl font-bold text-white mb-4">No Cases Published</h3>
                                         <p className="text-gray-400">Intelligence dossiers will appear here when published by admin.</p>
                                     </div>
+                                ) : filteredCases.length === 0 ? (
+                                    <div className="text-center py-20">
+                                        <Search className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                                        <h3 className="text-2xl font-bold text-white mb-4">No Results Found</h3>
+                                        <p className="text-gray-400 mb-4">No cases match your search &quot;{casesSearch}&quot;</p>
+                                        <button 
+                                            onClick={() => setCasesSearch('')}
+                                            className="text-intelligence hover:underline"
+                                        >
+                                            Clear search
+                                        </button>
+                                    </div>
                                 ) : (
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
-                                        {cases.map((item) => {
+                                        {filteredCases.map((item) => {
                                             const Icon = getIconForSector(item.sector)
                                             return (
                                                 <button
@@ -273,15 +336,54 @@ export default function DossiersPage() {
 
                         {activeTab === 'articles' && (
                             <>
+                                {/* Articles Search Bar */}
+                                <div className="max-w-2xl mx-auto mb-12">
+                                    <div className="relative">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            value={articlesSearch}
+                                            onChange={(e) => setArticlesSearch(e.target.value)}
+                                            placeholder="Search articles by title, keyword, author..."
+                                            className="w-full pl-12 pr-12 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-intelligence focus:outline-none focus:ring-1 focus:ring-intelligence transition-all"
+                                        />
+                                        {articlesSearch && (
+                                            <button
+                                                onClick={() => setArticlesSearch('')}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                                            >
+                                                <X className="h-5 w-5" />
+                                            </button>
+                                        )}
+                                    </div>
+                                    {articlesSearch && (
+                                        <p className="text-sm text-gray-400 mt-2 text-center">
+                                            Found {filteredArticles.length} result{filteredArticles.length !== 1 ? 's' : ''} for &quot;{articlesSearch}&quot;
+                                        </p>
+                                    )}
+                                </div>
+
                                 {articles.length === 0 ? (
                                     <div className="text-center py-20">
                                         <BookOpen className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                                         <h3 className="text-2xl font-bold text-white mb-4">No Articles Published</h3>
                                         <p className="text-gray-400">Intelligence articles will appear here when published.</p>
                                     </div>
+                                ) : filteredArticles.length === 0 ? (
+                                    <div className="text-center py-20">
+                                        <Search className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                                        <h3 className="text-2xl font-bold text-white mb-4">No Results Found</h3>
+                                        <p className="text-gray-400 mb-4">No articles match your search &quot;{articlesSearch}&quot;</p>
+                                        <button 
+                                            onClick={() => setArticlesSearch('')}
+                                            className="text-intelligence hover:underline"
+                                        >
+                                            Clear search
+                                        </button>
+                                    </div>
                                 ) : (
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
-                                        {articles.map((article) => (
+                                        {filteredArticles.map((article) => (
                                             <Link href={`/dossiers/${article.slug}/`} key={article.id} className="group p-8 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all block">
                                                 {article.thumbnail && (
                                                     <Image
@@ -323,15 +425,54 @@ export default function DossiersPage() {
 
                         {activeTab === 'blogs' && (
                             <>
+                                {/* Blogs Search Bar */}
+                                <div className="max-w-2xl mx-auto mb-12">
+                                    <div className="relative">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            value={blogsSearch}
+                                            onChange={(e) => setBlogsSearch(e.target.value)}
+                                            placeholder="Search blogs by title, keyword, author..."
+                                            className="w-full pl-12 pr-12 py-4 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-intelligence focus:outline-none focus:ring-1 focus:ring-intelligence transition-all"
+                                        />
+                                        {blogsSearch && (
+                                            <button
+                                                onClick={() => setBlogsSearch('')}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                                            >
+                                                <X className="h-5 w-5" />
+                                            </button>
+                                        )}
+                                    </div>
+                                    {blogsSearch && (
+                                        <p className="text-sm text-gray-400 mt-2 text-center">
+                                            Found {filteredBlogs.length} result{filteredBlogs.length !== 1 ? 's' : ''} for &quot;{blogsSearch}&quot;
+                                        </p>
+                                    )}
+                                </div>
+
                                 {blogs.length === 0 ? (
                                     <div className="text-center py-20">
                                         <Newspaper className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                                         <h3 className="text-2xl font-bold text-white mb-4">Coming Soon</h3>
                                         <p className="text-gray-400">Expert insights and thought leadership blogs will be published here.</p>
                                     </div>
+                                ) : filteredBlogs.length === 0 ? (
+                                    <div className="text-center py-20">
+                                        <Search className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                                        <h3 className="text-2xl font-bold text-white mb-4">No Results Found</h3>
+                                        <p className="text-gray-400 mb-4">No blogs match your search &quot;{blogsSearch}&quot;</p>
+                                        <button 
+                                            onClick={() => setBlogsSearch('')}
+                                            className="text-intelligence hover:underline"
+                                        >
+                                            Clear search
+                                        </button>
+                                    </div>
                                 ) : (
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
-                                        {blogs.map((blog) => (
+                                        {filteredBlogs.map((blog) => (
                                             <Link href={`/dossiers/${blog.slug}/`} key={blog.id} className="group p-8 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all block">
                                                 {blog.thumbnail && (
                                                     <Image
