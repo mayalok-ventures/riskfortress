@@ -1,5 +1,7 @@
 // Client-side content storage using localStorage
 // This is suitable for static export deployments
+// SECURITY: Authentication is handled via /api/auth endpoint
+// Never store passwords or API keys in source code
 
 export interface ContentItem {
     id: string
@@ -25,14 +27,11 @@ export interface ContentItem {
 
 const STORAGE_KEY = 'rf-admin-content'
 const AUTH_KEY = 'rf-admin-auth'
+const AUTH_API_URL = '/api/auth'
 
-// Admin credentials
-const ADMIN_PASSWORD = 'Mflica2026riskfortresspsw@'
-const ADMIN_PHONE = '918193948870' // With country code for SMS API (NO + sign)
-
-// Mtalkz SMS API Configuration - UPDATE SENDER_ID
-const MTALKZ_API_KEY = 'dOYA0E413khPUDKjhKBthmPPhOxn4o'
-const MTALKZ_SENDER_ID = 'YOUR_APPROVED_SENDER_ID' // ← Mtalkz dashboard se update karein
+// =============================================================================
+// CONTENT MANAGEMENT (localStorage based)
+// =============================================================================
 
 export function getAllContent(): ContentItem[] {
     if (typeof window === 'undefined') return []
@@ -123,85 +122,108 @@ export function deleteContent(id: string): boolean {
     return true
 }
 
-// OTP Generation with Mtalkz SMS API
-let currentOTP: { code: string; expiresAt: number; attempts: number } | null = null
+// =============================================================================
+// SECURE AUTHENTICATION VIA API
+// Password and API keys are stored in Cloudflare KV (encrypted)
+// =============================================================================
 
-async function sendSMSViaMtalkz(phone: string, message: string): Promise<boolean> {
+// OTP Generation via server-side API
+let currentOTPState: { expiresAt: number; attempts: number } | null = null
+
+export async function generateOTP(): Promise<{ phone: string; success: boolean; error?: string }> {
     try {
-        // CORRECTED: Using POST method with JSON body
-        const response = await fetch('https://msg.mtalkz.com/V2/http-api.php', {
+        const response = await fetch(AUTH_API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                apikey: MTALKZ_API_KEY,
-                senderid: MTALKZ_SENDER_ID,
-                number: phone,
-                message: message,
-                format: 'json'
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'generate-otp' })
         })
-
+        
         const data = await response.json()
-        console.log('Mtalkz Response:', data) // Debugging ke liye
-
-        // Check for various success statuses
-        return data.status === 'OK' || data.status === 'success' || data.status === 'submitted'
+        
+        if (data.success) {
+            currentOTPState = {
+                expiresAt: Date.now() + 5 * 60 * 1000,
+                attempts: 0
+            }
+        }
+        
+        return {
+            phone: data.phone || '****',
+            success: data.success,
+            error: data.error
+        }
     } catch (error) {
-        console.error('SMS sending failed:', error)
-        return false
+        console.error('OTP generation failed:', error)
+        return { phone: '****', success: false, error: 'Failed to generate OTP' }
     }
 }
 
-export async function generateOTP(): Promise<{ phone: string; success: boolean }> {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString()
-
-    currentOTP = {
-        code: otp,
-        expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
-        attempts: 0
-    }
-
-    // Send OTP via Mtalkz SMS API
-    const message = `Your RiskFortress Admin OTP is: ${otp}. Valid for 5 minutes. Do not share this code.`
-    const success = await sendSMSViaMtalkz(ADMIN_PHONE, message)
-
-    return {
-        phone: ADMIN_PHONE.slice(2, 4) + '****' + ADMIN_PHONE.slice(-2),
-        success
+export async function verifyOTPAsync(inputOtp: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        const response = await fetch(AUTH_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'verify-otp', otp: inputOtp })
+        })
+        
+        const data = await response.json()
+        return { success: data.success, error: data.error }
+    } catch (error) {
+        console.error('OTP verification failed:', error)
+        return { success: false, error: 'Verification failed' }
     }
 }
 
+// Legacy OTP verification (for backwards compatibility)
 export function verifyOTP(inputOtp: string): { success: boolean; error?: string } {
-    if (!currentOTP) {
-        return { success: false, error: 'No OTP requested. Please request a new one.' }
-    }
-
-    if (Date.now() > currentOTP.expiresAt) {
-        currentOTP = null
-        return { success: false, error: 'OTP expired. Please request a new one.' }
-    }
-
-    currentOTP.attempts++
-
-    if (currentOTP.attempts > 3) {
-        currentOTP = null
-        return { success: false, error: 'Too many attempts. Please request a new OTP.' }
-    }
-
-    if (inputOtp !== currentOTP.code) {
-        return { success: false, error: 'Invalid OTP. Please try again.' }
-    }
-
-    return { success: true }
+    console.warn('DEPRECATED: verifyOTP() is deprecated. Use verifyOTPAsync() instead.')
+    return { success: false, error: 'Use verifyOTPAsync instead' }
 }
 
-export function verifyPassword(password: string): boolean {
-    return password === ADMIN_PASSWORD
+// Secure password verification via API
+export async function verifyPasswordAsync(inputPassword: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        const response = await fetch(AUTH_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'verify', password: inputPassword })
+        })
+        
+        const data = await response.json()
+        
+        if (data.success && data.token) {
+            createSessionWithToken(data.token, data.expiresAt)
+            return { success: true }
+        }
+        
+        return { success: false, error: data.error || 'Authentication failed' }
+    } catch (error) {
+        console.error('Auth error:', error)
+        return { success: false, error: 'Connection failed' }
+    }
 }
 
-// Session management - 10 hours expiry
+// DEPRECATED: Use verifyPasswordAsync instead
+export function verifyPassword(_password: string): boolean {
+    console.warn('SECURITY: verifyPassword() is deprecated. Use verifyPasswordAsync() instead.')
+    return false
+}
+
+// =============================================================================
+// SESSION MANAGEMENT
+// =============================================================================
+
+function createSessionWithToken(token: string, expiresAt: number): void {
+    if (typeof window === 'undefined') return
+    const session = {
+        authenticated: true,
+        token,
+        createdAt: Date.now(),
+        expiresAt
+    }
+    sessionStorage.setItem(AUTH_KEY, JSON.stringify(session))
+}
+
 export function createSession(): void {
     if (typeof window === 'undefined') return
 
@@ -231,6 +253,18 @@ export function validateSession(): boolean {
         return session.authenticated
     } catch {
         return false
+    }
+}
+
+export function getSessionToken(): string | null {
+    if (typeof window === 'undefined') return null
+    try {
+        const data = sessionStorage.getItem(AUTH_KEY)
+        if (!data) return null
+        const session = JSON.parse(data)
+        return session.token || null
+    } catch {
+        return null
     }
 }
 

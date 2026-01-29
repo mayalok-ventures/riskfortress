@@ -5,13 +5,43 @@ compatibility_flags = ["nodejs_compat"]
 # Cloudflare Pages configuration
 pages_build_output_dir = "out"
 
+# ===========================================
 # D1 Database for metadata storage
+# ===========================================
 [[d1_databases]]
 binding = "RF_DB"
 database_name = "rf-blog-db"
 database_id = "962a0d42-8f11-45aa-b8d6-3a88370b06e3"
 
-# KV Namespace for large content storage (up to 25MB per item)
+# ===========================================
+# KV Namespaces
+# ===========================================
+
+# KV for large content storage (up to 25MB per item)
 [[kv_namespaces]]
 binding = "RF_CONTENT"
 id = "9c4eb8cc1d654491a5b0c28fbac47897"
+
+# KV for encrypted secrets and admin credentials
+# Create this KV namespace in Cloudflare Dashboard:
+# Workers & Pages > KV > Create namespace > Name: "rf-secrets"
+# Then add these keys via Dashboard (encrypted):
+#   - ADMIN_PASSWORD_HASH (bcrypt hash of password)
+#   - ADMIN_PHONE (918193948870)
+#   - MTALKZ_API_KEY (your API key)
+#   - MTALKZ_SENDER_ID (your sender ID)
+[[kv_namespaces]]
+binding = "RF_SECRETS"
+id = "YOUR_RF_SECRETS_KV_NAMESPACE_ID"
+
+# ===========================================
+# Environment Variables (Set in Cloudflare Dashboard)
+# ===========================================
+# Go to: Workers & Pages > Your Project > Settings > Environment Variables
+# Add these as "Encrypted" variables:
+#   - ADMIN_PASSWORD_HASH: bcrypt hash of admin password
+#   - JWT_SECRET: random 64-char string for session tokens
+#   - ENCRYPTION_KEY: 256-bit base64 encryption key
+
+[vars]
+NODE_ENV = "production"

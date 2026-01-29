@@ -21,7 +21,7 @@ import {
     createContent,
     updateContent,
     deleteContent,
-    verifyPassword,
+    verifyPasswordAsync,
     createSession,
     validateSession,
     clearSession
@@ -76,13 +76,13 @@ export default function AdminPage() {
         setError('')
 
         try {
-            if (verifyPassword(password)) {
-                createSession()
+            const result = await verifyPasswordAsync(password)
+            
+            if (result.success) {
                 setAuthStep('authenticated')
                 loadContent()
             } else {
-                await new Promise(resolve => setTimeout(resolve, 1000))
-                setError('Invalid password')
+                setError(result.error || 'Invalid password')
             }
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Authentication failed'

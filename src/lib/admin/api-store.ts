@@ -1,5 +1,6 @@
 // API-based content storage
 // Uses Cloudflare KV for content (up to 25MB) + D1 for metadata
+// SECURITY: Authentication handled via /api/auth endpoint with encrypted password hash
 
 export interface ContentItem {
     id: string
@@ -30,6 +31,7 @@ interface UploadProgress {
 }
 
 const API_URL = '/api/content'
+const AUTH_API_URL = '/api/auth'
 
 export async function getAllContent(): Promise<ContentItem[]> {
     try {
@@ -155,12 +157,53 @@ export function generateSlug(title: string): string {
         .trim()
 }
 
-// Auth functions (client-side session)
-const AUTH_KEY = 'rf-admin-auth'
-const ADMIN_PASSWORD = 'Mflica2026riskfortresspsw@'
+// =============================================================================
+// SECURE AUTHENTICATION
+// Password is stored as encrypted hash in Cloudflare environment variables
+// Never stored in source code
+// =============================================================================
 
-export function verifyPassword(password: string): boolean {
-    return password === ADMIN_PASSWORD
+const AUTH_KEY = 'rf-admin-auth'
+
+// Secure async password verification via server-side API
+export async function verifyPasswordAsync(inputPassword: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        const response = await fetch(AUTH_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'verify', password: inputPassword })
+        })
+        
+        const data = await response.json()
+        
+        if (data.success && data.token) {
+            createSessionWithToken(data.token, data.expiresAt)
+            return { success: true }
+        }
+        
+        return { success: false, error: data.error || 'Authentication failed' }
+    } catch (error) {
+        console.error('Auth API error:', error)
+        return { success: false, error: 'Connection failed. Please try again.' }
+    }
+}
+
+// DEPRECATED: Use verifyPasswordAsync instead
+// This function now always returns false for security - forces use of async API
+export function verifyPassword(_password: string): boolean {
+    console.warn('SECURITY: verifyPassword() is deprecated. Use verifyPasswordAsync() instead.')
+    return false
+}
+
+function createSessionWithToken(token: string, expiresAt: number): void {
+    if (typeof window === 'undefined') return
+    const session = {
+        authenticated: true,
+        token,
+        createdAt: Date.now(),
+        expiresAt
+    }
+    sessionStorage.setItem(AUTH_KEY, JSON.stringify(session))
 }
 
 export function createSession(): void {
@@ -186,6 +229,18 @@ export function validateSession(): boolean {
         return session.authenticated
     } catch {
         return false
+    }
+}
+
+export function getSessionToken(): string | null {
+    if (typeof window === 'undefined') return null
+    try {
+        const data = sessionStorage.getItem(AUTH_KEY)
+        if (!data) return null
+        const session = JSON.parse(data)
+        return session.token || null
+    } catch {
+        return null
     }
 }
 
