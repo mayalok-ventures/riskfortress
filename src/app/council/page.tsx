@@ -2,16 +2,23 @@ import { Users, Shield, Award, Briefcase, Globe, Cpu, Lock, Star } from 'lucide-
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Mayalok Ecosystem & Advisory Council | RiskFortress',
-    description: 'RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures, dedicated to preserving wealth through advanced predictive forensics.',
+    title: 'Mayalok Ventures Risk Management | RiskFortress Security Division | Advisory Council',
+    description: 'RiskFortress India is the specialized Risk Intelligence arm of Mayalok Ventures. Private Intelligence Firm India providing Predictive Risk Intelligence, HNI Asset Protection Services, and Strategic Foresight for UHNWIs with ₹100Cr+ assets.',
     keywords: [
-        'Mayalok Ventures',
-        'RiskFortress Advisory Council',
-        'Strategic Foresight Entity',
-        'Risk Intelligence Experts',
-        'Predictive Forensics',
-        'Ultra-HNWI Advisory',
+        'Mayalok Ventures Risk Management',
+        'RiskFortress Security Division',
+        'RiskFortress India',
+        'Private Intelligence Firm India',
+        'Predictive Risk Intelligence',
+        'Strategic Foresight for UHNWIs',
+        'HNI Asset Protection Services India',
+        'High-Stakes Advisory Mandate',
+        'Asset Protection Intelligence',
     ],
+    openGraph: {
+        title: 'Mayalok Ventures Risk Management | RiskFortress Security Division',
+        description: 'RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures. Private Intelligence Firm India for Ultra-HNWIs.',
+    },
 }
 
 const councilMembers = [

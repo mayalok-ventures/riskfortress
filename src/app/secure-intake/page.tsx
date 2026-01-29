@@ -4,15 +4,24 @@ import { Metadata } from 'next'
 import IntakeForm from '@/components/SecureForm/IntakeForm'
 
 export const metadata: Metadata = {
-    title: 'Secure Intelligence Intake | RiskFortress',
-    description: 'Military-grade encrypted submission for corporate intelligence requests. AES-256 protection for Fortune 500 companies and HNIs.',
+    title: 'Hire Private Intelligence Agency India | Discrete Consultation | RiskFortress',
+    description: 'Hire Private Intelligence Agency India for HNI Asset Protection Services. Discrete consultation for Predictive Risk Intelligence, Corporate Fraud Investigation Services, and TSCM Services Delhi. RiskFortress India - A Mayalok Ventures Division.',
     keywords: [
-        'Secure Intelligence Submission',
-        'Encrypted Corporate Intake',
-        'Enterprise Risk Management Request',
-        'Confidential Security Consultation',
-        'AES-256 Encrypted Form',
+        'Hire Private Intelligence Agency India',
+        'Discrete Consultation',
+        'RiskFortress India',
+        'HNI Asset Protection Services India',
+        'Corporate Fraud Investigation Services',
+        'TSCM Services Delhi',
+        'Private Intelligence Firm India',
+        'Executive Reputation Management Crisis',
+        'Kidnap and Ransom Prevention India',
+        'Leak Investigation for Companies',
     ],
+    openGraph: {
+        title: 'Hire Private Intelligence Agency India | Discrete Consultation',
+        description: 'Discrete consultation for Predictive Risk Intelligence. Private Intelligence Firm India for Ultra-HNWIs with ₹100Cr+ assets.',
+    },
 }
 
 export default function SecureIntakePage() {
@@ -29,21 +38,26 @@ export default function SecureIntakePage() {
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
                     <div className="text-center mb-16">
-                        <div className="inline-flex items-center space-x-2 px-6 py-3 rounded-full glass-morphism border border-intelligence/20 mb-6">
-                            <Lock className="h-5 w-5 text-intelligence" />
-                            <span className="text-sm font-semibold text-intelligence">
-                                AES-256 ENCRYPTED TRANSMISSION
+                        <div className="inline-flex items-center space-x-3 px-6 py-3 border border-champagne/20 rounded-none mb-8">
+                            <div className="w-2 h-2 bg-champagne rounded-full animate-pulse" />
+                            <span className="text-xs tracking-[0.25em] uppercase text-champagne font-light">
+                                HIRE PRIVATE INTELLIGENCE AGENCY INDIA
                             </span>
                         </div>
 
-                        <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                            <span className="text-gray-300">Secure</span>{' '}
-                            <span className="gradient-text">Intelligence Intake</span>
+                        <h1 className="text-4xl md:text-5xl font-light mb-6">
+                            <span className="text-white">Discrete</span>{' '}
+                            <span className="text-champagne">Consultation</span>
                         </h1>
 
-                        <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-                            Corporate email addresses only. All submissions are protected with military-grade
-                            encryption and automatically purged after 72 hours.
+                        <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light mb-4">
+                            Request Predictive Risk Intelligence, Corporate Fraud Investigation Services, 
+                            or TSCM Services Delhi from RiskFortress India—A Mayalok Ventures Division.
+                        </p>
+                        
+                        <p className="text-sm text-gray-500 max-w-2xl mx-auto">
+                            HNI Asset Protection Services India for Ultra-HNWIs with ₹100Cr+ assets. 
+                            All submissions encrypted and purged after 72 hours.
                         </p>
                     </div>
 

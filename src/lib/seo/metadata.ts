@@ -6,30 +6,47 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://riskfortress.in'
 export const defaultMetadata: Metadata = {
     metadataBase: new URL(baseUrl),
     title: {
-        default: 'RiskFortress | Enterprise Risk Management & Corporate Intelligence India',
-        template: '%s | RiskFortress Intelligence'
+        default: 'RiskFortress India | Private Intelligence & HNI Asset Protection | A Mayalok Division',
+        template: '%s | RiskFortress India'
     },
-    description: 'Advanced Predictive Risk Analytics for Heavy Industries and Family Offices. We specialize in Land Due Diligence, TSCM, and Strategic Security Consulting.',
+    description: 'Predictive Risk Intelligence & Strategic Foresight for UHNWIs. Private Intelligence Firm India specializing in Asset Protection Intelligence, Statutory Forensics, and Corporate Espionage Countermeasures. High-Stakes Advisory Mandate for ₹100Cr+ assets.',
     keywords: [
-        // Tier 1: Money Keywords
-        'Enterprise Risk Management India',
-        'Corporate Intelligence Agency',
-        'Predictive Risk Analytics',
-        'Strategic Security Consulting',
-        'Industrial Espionage Countermeasures',
-        // Tier 2: Capability Keywords
-        'Land Due Diligence India',
+        // Phase 1: Identity Keywords (To kill Global Confusion)
+        'RiskFortress India',
+        'RiskFortress Security Division',
+        'RiskFortress Asset Protection',
+        'Mayalok Ventures Risk Management',
+        'Private Intelligence Firm India',
+        // Phase 2: HNI & Family Office Keywords (Targeting Wealth)
+        'HNI Asset Protection Services India',
+        'Family Office Risk Advisory',
+        'Personal Threat Assessment for Executives',
+        'High Net Worth Security Audit',
+        'Kidnap and Ransom Prevention India',
+        'K&R Prevention India',
+        // Phase 3: Corporate & Startup Keywords (Targeting Businesses)
+        'Corporate Espionage Countermeasures India',
+        'TSCM Services Delhi',
         'TSCM Services India',
-        'Family Office Risk Management',
-        'HNI Executive Protection India',
-        // Tier 3: Future Keywords
-        'AI-Driven Risk Modeling',
-        'Future Threat Forecasting',
-        'Predictive Intelligence Engine',
+        'Insider Threat Detection Services',
+        'Due Diligence for Angel Investors',
+        'Startup Intellectual Property Protection',
+        // Phase 4: Emergency/Pain Keywords (High Intent)
+        'Hire Private Intelligence Agency India',
+        'Corporate Fraud Investigation Services',
+        'Executive Reputation Management Crisis',
+        'Secure Transport for Valuables India',
+        'Leak Investigation for Companies',
+        // Primary Premium Keywords
+        'Predictive Risk Intelligence',
+        'Strategic Foresight for UHNWIs',
+        'Asset Protection Intelligence',
+        'Statutory Forensics',
+        'High-Stakes Advisory Mandate',
     ],
-    authors: [{ name: 'RiskFortress Intelligence', url: baseUrl }],
-    creator: 'RiskFortress Intelligence Engine',
-    publisher: 'RiskFortress Holdings',
+    authors: [{ name: 'RiskFortress India - A Mayalok Ventures Division', url: baseUrl }],
+    creator: 'RiskFortress Strategic Foresight Entity',
+    publisher: 'Mayalok Ventures',
     robots: {
         index: true,
         follow: true,
@@ -48,30 +65,30 @@ export const defaultMetadata: Metadata = {
         type: 'website',
         locale: 'en_IN',
         url: baseUrl,
-        siteName: 'RiskFortress',
-        title: 'RiskFortress | Enterprise Intelligence & Risk Platform',
-        description: 'Predictive Intelligence for safeguarding India\'s most critical industrial assets and private legacies.',
+        siteName: 'RiskFortress India',
+        title: 'RiskFortress India | Private Intelligence & HNI Asset Protection | A Mayalok Division',
+        description: 'Predictive Risk Intelligence preventing the next corporate collapse. Strategic Foresight for UHNWIs with ₹100Cr+ assets. Private Intelligence Firm India. Statutory Land Intelligence & Asset Protection.',
         images: [
             {
                 url: '/og-image.png',
                 width: 1200,
                 height: 630,
-                alt: 'RiskFortress Intelligence Platform',
+                alt: 'RiskFortress India - Private Intelligence & Asset Protection',
             },
         ],
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'RiskFortress Intelligence',
-        description: 'Enterprise-grade risk intelligence platform for HNIs and Corporations',
+        title: 'RiskFortress India | Private Intelligence Firm',
+        description: 'Predictive Risk Intelligence for HNI Asset Protection. Preventing the next corporate collapse. A Mayalok Ventures Division.',
         images: ['/og-image.png'],
         creator: '@riskfortress',
     },
     verification: {
         google: 'google-site-verification-code',
     },
-    category: 'Security Services',
-    classification: 'Corporate Intelligence',
+    category: 'Private Intelligence Services',
+    classification: 'Asset Protection Intelligence',
     formatDetection: {
         email: false,
         address: false,
@@ -119,10 +136,11 @@ export function generateOrganizationSchema() {
     return {
         '@context': 'https://schema.org',
         '@type': 'Organization',
-        name: 'RiskFortress Intelligence',
+        name: 'RiskFortress India - A Mayalok Ventures Division',
+        alternateName: ['RiskFortress Security Division', 'RiskFortress Asset Protection', 'Private Intelligence Firm India'],
         url: baseUrl,
         logo: `${baseUrl}/logo.png`,
-        description: defaultMetadata.description,
+        description: 'RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures. Private Intelligence Firm India providing Predictive Risk Intelligence, HNI Asset Protection Services, and Corporate Espionage Countermeasures for Ultra-HNWIs with ₹100Cr+ assets.',
         address: {
             '@type': 'PostalAddress',
             addressLocality: 'Greater Noida',
@@ -132,14 +150,26 @@ export function generateOrganizationSchema() {
         },
         contactPoint: {
             '@type': 'ContactPoint',
-            contactType: 'Intelligence Inquiry',
+            contactType: 'Discrete Consultation',
             telephone: '+91-22-XXXX-XXXX',
-            email: 'intelligence@riskfortress.in',
+            email: 'kunal@riskfortress.in',
             availableLanguage: ['English', 'Hindi'],
         },
+        parentOrganization: {
+            '@type': 'Organization',
+            name: 'Mayalok Ventures',
+        },
         sameAs: [
-            `${baseUrl}/linkedin`,
-            `${baseUrl}/twitter`,
+            'https://www.linkedin.com/company/riskfortress',
+        ],
+        knowsAbout: [
+            'Predictive Risk Intelligence',
+            'HNI Asset Protection Services India',
+            'Corporate Espionage Countermeasures India',
+            'TSCM Services India',
+            'Kidnap and Ransom Prevention India',
+            'Statutory Forensics',
+            'Family Office Risk Advisory',
         ],
     }
 }
@@ -149,20 +179,28 @@ export function generateServiceSchema() {
         '@context': 'https://schema.org',
         '@type': 'Service',
         serviceType: [
-            'Enterprise Risk Management',
-            'Corporate Intelligence',
-            'Land Due Diligence',
-            'TSCM Services',
-            'Family Office Security',
-            'Predictive Risk Analytics',
+            'Predictive Risk Intelligence',
+            'HNI Asset Protection Services India',
+            'Corporate Espionage Countermeasures India',
+            'TSCM Services Delhi',
+            'Family Office Risk Advisory',
+            'Statutory Forensics',
+            'Kidnap and Ransom Prevention India',
+            'Corporate Fraud Investigation Services',
+            'Insider Threat Detection Services',
+            'Executive Reputation Management Crisis',
         ],
         provider: {
             '@type': 'Organization',
-            name: 'RiskFortress Intelligence',
+            name: 'RiskFortress India - A Mayalok Ventures Division',
         },
         areaServed: {
             '@type': 'Country',
             name: 'India',
+        },
+        audience: {
+            '@type': 'Audience',
+            audienceType: 'Ultra-High-Net-Worth Individuals with ₹100Cr+ assets',
         },
     }
 }

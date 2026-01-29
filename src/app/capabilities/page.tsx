@@ -11,104 +11,110 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-    title: 'Corporate Intelligence Capabilities | RiskFortress',
-    description: 'Enterprise Risk Management, Land Due Diligence, TSCM Services, and Family Office Security for Fortune 500 companies and HNIs.',
+    title: 'Intelligence Verticals | TSCM Services Delhi | Corporate Espionage Countermeasures India',
+    description: 'Predictive Risk Intelligence capabilities preventing the next corporate collapse. TSCM Services Delhi & India, Corporate Espionage Countermeasures, Insider Threat Detection Services, HNI Asset Protection Services India. Statutory Forensics and Strategic Foresight for UHNWIs.',
     keywords: [
-        'Enterprise Risk Management India',
-        'Corporate Intelligence Agency',
-        'Land Due Diligence India',
+        'TSCM Services Delhi',
         'TSCM Services India',
-        'Family Office Risk Management',
-        'Predictive Risk Analytics',
-        'Strategic Security Consulting',
-        'Industrial Espionage Countermeasures',
+        'Corporate Espionage Countermeasures India',
+        'Insider Threat Detection Services',
+        'HNI Asset Protection Services India',
+        'Family Office Risk Advisory',
+        'Startup Intellectual Property Protection',
+        'Due Diligence for Angel Investors',
+        'Statutory Forensics',
+        'Leak Investigation for Companies',
+        'RiskFortress Security Division',
+        'Private Intelligence Firm India',
+        'Predictive Risk Intelligence',
+        'High Net Worth Security Audit',
     ],
 }
 
 const capabilities = [
     {
-        id: 'erm',
-        title: 'Enterprise Risk Management',
-        icon: Shield,
-        description: 'Comprehensive risk assessment and mitigation strategies for Fortune 500 companies',
-        features: [
-            'Risk Identification & Assessment',
-            'Business Continuity Planning',
-            'Crisis Management Framework',
-            'Regulatory Compliance Advisory',
-            'Risk Appetite Framework Development',
-        ],
-        keywords: ['Enterprise Risk Management India', 'Corporate Risk Framework', 'Business Continuity Planning'],
-    },
-    {
-        id: 'land',
-        title: 'Land Due Diligence',
-        icon: Building,
-        description: 'End-to-end land verification and encroachment prevention for industrial projects',
-        features: [
-            'Title Verification & Chain Analysis',
-            'Encroachment Risk Assessment',
-            'Environmental Compliance Check',
-            'Political Risk Analysis',
-            'Dispute Prevention Strategy',
-        ],
-        keywords: ['Land Due Diligence India', 'Industrial Land Verification', 'Encroachment Monitoring'],
-    },
-    {
         id: 'tscm',
-        title: 'TSCM Services',
+        title: 'TSCM Services India & Delhi',
         icon: Cpu,
-        description: 'Technical Surveillance Counter-Measures for corporate espionage prevention',
+        description: 'Technical Surveillance Counter-Measures preventing corporate espionage. Bug sweeping and leak investigation for companies.',
         features: [
-            'Bug Sweeping & Detection',
-            'Electronic Surveillance Audit',
-            'Secure Communication Setup',
-            'Cybersecurity Threat Assessment',
-            'Insider Threat Detection',
+            'Bug Sweeping & Detection (TSCM Services Delhi)',
+            'Corporate Espionage Countermeasures India',
+            'Leak Investigation for Companies',
+            'Secure Communication Channels',
+            'Insider Threat Detection Services',
         ],
-        keywords: ['TSCM Services India', 'Bug Sweeping', 'Electronic Surveillance Defense'],
+        keywords: ['TSCM Services India', 'TSCM Services Delhi', 'Corporate Espionage Countermeasures India'],
+    },
+    {
+        id: 'hni',
+        title: 'HNI Asset Protection Services India',
+        icon: Shield,
+        description: 'Asset Protection Intelligence for Ultra-HNWIs with ₹100Cr+ assets. Strategic Foresight preventing the next corporate collapse.',
+        features: [
+            'High Net Worth Security Audit',
+            'Personal Threat Assessment for Executives',
+            'Kidnap and Ransom (K&R) Prevention India',
+            'Secure Transport for Valuables India',
+            'Executive Reputation Management Crisis',
+        ],
+        keywords: ['HNI Asset Protection Services India', 'High Net Worth Security Audit', 'K&R Prevention India'],
     },
     {
         id: 'family',
-        title: 'Family Office Security',
+        title: 'Family Office Risk Advisory',
         icon: Users,
-        description: 'Complete security architecture for ultra-high-net-worth families',
+        description: 'Predictive Risk Intelligence for Family Offices. Preventing succession crises and protecting multi-generational wealth.',
         features: [
+            'Family Office Risk Advisory',
             'Legacy Succession Security',
-            'Digital Footprint Management',
-            'Executive Protection Planning',
+            'Wealth Transfer Intelligence',
+            'Digital Footprint Sanitization',
             'Reputation Risk Management',
-            'Private Asset Protection',
         ],
-        keywords: ['Family Office Risk Management', 'HNI Security', 'Legacy Succession Security'],
+        keywords: ['Family Office Risk Advisory', 'HNI Asset Protection Services India', 'Legacy Security'],
+    },
+    {
+        id: 'corporate',
+        title: 'Corporate Fraud Investigation Services',
+        icon: BarChart3,
+        description: 'Predictive Risk Intelligence detecting fraud and insider threats before they cause catastrophic damage.',
+        features: [
+            'Corporate Fraud Investigation Services',
+            'Insider Threat Detection Services',
+            'Due Diligence for Angel Investors',
+            'Startup Intellectual Property Protection',
+            'Competitor Vulnerability Assessment',
+        ],
+        keywords: ['Corporate Fraud Investigation Services', 'Insider Threat Detection Services', 'Due Diligence for Angel Investors'],
+    },
+    {
+        id: 'statutory',
+        title: 'Statutory Forensics',
+        icon: Building,
+        description: 'Statutory land intelligence preventing the next Noida Twin Tower scenario. Regulatory and zoning risk prediction.',
+        features: [
+            'Statutory Land Intelligence',
+            'Regulatory Change Forecasting',
+            'Zoning & Land Use Risk Prediction',
+            'Political Risk Assessment',
+            'Title & Encumbrance Forensics',
+        ],
+        keywords: ['Statutory Forensics', 'Statutory Land Intelligence', 'RiskFortress Asset Protection'],
     },
     {
         id: 'intelligence',
-        title: 'Predictive Intelligence',
-        icon: BarChart3,
-        description: 'AI-driven threat forecasting and risk modeling',
-        features: [
-            'Threat Intelligence Gathering',
-            'Predictive Analytics Modeling',
-            'Geopolitical Risk Analysis',
-            'Market Intelligence',
-            'Competitive Intelligence',
-        ],
-        keywords: ['Predictive Risk Analytics', 'AI-Driven Risk Modeling', 'Threat Intelligence'],
-    },
-    {
-        id: 'industrial',
-        title: 'Industrial Security',
+        title: 'Predictive Risk Intelligence',
         icon: Target,
-        description: 'Security solutions for manufacturing and infrastructure sectors',
+        description: 'Strategic Foresight for UHNWIs preventing the next corporate collapse. High-Stakes Advisory Mandate.',
         features: [
-            'Supply Chain Security',
-            'Labor Unrest Prediction',
-            'Industrial Espionage Prevention',
-            'Critical Infrastructure Protection',
-            'Greenfield Project Security',
+            'Predictive Risk Intelligence',
+            'Preventing the next corporate collapse',
+            'Strategic Foresight for UHNWIs',
+            'Business Model Collapse Prediction',
+            'High-Stakes Advisory Mandate',
         ],
-        keywords: ['Industrial Security', 'Supply Chain Security', 'Critical Infrastructure Protection'],
+        keywords: ['Predictive Risk Intelligence', 'Strategic Foresight for UHNWIs', 'Private Intelligence Firm India'],
     },
 ]
 
@@ -125,21 +131,27 @@ export default function CapabilitiesPage() {
             <div className="container relative z-10 mx-auto px-6">
                 {/* Header */}
                 <div className="text-center mb-20">
-                    <div className="inline-flex items-center space-x-2 px-6 py-3 rounded-full glass-morphism border border-intelligence/20 mb-6">
-                        <Zap className="h-5 w-5 text-intelligence" />
-                        <span className="text-sm font-semibold text-intelligence">
-                            PREMIUM CORPORATE CAPABILITIES
+                    <div className="inline-flex items-center space-x-3 px-6 py-3 border border-champagne/20 rounded-none mb-8">
+                        <div className="w-2 h-2 bg-champagne rounded-full animate-pulse" />
+                        <span className="text-xs tracking-[0.25em] uppercase text-champagne font-light">
+                            RISKFORTRESS SECURITY DIVISION
                         </span>
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                        <span className="text-gray-300">Intelligence</span>{' '}
-                        <span className="gradient-text">Capabilities</span>
+                    <h1 className="text-4xl md:text-5xl font-light mb-6">
+                        <span className="text-white">Intelligence</span>{' '}
+                        <span className="text-champagne">Verticals</span>
                     </h1>
 
-                    <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-                        Unlike security guard agencies, we focus exclusively on strategic intelligence
-                        and risk management for India&apos;s most critical assets and private legacies.
+                    <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light mb-6">
+                        Predictive Risk Intelligence preventing the next corporate collapse. 
+                        Private Intelligence Firm India specializing in HNI Asset Protection Services, 
+                        Corporate Espionage Countermeasures, and Statutory Forensics.
+                    </p>
+                    
+                    <p className="text-sm text-gray-500 max-w-2xl mx-auto">
+                        Strategic Foresight for UHNWIs with ₹100Cr+ assets. High-Stakes Advisory Mandate 
+                        by RiskFortress India—A Mayalok Ventures Division.
                     </p>
                 </div>
 

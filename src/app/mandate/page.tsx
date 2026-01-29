@@ -2,43 +2,44 @@
 
 import { motion } from 'framer-motion'
 import { ArrowRight, Eye, Shield, Target, TrendingDown, CheckCircle } from 'lucide-react'
+import Head from 'next/head'
 import Link from 'next/link'
 
 const mandatePrinciples = [
     {
         icon: Target,
-        title: 'Minimum ₹1Cr Risk Threshold',
-        description: 'We only engage with risks valued at ₹1 Crore or above. This ensures we focus our forensic capabilities on scenarios where the stakes justify deep investigation.',
+        title: 'High-Stakes Advisory Mandate',
+        description: 'We only engage with risks valued at ₹1 Crore or above. This High-Stakes Advisory Mandate ensures our Predictive Risk Intelligence focuses on scenarios where Strategic Foresight for UHNWIs justifies deep forensic investigation.',
     },
     {
         icon: TrendingDown,
-        title: '1% of Protected Asset Value',
-        description: 'Our fee is exactly 1% of the asset value at risk. This creates perfect alignment—we only prosper when we successfully identify and help you prevent catastrophic loss.',
+        title: '1% Fee Model for Asset Protection',
+        description: 'Our fee is exactly 1% of the protected asset value. This value-based pricing attracts high-intent, wealthy clients who understand that Asset Protection Intelligence prevents catastrophic wealth destruction.',
     },
     {
         icon: Shield,
-        title: '₹100Cr+ Target Clients',
-        description: 'Our ideal clients own assets worth ₹100 Crores or more. Large developers, industrial dynasties, and enterprise founders who cannot afford to learn from their mistakes.',
+        title: 'HNI Asset Protection Services India',
+        description: 'Our Private Intelligence Firm India serves Ultra-HNWIs with ₹100Cr+ assets. Large developers, industrial dynasties, and enterprise founders who need Predictive Risk Intelligence preventing the next corporate collapse.',
     },
 ]
 
 const caseScenarios = [
     {
-        title: 'The Byju\'s Scenario',
-        category: 'Macro-Financial Forensics',
-        description: 'Before the collapse, patterns existed. Governance gaps, unsustainable growth metrics, market positioning risks. We identify these fractures before they become public catastrophes.',
+        title: 'Preventing the Next Corporate Collapse',
+        category: 'Predictive Risk Intelligence',
+        description: 'Before the Byju\'s collapse, patterns existed. Governance gaps, unsustainable growth metrics, market risks. Our Corporate Fraud Investigation Services identify these fractures through Due Diligence for Angel Investors.',
         prevented: '₹2,500Cr+ potential exposure',
     },
     {
-        title: 'The Noida Twin Tower',
-        category: 'Statutory & Structural Intelligence',
-        description: 'Zoning violations, regulatory non-compliance, political risk factors. These signatures are visible to trained forensic analysis years before demolition orders arrive.',
+        title: 'Statutory Land Intelligence',
+        category: 'Statutory Forensics',
+        description: 'The Noida Twin Tower scenario: Zoning violations, regulatory non-compliance, political risk. Our Statutory Forensics provides statutory land intelligence years before regulatory action.',
         prevented: '₹800Cr+ in stranded assets',
     },
     {
-        title: 'The Succession Crisis',
-        category: 'Family Office Forensics',
-        description: 'Multi-generational wealth transitions create vulnerability windows. Legal challenges, family disputes, and legacy dilution can be predicted and preempted.',
+        title: 'Family Office Risk Advisory',
+        category: 'HNI Asset Protection',
+        description: 'Multi-generational wealth transitions create vulnerability. Our Family Office Risk Advisory provides Personal Threat Assessment for Executives and Kidnap and Ransom Prevention India.',
         prevented: '₹1,200Cr+ in contested inheritance',
     },
 ]
