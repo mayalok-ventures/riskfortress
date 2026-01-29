@@ -10,22 +10,25 @@ Disallow: /secure-intake/submit/
 Disallow: /private/
 Disallow: /dashboard/
 Disallow: /dossiers/_placeholder/
+Disallow: /staging/
 
-# Crawl delay
-Crawl-delay: 1
+
+# Googlebot Crawl delay
+User-agent: Googlebot
+Crawl-delay: 0.5
 
 # Sitemap
 Sitemap: https://riskfortress.in/sitemap.xml
 
 # Specific bots
 User-agent: GPTBot
-Disallow: /
+allow: /
 
 User-agent: ChatGPT-User
-Disallow: /
+allow: /
 
 User-agent: Google-Extended
-Disallow: /
+allow: /
 
 # Scrapers
 User-agent: AhrefsBot

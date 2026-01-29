@@ -6,58 +6,58 @@ import { useState } from 'react'
 
 const sectors = [
     {
-        id: 'industrial',
-        title: 'Industrial & Land Security',
+        id: 'financial',
+        title: 'Macro-Financial Forensics',
         icon: Factory,
-        color: 'from-industrial to-green-600',
-        borderColor: 'border-industrial/30',
+        color: 'from-champagne to-champagne-dark',
+        borderColor: 'border-champagne/30',
         capabilities: [
-            'Land Due Diligence India',
-            'Labor Unrest Prediction',
-            'Supply Chain Security Audit',
-            'Greenfield Project Risk Assessment',
-            'Factory Encroachment Monitoring',
-            'Asset Hardening Solutions',
-            'Critical Infrastructure Protection',
+            'Business Model Collapse Prediction',
+            'Market Shift Analysis',
+            'Corporate Governance Forensics',
+            'Pre-Investment Risk Intelligence',
+            'Competitor Vulnerability Assessment',
+            'Financial Fraud Early Detection',
+            'Exit Strategy Risk Analysis',
         ],
-        caseStudy: 'Prevented ₹250Cr land dispute for major infrastructure project through pre-emptive due diligence',
-        clients: 'Fortune 500 Manufacturing, Infrastructure Companies, Real Estate Conglomerates',
+        caseStudy: 'Identified governance gaps in a ₹3,000Cr enterprise 18 months before public collapse (The "Byju\'s Scenario")',
+        clients: 'Private Equity Firms, Industrial Conglomerates, Ultra-HNWIs investing in ventures',
     },
     {
-        id: 'hni',
-        title: 'Family Office & HNI Security',
+        id: 'statutory',
+        title: 'Statutory & Structural Intelligence',
         icon: Users,
-        color: 'from-legacy to-purple-600',
-        borderColor: 'border-legacy/30',
+        color: 'from-champagne to-champagne-dark',
+        borderColor: 'border-champagne/30',
         capabilities: [
-            'Family Office Risk Management',
-            'HNI Executive Protection India',
-            'Legacy Succession Security',
-            'Digital Footprint Sanitization',
-            'Kidnap and Ransom (K&R) Consulting',
-            'Private Client Security Architecture',
-            'Reputation Management for HNIs',
+            'Zoning & Land Use Risk Prediction',
+            'Regulatory Change Forecasting',
+            'Political Risk Assessment',
+            'Infrastructure Policy Analysis',
+            'Title & Encumbrance Forensics',
+            'Multi-jurisdiction Compliance Foresight',
+            'Developer Risk Profiling',
         ],
-        caseStudy: 'Secured ₹500Cr legacy portfolio for 4th generation industrial family',
-        clients: 'Ultra-High-Net-Worth Families, Family Offices, Industrial Dynasties',
+        caseStudy: 'Predicted demolition risk for ₹800Cr real estate project 2 years before regulatory action (The "Noida Twin Tower" foresight)',
+        clients: 'Large Developers, Real Estate Conglomerates, Infrastructure Companies',
     },
     {
-        id: 'technical',
-        title: 'Technical & Cyber Intelligence',
+        id: 'environmental',
+        title: 'Geo-Environmental Risk',
         icon: Cpu,
-        color: 'from-intelligence to-blue-600',
-        borderColor: 'border-intelligence/30',
+        color: 'from-champagne to-champagne-dark',
+        borderColor: 'border-champagne/30',
         capabilities: [
-            'TSCM Services India (Bug Sweeping)',
-            'Insider Threat Detection',
-            'Digital Espionage Defense',
-            'Secure Communication Channels',
-            'Cyber-Physical Threat Convergence',
-            'Predictive Intelligence Engine',
-            'AI-Driven Risk Modeling',
+            'Climate Impact Projection (30-50 years)',
+            'Geographical Vulnerability Mapping',
+            'Multi-generational Asset Protection',
+            'Coastal & Flood Risk Analysis',
+            'Agricultural Land Viability',
+            'Resource Scarcity Forecasting',
+            'Environmental Litigation Risk',
         ],
-        caseStudy: 'Detected and neutralized corporate espionage attempt saving ₹150Cr in IP',
-        clients: 'Technology Companies, Financial Institutions, Defense Contractors',
+        caseStudy: 'Protected ₹1,200Cr multi-generational agricultural holdings from 30-year climate impact trajectory',
+        clients: 'Family Offices, Agricultural Dynasties, Multi-generational Asset Owners',
     },
 ]
 
@@ -82,12 +82,18 @@ export default function SectorFocus() {
                     viewport={{ once: true }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                        <span className="text-gray-300">Sector-Specific</span>{' '}
-                        <span className="gradient-text">Intelligence Solutions</span>
+                    <div className="inline-flex items-center space-x-3 px-5 py-2.5 border border-champagne/20 rounded-none mb-8">
+                        <div className="w-1.5 h-1.5 bg-champagne rounded-full" />
+                        <span className="text-xs tracking-[0.2em] uppercase text-champagne font-light">
+                            Core Intelligence Domains
+                        </span>
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-light mb-6">
+                        <span className="text-white">Forensic</span>{' '}
+                        <span className="text-champagne">Specializations</span>
                     </h2>
-                    <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-                        Unlike generic security agencies, we specialize in three premium sectors where intelligence matters more than manpower.
+                    <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light">
+                        Three core verticals where predictive forensics prevents catastrophic wealth destruction.
                     </p>
                 </motion.div>
 

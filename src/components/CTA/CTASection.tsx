@@ -1,22 +1,22 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowRight, Shield, Lock } from 'lucide-react'
+import { ArrowRight, Eye, Lock } from 'lucide-react'
 import Link from 'next/link'
 
 export default function CTASection() {
     return (
         <section className="py-32 relative overflow-hidden">
-            {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-                <div className="absolute inset-0 opacity-10">
+            {/* Premium Obsidian Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#0d0d0d] to-[#0a0a0a]">
+                <div className="absolute inset-0 opacity-5">
                     <div className="absolute inset-0 bg-grid-pattern" />
                 </div>
             </div>
 
-            {/* Animated Orbs */}
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-intelligence/10 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-industrial/10 rounded-full blur-3xl animate-pulse delay-1000" />
+            {/* Subtle Champagne accents */}
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-champagne/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-champagne/3 rounded-full blur-3xl" />
 
             <div className="container relative z-10 mx-auto px-6">
                 <motion.div
@@ -31,64 +31,75 @@ export default function CTASection() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="inline-flex items-center space-x-2 px-6 py-3 rounded-full glass-morphism border border-intelligence/20 mb-8"
+                        className="inline-flex items-center space-x-3 px-6 py-3 border border-champagne/20 rounded-none mb-10"
                     >
-                        <Shield className="h-5 w-5 text-intelligence" />
-                        <span className="text-sm font-semibold text-intelligence">
-                            ENTERPRISE-ONLY ACCESS
+                        <Lock className="h-4 w-4 text-champagne" />
+                        <span className="text-xs tracking-[0.2em] uppercase text-champagne font-light">
+                            ₹100Cr+ Assets Only
                         </span>
                     </motion.div>
 
                     {/* Headline */}
-                    <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                        <span className="text-gray-300">Ready to Secure Your</span>{' '}
-                        <span className="gradient-text">Critical Assets?</span>
+                    <h2 className="text-4xl md:text-5xl font-light mb-8">
+                        <span className="text-white">The Crisis You Prevent</span>{' '}
+                        <span className="text-champagne">Is The One You Never Face.</span>
                     </h2>
 
                     {/* Description */}
-                    <p className="text-xl text-gray-400 mb-12 max-w-3xl mx-auto">
-                        Speak with our intelligence team about predictive risk management,
-                        land due diligence, or family office security. No security guard inquiries.
+                    <p className="text-xl text-gray-400 mb-14 max-w-3xl mx-auto font-light">
+                        Speak with our forensic intelligence team about protecting your legacy 
+                        from unseen threats. We don&apos;t solve generic problems—we prevent catastrophic losses.
                     </p>
 
                     {/* CTA Buttons */}
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                         <Link
                             href="/secure-intake"
-                            className="group relative px-8 py-4 bg-gradient-to-r from-intelligence to-industrial rounded-lg font-semibold text-white hover:shadow-intelligence hover:scale-105 transition-all"
+                            className="group px-10 py-5 bg-champagne text-obsidian font-medium tracking-widest uppercase text-sm transition-all hover:bg-champagne-light hover:shadow-champagne"
                         >
-                            <div className="absolute inset-0 bg-white/10 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <span className="relative flex items-center justify-center space-x-3">
-                                <Lock className="h-5 w-5" />
-                                <span>Begin Secure Intake</span>
-                                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                            <span className="flex items-center justify-center space-x-4">
+                                <Eye className="h-4 w-4" />
+                                <span>Request Discrete Consultation</span>
+                                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                             </span>
                         </Link>
 
                         <Link
-                            href="tel:+912200000000"
-                            className="px-8 py-4 rounded-lg font-semibold border border-intelligence text-intelligence hover:bg-intelligence/10 transition-all"
+                            href="/mandate"
+                            className="px-10 py-5 border border-gray-800 text-gray-300 font-medium tracking-widest uppercase text-sm hover:border-champagne hover:text-champagne transition-all"
                         >
-                            <span className="flex items-center justify-center space-x-3">
-                                <Shield className="h-5 w-5" />
-                                <span>Call Secure Line</span>
-                            </span>
+                            Understand The 1% Mandate
                         </Link>
                     </div>
 
-                    {/* Enterprise Notice */}
+                    {/* The 1% Rule Notice */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         transition={{ duration: 0.6, delay: 0.3 }}
                         viewport={{ once: true }}
-                        className="mt-12 p-6 rounded-2xl glass-morphism border border-gray-800 max-w-2xl mx-auto"
+                        className="mt-16 p-8 border border-champagne/10 max-w-3xl mx-auto"
                     >
-                        <p className="text-gray-400 text-sm">
-                            <span className="font-semibold text-intelligence">Note:</span>{' '}
-                            We serve Fortune 500 companies, industrial conglomerates, and family offices only.
-                            Corporate email verification required. No security guard or bouncer services.
+                        <h3 className="text-lg font-light text-champagne mb-4 tracking-wide">THE 1% MANDATE</h3>
+                        <p className="text-gray-400 text-sm leading-relaxed">
+                            We are a premium filter. We only accept engagements involving assets worth ₹1Cr+ 
+                            and charge 1% of the protected asset value. This ensures our interests are perfectly 
+                            aligned with yours—we only succeed when we prevent your catastrophic loss.
                         </p>
+                        <div className="mt-6 pt-6 border-t border-gray-800 grid grid-cols-3 gap-6">
+                            <div className="text-center">
+                                <p className="text-2xl font-light text-champagne">₹1Cr+</p>
+                                <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Minimum Risk</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-2xl font-light text-champagne">1%</p>
+                                <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Of Asset Value</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-2xl font-light text-champagne">₹100Cr+</p>
+                                <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Target Clients</p>
+                            </div>
+                        </div>
                     </motion.div>
                 </motion.div>
             </div>

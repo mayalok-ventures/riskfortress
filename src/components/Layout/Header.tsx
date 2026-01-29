@@ -8,18 +8,18 @@ import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Capabilities', href: '/capabilities' },
-    { name: 'Case Studies', href: '/dossiers' },
-    { name: 'Advisory Council', href: '/council' },
+    { name: 'Intelligence Verticals', href: '/capabilities' },
+    { name: 'The 1% Mandate', href: '/mandate' },
+    { name: 'Case Scenarios', href: '/dossiers' },
+    { name: 'Mayalok Ecosystem', href: '/council' },
 ]
 
 const mobileNavigation = [
     { name: 'Home', href: '/' },
-    { name: 'Capabilities', href: '/capabilities' },
-    { name: 'Case Studies', href: '/dossiers' },
-    { name: 'Advisory Council', href: '/council' },
-    { name: 'Admin', href: '/rfadmin' },
+    { name: 'Intelligence Verticals', href: '/capabilities' },
+    { name: 'The 1% Mandate', href: '/mandate' },
+    { name: 'Case Scenarios', href: '/dossiers' },
+    { name: 'Mayalok Ecosystem', href: '/council' },
 ]
 
 export default function Header() {
@@ -54,8 +54,8 @@ export default function Header() {
                             <h1 className="text-lg font-semibold text-white tracking-wide">
                                 RiskFortress
                             </h1>
-                            <p className="text-[10px] text-gray-500 uppercase tracking-[0.15em]">
-                                Intelligence & Risk Advisory
+                            <p className="text-[10px] text-champagne uppercase tracking-[0.15em]">
+                                A Mayalok Ventures Entity
                             </p>
                         </div>
                     </Link>
@@ -81,9 +81,9 @@ export default function Header() {
                     <div className="hidden lg:block">
                         <Link
                             href="/secure-intake"
-                            className="px-6 py-2.5 bg-intelligence text-gray-900 text-sm font-medium tracking-wide hover:bg-intelligence-light transition-colors"
+                            className="px-6 py-2.5 bg-champagne text-obsidian text-sm font-medium tracking-widest uppercase hover:bg-champagne-light transition-colors"
                         >
-                            Request Consultation
+                            Discrete Consultation
                         </Link>
                     </div>
 
@@ -130,10 +130,10 @@ export default function Header() {
                                 <div className="pt-4 border-t border-gray-800">
                                     <Link
                                         href="/secure-intake"
-                                        className="block w-full text-center px-6 py-3 bg-intelligence text-gray-900 font-medium"
+                                        className="block w-full text-center px-6 py-3 bg-champagne text-obsidian font-medium uppercase tracking-wider"
                                         onClick={() => setIsOpen(false)}
                                     >
-                                        Request Consultation
+                                        Discrete Consultation
                                     </Link>
                                 </div>
                             </div>

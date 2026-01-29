@@ -2,15 +2,15 @@ import { Users, Shield, Award, Briefcase, Globe, Cpu, Lock, Star } from 'lucide-
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Security Intelligence Council | RiskFortress',
-    description: 'Our council of former intelligence officers, military leaders, and corporate security experts providing strategic guidance.',
+    title: 'Mayalok Ecosystem & Advisory Council | RiskFortress',
+    description: 'RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures, dedicated to preserving wealth through advanced predictive forensics.',
     keywords: [
-        'Security Intelligence Council',
-        'Corporate Security Advisors',
-        'Risk Management Experts',
-        'Former Intelligence Officers',
-        'Military Security Consultants',
-        'Enterprise Risk Advisory Board',
+        'Mayalok Ventures',
+        'RiskFortress Advisory Council',
+        'Strategic Foresight Entity',
+        'Risk Intelligence Experts',
+        'Predictive Forensics',
+        'Ultra-HNWI Advisory',
     ],
 }
 
@@ -78,22 +78,29 @@ export default function CouncilPage() {
             <div className="container relative z-10 mx-auto px-6">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <div className="inline-flex items-center space-x-2 px-6 py-3 rounded-full glass-morphism border border-intelligence/20 mb-6">
-                        <Users className="h-5 w-5 text-intelligence" />
-                        <span className="text-sm font-semibold text-intelligence">
-                            STRATEGIC INTELLIGENCE COUNCIL
+                    <div className="inline-flex items-center space-x-3 px-6 py-3 border border-champagne/20 rounded-none mb-8">
+                        <div className="w-2 h-2 bg-champagne rounded-full animate-pulse" />
+                        <span className="text-xs tracking-[0.25em] uppercase text-champagne font-light">
+                            A MAYALOK VENTURES ENTITY
                         </span>
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                        <span className="text-gray-300">Security</span>{' '}
-                        <span className="gradient-text">Intelligence Council</span>
+                    <h1 className="text-4xl md:text-5xl font-light mb-6">
+                        <span className="text-white">Mayalok</span>{' '}
+                        <span className="text-champagne">Ecosystem</span>
                     </h1>
 
-                    <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-                        Former intelligence officers, military leaders, and corporate security experts
-                        providing strategic guidance for India's most critical assets.
+                    <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light mb-8">
+                        RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures, 
+                        dedicated to preserving wealth through advanced predictive forensics.
                     </p>
+
+                    <div className="max-w-2xl mx-auto p-6 border border-champagne/10">
+                        <p className="text-gray-300 text-sm leading-relaxed">
+                            Our council of former intelligence officers, forensic analysts, and strategic advisors 
+                            provide foresight for Ultra-HNWIs with assets worth ₹100Cr+.
+                        </p>
+                    </div>
                 </div>
 
                 {/* Council Grid */}

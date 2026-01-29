@@ -4,17 +4,17 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 const footerLinks = {
-    Services: [
-        { label: 'Enterprise Risk Management', href: '/capabilities' },
-        { label: 'Land Due Diligence', href: '/capabilities' },
-        { label: 'Family Office Advisory', href: '/capabilities' },
-        { label: 'Technical Surveillance', href: '/capabilities' },
+    'Intelligence Verticals': [
+        { label: 'Macro-Financial Forensics', href: '/capabilities' },
+        { label: 'Statutory & Structural Intelligence', href: '/capabilities' },
+        { label: 'Geo-Environmental Risk', href: '/capabilities' },
+        { label: 'The 1% Mandate', href: '/mandate' },
     ],
-    Company: [
-        { label: 'About', href: '/council' },
-        { label: 'Case Studies', href: '/dossiers' },
+    'Mayalok Ecosystem': [
+        { label: 'About RiskFortress', href: '/council' },
+        { label: 'Case Scenarios', href: '/dossiers' },
         { label: 'Advisory Council', href: '/council' },
-        { label: 'Contact', href: '/secure-intake' },
+        { label: 'Discrete Consultation', href: '/secure-intake' },
     ],
 }
 
@@ -34,15 +34,19 @@ export default function Footer() {
                             />
                             <div>
                                 <h2 className="text-lg font-semibold text-white">RiskFortress</h2>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider">Intelligence & Risk Advisory</p>
+                                <p className="text-xs text-champagne uppercase tracking-wider">A Mayalok Ventures Entity</p>
                             </div>
                         </div>
+                        <p className="text-gray-400 text-sm leading-relaxed max-w-md mb-6">
+                            RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures, 
+                            dedicated to preserving wealth through advanced predictive forensics.
+                        </p>
                         <p className="text-gray-500 text-sm leading-relaxed max-w-md mb-8">
-                            Strategic intelligence and risk advisory for India&apos;s leading
-                            industrial conglomerates and distinguished family offices.
+                            Strategic foresight for Ultra-HNWIs with assets worth ₹100Cr+. 
+                            We predict the crisis you don&apos;t see coming.
                         </p>
                         <div className="text-xs text-gray-600">
-                            <p>ISO 27001 Certified • AES-256 Encryption</p>
+                            <p>Forensic Predictive Intelligence • Absolute Confidentiality</p>
                         </div>
                     </div>
 

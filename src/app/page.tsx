@@ -11,11 +11,11 @@ import Testimonials from '@/components/Testimonials/Testimonials'
 
 
 export const metadata: Metadata = {
-    title: 'Deciphering Uncertainty. Protecting Sovereignty. | RiskFortress',
-    description: 'Beyond surveillance. Beyond response. RiskFortress provides the Predictive Intelligence required to safeguard India\'s most critical industrial assets and private legacies.',
+    title: 'We Predict The Crisis You Don\'t See Coming | RiskFortress',
+    description: 'Strategic Risk Intelligence for assets worth ₹100Cr+. RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures, dedicated to preserving wealth through advanced predictive forensics.',
     openGraph: {
-        title: 'Deciphering Uncertainty. Protecting Sovereignty. | RiskFortress',
-        description: 'Enterprise Risk Management India - Predictive Intelligence for Fortune 500 Companies and HNIs',
+        title: 'We Predict The Crisis You Don\'t See Coming | RiskFortress',
+        description: 'Strategic Risk Intelligence for Ultra-HNWIs. Moving beyond compliance into the realm of absolute foresight. A Mayalok Ventures Entity.',
     },
 }
 
@@ -37,10 +37,10 @@ export default function Home() {
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "ProfessionalService",
-                        "name": "RiskFortress Intelligence",
+                        "name": "RiskFortress - A Mayalok Ventures Entity",
                         "url": "https://riskfortress.in",
                         "logo": "https://riskfortress.in/logo.svg",
-                        "description": "Enterprise intelligence and risk management platform specializing in predictive analytics for industrial assets and private legacies",
+                        "description": "RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures, dedicated to preserving wealth through advanced predictive forensics for Ultra-HNWIs with assets worth ₹100Cr+.",
                         "address": {
                             "@type": "PostalAddress",
                             "streetAddress": "Pari Chowk",
@@ -56,18 +56,18 @@ export default function Home() {
                         },
                         "contactPoint": {
                             "@type": "ContactPoint",
-                            "contactType": "Intelligence Inquiry",
+                            "contactType": "Discrete Consultation",
                             "telephone": "+91-22-XXXX-XXXX",
                             "availableLanguage": ["English", "Hindi"],
                             "email": "kunal@riskfortress.in"
                         },
                         "serviceType": [
-                            "Enterprise Risk Management",
-                            "Corporate Intelligence",
-                            "Land Due Diligence",
-                            "Family Office Security",
-                            "TSCM Services",
-                            "Predictive Risk Analytics"
+                            "Macro-Financial Forensics",
+                            "Statutory & Structural Intelligence",
+                            "Geo-Environmental Risk Analysis",
+                            "Family Office Forensics",
+                            "Counter-Intelligence & TSCM",
+                            "Predictive Risk Intelligence"
                         ],
                         "areaServed": {
                             "@type": "Country",
@@ -75,6 +75,10 @@ export default function Home() {
                         },
                         "openingHours": "Mo-Fr 09:00-18:00",
                         "priceRange": "$$$$",
+                        "parentOrganization": {
+                            "@type": "Organization",
+                            "name": "Mayalok Ventures"
+                        },
                         "sameAs": [
                             "https://www.linkedin.com/company/riskfortress"
                         ]
@@ -92,26 +96,34 @@ export default function Home() {
                         "mainEntity": [
                             {
                                 "@type": "Question",
-                                "name": "What is Enterprise Risk Management?",
+                                "name": "What is the 1% Mandate?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Enterprise Risk Management (ERM) in India involves identifying, assessing, and mitigating risks across an organization's entire portfolio, including operational, strategic, financial, and compliance risks. Unlike traditional security agencies, RiskFortress provides predictive intelligence and strategic consulting for Fortune 500 companies and HNIs."
+                                    "text": "The 1% Mandate is RiskFortress's engagement model. We only accept risks valued at ₹1Cr+ and charge 1% of the protected asset value. This ensures our interests are perfectly aligned with our clients—we only succeed when we prevent catastrophic loss."
                                 }
                             },
                             {
                                 "@type": "Question",
-                                "name": "How does RiskFortress differ from traditional security agencies?",
+                                "name": "How does RiskFortress differ from traditional consulting firms?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "RiskFortress focuses on predictive intelligence and strategic risk management rather than physical security. We serve corporate clients and HNIs with services like Land Due Diligence, TSCM, Labor Unrest Prediction, and Digital Espionage Defense, avoiding security guard and bouncer services completely."
+                                    "text": "RiskFortress is a Strategic Foresight Entity, not a consulting firm. We predict crises before they happen through forensic intelligence. Our focus is on Ultra-HNWIs with ₹100Cr+ assets—large developers, industrial dynasties, and enterprise founders who cannot afford to learn from their mistakes."
                                 }
                             },
                             {
                                 "@type": "Question",
-                                "name": "What industries does RiskFortress serve?",
+                                "name": "What are RiskFortress's Intelligence Verticals?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "We specialize in Heavy Industries (Land Due Diligence, Supply Chain Security), Family Offices (HNI Protection, Legacy Security), and Technical Threats (TSCM Services, Insider Threat Detection). Our focus is exclusively on premium corporate and HNI clients."
+                                    "text": "We operate across three core verticals: Macro-Financial Forensics (predicting business model collapses), Statutory & Structural Intelligence (predicting legal and zoning risks for real estate), and Geo-Environmental Risk (long-term climate impact analysis for multi-generational assets)."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "What is Mayalok Ventures?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures, dedicated to preserving wealth through advanced predictive forensics."
                                 }
                             }
                         ]

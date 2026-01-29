@@ -54,11 +54,30 @@ const config: Config = {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
-                // Corporate Intelligence Colors - Premium Gold
+                // Premium Risk Intelligence Colors
+                // Champagne Gold - Primary accent
+                champagne: {
+                    DEFAULT: '#D4AF37',
+                    light: '#E5C158',
+                    dark: '#B8962E',
+                },
+                // Obsidian Black - Deep backgrounds
+                obsidian: {
+                    DEFAULT: '#0a0a0a',
+                    light: '#0d0d0d',
+                    dark: '#050505',
+                },
+                // Deep Charcoal - Secondary backgrounds
+                charcoal: {
+                    DEFAULT: '#1a1a1a',
+                    light: '#252525',
+                    dark: '#0f0f0f',
+                },
+                // Legacy intelligence color (kept for compatibility)
                 intelligence: {
-                    DEFAULT: '#c5a059',
-                    dark: '#a68942',
-                    light: '#d4b76a',
+                    DEFAULT: '#D4AF37',
+                    dark: '#B8962E',
+                    light: '#E5C158',
                 },
                 risk: {
                     DEFAULT: '#ef4444',
@@ -119,19 +138,22 @@ const config: Config = {
                 },
             },
             backgroundImage: {
-                'gradient-intelligence': 'linear-gradient(135deg, #c5a059 0%, #a68942 100%)',
+                'gradient-intelligence': 'linear-gradient(135deg, #D4AF37 0%, #B8962E 100%)',
+                'gradient-champagne': 'linear-gradient(135deg, #D4AF37 0%, #B8962E 100%)',
                 'gradient-risk': 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                'gradient-industrial': 'linear-gradient(135deg, #c5a059 0%, #8b7355 100%)',
+                'gradient-industrial': 'linear-gradient(135deg, #D4AF37 0%, #8b7355 100%)',
                 'gradient-legacy': 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                'grid-pattern': 'linear-gradient(to right, #1e293b 1px, transparent 1px), linear-gradient(to bottom, #1e293b 1px, transparent 1px)',
+                'gradient-obsidian': 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+                'grid-pattern': 'linear-gradient(to right, #1a1a1a 1px, transparent 1px), linear-gradient(to bottom, #1a1a1a 1px, transparent 1px)',
                 'topographic': 'url("/images/topographic-bg.webp")',
                 'wireframe': 'url("/images/wireframe-bg.webp")',
             },
             boxShadow: {
-                'intelligence': '0 0 40px rgba(197, 160, 89, 0.3)',
+                'intelligence': '0 0 40px rgba(212, 175, 55, 0.3)',
+                'champagne': '0 0 40px rgba(212, 175, 55, 0.25)',
                 'risk': '0 0 40px rgba(239, 68, 68, 0.2)',
-                'glass': 'inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.3)',
-                'elevation': '0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                'glass': 'inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.5)',
+                'elevation': '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
             }
         },
     },

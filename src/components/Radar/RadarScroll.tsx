@@ -6,66 +6,66 @@ import { useState, useRef, useEffect } from 'react'
 
 import RadarCard from './RadarCard'
 
-const riskData = [
+const intelligenceVerticals = [
     {
         id: 1,
-        title: 'Labor Unrest Prediction',
-        sector: 'Industrial',
-        severity: 'High' as const,
-        probability: '75%',
-        icon: Users,
-        description: 'AI-driven analysis of labor patterns to predict and prevent industrial strikes',
-        keywords: ['Labor Unrest Prediction', 'Factory Encroachment Monitoring', 'Industrial Risk Management'],
+        title: 'Macro-Financial Forensics',
+        sector: 'Financial',
+        severity: 'Critical' as const,
+        probability: '95%',
+        icon: AlertTriangle,
+        description: 'Predicting business model collapses and market shifts before they happen. Identifying the "Byju\'s Scenario" before it unfolds.',
+        keywords: ['Business Model Collapse Prediction', 'Market Shift Analysis', 'Financial Forensics', 'Corporate Foresight'],
     },
     {
         id: 2,
-        title: 'Land Due Diligence',
+        title: 'Statutory & Structural Intelligence',
         sector: 'Real Estate',
         severity: 'Critical' as const,
         probability: '90%',
         icon: Building,
-        description: 'Comprehensive land title verification and encroachment risk assessment',
-        keywords: ['Land Due Diligence India', 'Greenfield Project Risk Assessment', 'Asset Hardening Solutions'],
+        description: 'Predicting legal, zoning, and policy risks for large-scale real estate. The "Noida Twin Tower" foresight before demolition orders.',
+        keywords: ['Zoning Risk Analysis', 'Policy Change Prediction', 'Real Estate Intelligence', 'Structural Risk Assessment'],
     },
     {
         id: 3,
-        title: 'TSCM Services',
-        sector: 'Technical',
+        title: 'Geo-Environmental Risk',
+        sector: 'Environmental',
         severity: 'High' as const,
-        probability: '65%',
-        icon: Cpu,
-        description: 'Technical Surveillance Counter-Measures for corporate espionage detection',
-        keywords: ['TSCM Services India', 'Digital Espionage Defense', 'Secure Communication Channels'],
+        probability: '85%',
+        icon: Globe,
+        description: 'Long-term climate and geographical impact analysis for multi-generational assets. Protecting legacy wealth from environmental shifts.',
+        keywords: ['Climate Risk Analysis', 'Environmental Impact Prediction', 'Multi-generational Asset Protection', 'Geographical Risk Intelligence'],
     },
     {
         id: 4,
-        title: 'Family Office Security',
-        sector: 'HNI',
-        severity: 'Medium' as const,
+        title: 'Succession & Legacy Forensics',
+        sector: 'Family Office',
+        severity: 'High' as const,
         probability: '80%',
-        icon: Shield,
-        description: 'Complete security architecture for ultra-high-net-worth families',
-        keywords: ['Family Office Risk Management', 'HNI Executive Protection', 'Legacy Succession Security'],
+        icon: Users,
+        description: 'Predicting succession conflicts and family disputes before they threaten multi-generational wealth.',
+        keywords: ['Succession Planning', 'Family Office Security', 'Legacy Protection', 'Wealth Transfer Intelligence'],
     },
     {
         id: 5,
-        title: 'Geo-political Intelligence',
-        sector: 'Strategic',
+        title: 'Regulatory Foresight',
+        sector: 'Compliance',
         severity: 'High' as const,
-        probability: '70%',
-        icon: Globe,
-        description: 'Real-time analysis of geopolitical events impacting business operations',
-        keywords: ['Geo-political Risk Intelligence', 'Business Continuity Planning', 'Corporate Sovereignty Protection'],
+        probability: '88%',
+        icon: Shield,
+        description: 'Anticipating regulatory changes that could impact business operations and asset values before announcements.',
+        keywords: ['Regulatory Intelligence', 'Compliance Prediction', 'Policy Foresight', 'Government Action Analysis'],
     },
     {
         id: 6,
-        title: 'Insider Threat Detection',
-        sector: 'Corporate',
+        title: 'Counter-Intelligence & TSCM',
+        sector: 'Security',
         severity: 'Critical' as const,
-        probability: '85%',
-        icon: AlertTriangle,
-        description: 'Advanced behavioral analytics to identify potential insider threats',
-        keywords: ['Insider Threat Detection', 'Predictive Risk Analytics', 'Enterprise Risk Management'],
+        probability: '92%',
+        icon: Cpu,
+        description: 'Detecting and neutralizing corporate espionage attempts. Protecting sensitive negotiations and strategic decisions.',
+        keywords: ['TSCM Services', 'Corporate Espionage Defense', 'Counter-Intelligence', 'Secure Communications'],
     },
 ]
 
@@ -129,19 +129,25 @@ export default function RadarScroll() {
                     style={{ opacity, scale }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                        <span className="text-gray-300">Live Risk</span>{' '}
-                        <span className="gradient-text">Intelligence Radar</span>
+                    <div className="inline-flex items-center space-x-3 px-5 py-2.5 border border-champagne/20 rounded-none mb-8">
+                        <div className="w-1.5 h-1.5 bg-champagne rounded-full" />
+                        <span className="text-xs tracking-[0.2em] uppercase text-champagne font-light">
+                            Strategic Foresight Capabilities
+                        </span>
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-light mb-6">
+                        <span className="text-white">Intelligence</span>{' '}
+                        <span className="text-champagne">Verticals</span>
                     </h2>
-                    <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-                        Real-time monitoring of emerging threats across Industrial, HNI, and Corporate sectors.
-                        No security guards. Only predictive intelligence.
+                    <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light">
+                        Predictive forensics across financial, statutory, and environmental domains.
+                        We identify catastrophic risks before they materialize.
                     </p>
                 </motion.div>
 
-                {/* Radar Cards Grid */}
+                {/* Intelligence Verticals Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    {riskData.map((risk, index) => (
+                    {intelligenceVerticals.map((risk, index) => (
                         <motion.div
                             key={risk.id}
                             initial={{ opacity: 0, y: 50 }}
