@@ -1,5 +1,5 @@
 name = "riskfortress"
-compatibility_date = "2024-01-15"
+compatibility_date = "2026-01-15"
 compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Pages configuration
@@ -32,16 +32,14 @@ id = "9c4eb8cc1d654491a5b0c28fbac47897"
 #   - MTALKZ_SENDER_ID (your sender ID)
 [[kv_namespaces]]
 binding = "RF_SECRETS"
-id = "YOUR_RF_SECRETS_KV_NAMESPACE_ID"
+id = "7b21430c58e7492284f0f44ff1f34aa6"
 
 # ===========================================
-# Environment Variables (Set in Cloudflare Dashboard)
+# Environment Variables
 # ===========================================
-# Go to: Workers & Pages > Your Project > Settings > Environment Variables
-# Add these as "Encrypted" variables:
-#   - ADMIN_PASSWORD_HASH: bcrypt hash of admin password
-#   - JWT_SECRET: random 64-char string for session tokens
-#   - ENCRYPTION_KEY: 256-bit base64 encryption key
+# IMPORTANT: Add ADMIN_PASSWORD_HASH as "Encrypted" variable in Cloudflare Dashboard
+# Generate hash: node scripts/generate-password-hash.js "your-password"
 
 [vars]
 NODE_ENV = "production"
+ENCRYPTION_KEY = "prlTzdxSpMc/UiQYDRzWjB+eFjJDZbYk9W4IzXEZYko="

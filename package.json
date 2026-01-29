@@ -13,7 +13,7 @@
         "test:ci": "jest --ci --coverage",
         "security:audit": "npm audit --production",
         "security:scan": "snyk test",
-        "prepare": "husky",
+        "prepare": "node -e \"try { require('husky')() } catch (e) { if (e.code !== 'MODULE_NOT_FOUND') throw e }\"",
         "type-check": "tsc --noEmit",
         "analyze": "ANALYZE=true next build",
         "generate-sitemap": "tsx src/scripts/generate-sitemap.ts",
