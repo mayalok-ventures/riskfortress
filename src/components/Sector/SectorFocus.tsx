@@ -78,8 +78,8 @@ export default function SectorFocus() {
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    viewport={{ once: true }}
+                    transition={{ duration: 0.4 }}
+                    viewport={{ once: true, amount: 0.1 }}
                     className="text-center mb-16"
                 >
                     <div className="inline-flex items-center space-x-3 px-5 py-2.5 border border-champagne/20 rounded-none mb-8">

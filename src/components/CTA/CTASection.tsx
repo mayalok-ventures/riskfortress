@@ -22,15 +22,16 @@ export default function CTASection() {
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    viewport={{ once: true }}
+                    transition={{ duration: 0.4 }}
+                    viewport={{ once: true, amount: 0.1 }}
                     className="max-w-4xl mx-auto text-center"
                 >
                     {/* Badge */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 0.3 }}
+                        viewport={{ once: true, amount: 0.1 }}
                         className="inline-flex items-center space-x-3 px-6 py-3 border border-champagne/20 rounded-none mb-10"
                     >
                         <Lock className="h-4 w-4 text-champagne" />
@@ -74,10 +75,10 @@ export default function CTASection() {
 
                     {/* The 1% Rule Notice */}
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        viewport={{ once: true }}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4 }}
+                        viewport={{ once: true, amount: 0.1 }}
                         className="mt-16 p-8 border border-champagne/10 max-w-3xl mx-auto"
                     >
                         <h3 className="text-lg font-light text-champagne mb-4 tracking-wide">THE 1% MANDATE</h3>

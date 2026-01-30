@@ -80,8 +80,8 @@ export default function RiskFortressEdge() {
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    viewport={{ once: true }}
+                    transition={{ duration: 0.4 }}
+                    viewport={{ once: true, amount: 0.1 }}
                     className="text-center mb-20"
                 >
                     <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-intelligence/10 border border-intelligence/20 mb-6">
@@ -104,10 +104,10 @@ export default function RiskFortressEdge() {
                     {advantages.map((advantage, index) => (
                         <motion.div
                             key={advantage.title}
-                            initial={{ opacity: 0, y: 50 }}
+                            initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
-                            viewport={{ once: true }}
+                            transition={{ duration: 0.4, delay: index * 0.05 }}
+                            viewport={{ once: true, amount: 0.1 }}
                             className="relative group"
                         >
                             <div className={`p-8 rounded-2xl bg-gradient-to-br ${advantage.color}/10 border ${advantage.color.replace('from-', 'border-').replace(' to-', '/30')} h-full`}>
@@ -128,10 +128,10 @@ export default function RiskFortressEdge() {
 
                 {/* Comparison Table */}
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                    viewport={{ once: true }}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    viewport={{ once: true, amount: 0.1 }}
                     className="mb-20"
                 >
                     <div className="text-center mb-12">
@@ -187,10 +187,10 @@ export default function RiskFortressEdge() {
 
                 {/* Zero Compromise Section */}
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                    viewport={{ once: true }}
+                    transition={{ duration: 0.4 }}
+                    viewport={{ once: true, amount: 0.1 }}
                     className="max-w-4xl mx-auto"
                 >
                     <div className="p-8 rounded-2xl bg-gradient-to-r from-gray-900 to-gray-950 border border-gray-800">
