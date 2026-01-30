@@ -84,6 +84,34 @@
     }
 }
 
+/* Smoke Wave Animations */
+@keyframes wave-slow {
+    0% { background-position: 1200px 0; }
+    100% { background-position: 0 0; }
+}
+
+@keyframes wave-medium {
+    0% { background-position: 1200px 0; }
+    100% { background-position: 0 0; }
+}
+
+@keyframes wave-fast {
+    0% { background-position: 1200px 0; }
+    100% { background-position: 0 0; }
+}
+
+.animate-wave-slow {
+    animation: wave-slow 120s linear infinite;
+}
+
+.animate-wave-medium {
+    animation: wave-medium 90s linear infinite;
+}
+
+.animate-wave-fast {
+    animation: wave-fast 60s linear infinite;
+}
+
 /* Animation Classes */
 .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;

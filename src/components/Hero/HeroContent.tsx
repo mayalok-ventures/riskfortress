@@ -20,6 +20,23 @@ export default function Hero() {
                 <div className="absolute bottom-1/4 left-0 w-px h-64 bg-gradient-to-b from-transparent via-champagne/20 to-transparent" />
             </div>
 
+            {/* Animated Smoke Waves */}
+            <div className="absolute inset-0 z-10 opacity-20 pointer-events-none">
+                <div 
+                    className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTIwMCA4MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTIwMCwwTDAsODAwSDEyMDBWMFoiIGZpbGw9IiNENEFGMzciIG9wYWNpdHk9Ii4wOCIvPjxwYXRoIGQ9Ik0wLDBMMTIwMCw4MDBIMFYwWiIgZmlsbD0iI0Q0QUYzNyIgb3BhY2l0eT0iLjA1Ii8+PC9nPjwvc3ZnPg==')] bg-repeat-x bg-[length:1200px_800px] animate-wave-slow"
+                />
+                <div 
+                    className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTIwMCA2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTIwMCwwTDAuMTk0LDYwMC4xOTRIMTIwMFYwWiIgZmlsbD0iI0Q0QUYzNyIgb3BhY2l0eT0iLjEiLz48cGF0aCBkPSJNMCwwTDExOTkuOTU2LDYwMEgwVjBaIiBmaWxsPSIjRDRBRjM3IiBvcGFjaXR5PSIuMDMiLz48L2c+PC9zdmc+')] bg-repeat-x bg-[length:1200px_600px] animate-wave-medium"
+                />
+                <div 
+                    className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTIwMCA0MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTIwMCwwTDMxMy4xNjYsNDAwSDEyMDBWMFoiIGZpbGw9IiNENEFGMzciIG9wYWNpdHk9Ii4xMiIvPjxwYXRoIGQ9Ik0wLDBMMTIwMCwzOTkuOTg1SDBWMFoiIGZpbGw9IiNENEFGMzciIG9wYWNpdHk9Ii4wNiIvPjwvZz48L3N2Zz4=')] bg-repeat-x bg-[length:1200px_400px] animate-wave-fast"
+                />
+            </div>
+
+            {/* Gradient overlays for depth */}
+            <div className="absolute inset-0 z-15 bg-gradient-to-r from-black/40 via-transparent to-black/40 pointer-events-none" />
+            <div className="absolute inset-0 z-15 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+
             <div className="container relative z-20 mx-auto px-6 py-32">
                 <div className="max-w-5xl mx-auto text-center">
                     {/* Strategic Foresight Badge */}
