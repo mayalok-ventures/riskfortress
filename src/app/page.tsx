@@ -1,13 +1,9 @@
 import { Metadata } from 'next'
 
-import CTASection from '@/components/CTA/CTASection'
-import RiskFortressEdge from '@/components/Edge/RiskFortressEdge'
 import Hero from '@/components/Hero/HeroContent'
 import IntelligenceMetrics from '@/components/Metrics/IntelligenceMetrics'
-import RadarScroll from '@/components/Radar/RadarScroll'
-import RealityCheck from '@/components/RealityCheck/RealityCheck'
 import SectorFocus from '@/components/Sector/SectorFocus'
-import Testimonials from '@/components/Testimonials/Testimonials'
+import HomeClient from './HomeClient'
 
 
 export const metadata: Metadata = {
@@ -44,11 +40,8 @@ export default function Home() {
         <>
             <Hero />
             <IntelligenceMetrics />
-            <RadarScroll />
             <SectorFocus />
-            <RiskFortressEdge />
-            <Testimonials />
-            <CTASection />
+            <HomeClient />
 
             {/* Structured Data for SEO */}
             <script

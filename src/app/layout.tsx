@@ -26,14 +26,14 @@ const playfair = Playfair_Display({
     subsets: ['latin'],
     variable: '--font-playfair',
     display: 'swap',
-    preload: true,
+    preload: false,
 })
 
 const jetbrainsMono = JetBrains_Mono({
     subsets: ['latin'],
     variable: '--font-mono',
     display: 'swap',
-    preload: true,
+    preload: false,
 })
 
 export const metadata: Metadata = {
@@ -171,15 +171,26 @@ export default function RootLayout({
     return (
         <html lang="en" className={`${inter.variable} ${playfair.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
             <head>
+                {/* DNS Prefetch and Preconnect for external resources */}
+                <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+                <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+                <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+                <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
+                <link rel="dns-prefetch" href="https://formspree.io" />
+                
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+                <link rel="preconnect" href="https://www.googletagmanager.com" />
+                
                 <link rel="manifest" href="/manifest.json" />
                 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
                 
-                {/* Google Analytics */}
+                {/* Google Analytics - lazyOnload for better performance */}
                 <Script
                     src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-                    strategy="afterInteractive"
+                    strategy="lazyOnload"
                 />
-                <Script id="google-analytics" strategy="afterInteractive">
+                <Script id="google-analytics" strategy="lazyOnload">
                     {`
                         window.dataLayer = window.dataLayer || [];
                         function gtag(){dataLayer.push(arguments);}

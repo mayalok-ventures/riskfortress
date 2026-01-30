@@ -28,9 +28,21 @@ const nextConfig = {
     },
     experimental: {
         optimizeCss: true,
-        optimizePackageImports: ['three', 'framer-motion', 'lucide-react', 'recharts'],
+        optimizePackageImports: [
+            'three',
+            'framer-motion',
+            'lucide-react',
+            'recharts',
+            '@vercel/analytics',
+            '@vercel/speed-insights',
+            'sonner',
+            'react-icons',
+            'date-fns',
+            'lodash',
+            'clsx',
+            'tailwind-merge',
+        ],
     },
-    // Add turbopack config to silence the warning
     turbopack: {
         rules: {
             '*.svg': {
@@ -38,18 +50,44 @@ const nextConfig = {
                 as: '*.js',
             },
         },
+        resolveAlias: {
+            '@': './src',
+        },
     },
-    // Keep webpack config for production builds
-    webpack: (config) => {
+    webpack: (config, { isServer }) => {
         config.module.rules.push({
             test: /\.svg$/,
             use: ['@svgr/webpack'],
         });
+        
+        if (!isServer) {
+            config.optimization.splitChunks = {
+                ...config.optimization.splitChunks,
+                cacheGroups: {
+                    ...config.optimization.splitChunks?.cacheGroups,
+                    framework: {
+                        chunks: 'all',
+                        name: 'framework',
+                        test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+                        priority: 40,
+                        enforce: true,
+                    },
+                    lib: {
+                        test: /[\\/]node_modules[\\/](framer-motion|lucide-react)[\\/]/,
+                        name: 'lib',
+                        chunks: 'all',
+                        priority: 30,
+                    },
+                },
+            };
+        }
+        
         return config;
     },
-    // Headers are handled by Cloudflare via public/_headers file
     compress: true,
     productionBrowserSourceMaps: false,
+    poweredByHeader: false,
+    generateEtags: true,
 };
 
 module.exports = nextConfig;
