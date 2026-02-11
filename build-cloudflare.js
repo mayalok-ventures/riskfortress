@@ -11,6 +11,11 @@ try {
 } catch (e) {
   // Directory might not exist, continue
 }
+try {
+  execSync('rmdir /s /q out', { stdio: 'inherit' })
+} catch (e) {
+  // Directory might not exist, continue
+}
 
 // Set environment for Cloudflare
 process.env.NEXT_PUBLIC_APP_ENV = 'production'
@@ -20,17 +25,19 @@ process.env.NEXT_PUBLIC_APP_URL = 'https://riskfortress.in'
 console.log('📦 Building Next.js application...')
 execSync('next build', { stdio: 'inherit' })
 
-// Create Cloudflare-specific files
+// Create Cloudflare-specific files in `out/` (static export output)
+const outDir = 'out'
 console.log('⚙️  Creating Cloudflare configuration...')
 
 // Create _routes.json for Cloudflare Pages
+// `include` tells Cloudflare which routes should invoke Pages Functions
+// `exclude` tells Cloudflare which routes to serve as static assets
 const routesConfig = {
   version: 1,
-  include: ['/*'],
+  include: ['/api/*'],
   exclude: [
     '/_next/*',
     '/static/*',
-    '/api/*',
     '/favicon.ico',
     '/robots.txt',
     '/sitemap.xml'
@@ -38,7 +45,7 @@ const routesConfig = {
 }
 
 fs.writeFileSync(
-  path.join('.next', '_routes.json'),
+  path.join(outDir, '_routes.json'),
   JSON.stringify(routesConfig, null, 2)
 )
 
@@ -63,7 +70,7 @@ const headersConfig = `
 `
 
 fs.writeFileSync(
-  path.join('.next', '_headers'),
+  path.join(outDir, '_headers'),
   headersConfig.trim()
 )
 
@@ -74,10 +81,10 @@ const redirectsConfig = `
 `
 
 fs.writeFileSync(
-  path.join('.next', '_redirects'),
+  path.join(outDir, '_redirects'),
   redirectsConfig.trim()
 )
 
 console.log('✅ Cloudflare build complete!')
-console.log('📁 Build output: .next/')
-console.log('🚀 Deploy with: wrangler pages deploy .next --project-name=riskfortress')
+console.log('📁 Build output: out/')
+console.log('🚀 Deploy with: wrangler pages deploy out --project-name=riskfortress')

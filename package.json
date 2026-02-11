@@ -19,8 +19,8 @@
         "generate-sitemap": "tsx src/scripts/generate-sitemap.ts",
         "generate-og": "tsx src/scripts/generate-og.ts",
         "build:cloudflare": "node build-cloudflare.js",
-        "deploy:cloudflare": "npm run build:cloudflare && wrangler pages deploy .next --project-name=riskfortress",
-        "deploy:staging": "NEXT_PUBLIC_APP_URL=https://staging.riskfortress.in npm run build:cloudflare && wrangler pages deploy .next --project-name=riskfortress-staging"
+        "deploy:cloudflare": "npm run build:cloudflare && wrangler pages deploy out --project-name=riskfortress",
+        "deploy:staging": "NEXT_PUBLIC_APP_URL=https://staging.riskfortress.in npm run build:cloudflare && wrangler pages deploy out --project-name=riskfortress-staging"
     },
     "dependencies": {
         "@hookform/resolvers": "^3.3.4",
