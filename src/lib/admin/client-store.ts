@@ -221,17 +221,6 @@ export async function verifyPasswordAsync(inputPassword: string): Promise<{ succ
 
         const token = crypto.randomUUID()
         const expiresAt = Date.now() + 10 * 60 * 60 * 1000
-
-        try {
-            await setDoc(doc(db, 'sessions', token), {
-                token,
-                createdAt: Date.now(),
-                expiresAt
-            })
-        } catch (sessionError) {
-            console.warn('Firestore session write failed, using local session:', sessionError)
-        }
-
         createSessionWithToken(token, expiresAt)
         return { success: true }
     } catch (error) {
