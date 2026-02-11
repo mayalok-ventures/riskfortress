@@ -212,26 +212,46 @@ export async function verifyPasswordAsync(
     inputPassword: string
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        const configDoc = await getDoc(doc(db, 'secrets', 'admin_config'))
-        if (!configDoc.exists()) {
-            return { success: false, error: 'Admin configuration not found' }
+        const inputHash = await hashPassword(inputPassword)
+        let storedHash: string | undefined
+
+        const envHash = process.env.NEXT_PUBLIC_ADMIN_PASSWORD_HASH
+        if (envHash) {
+            storedHash = envHash
         }
 
-        const { ADMIN_PASSWORD_HASH } = configDoc.data() as { ADMIN_PASSWORD_HASH: string }
-        const inputHash = await hashPassword(inputPassword)
+        if (!storedHash) {
+            try {
+                const configDoc = await getDoc(doc(db, 'secrets', 'admin_config'))
+                if (configDoc.exists()) {
+                    const data = configDoc.data() as { ADMIN_PASSWORD_HASH?: string }
+                    storedHash = data.ADMIN_PASSWORD_HASH
+                }
+            } catch (firestoreError) {
+                console.warn('Firestore secrets read failed:', firestoreError)
+            }
+        }
 
-        if (inputHash !== ADMIN_PASSWORD_HASH) {
+        if (!storedHash) {
+            return { success: false, error: 'Admin password not configured. Set NEXT_PUBLIC_ADMIN_PASSWORD_HASH in .env.local' }
+        }
+
+        if (inputHash !== storedHash) {
             return { success: false, error: 'Invalid password' }
         }
 
         const token = crypto.randomUUID()
         const expiresAt = Date.now() + 10 * 60 * 60 * 1000
 
-        await setDoc(doc(db, 'secrets', `session:${token}`), {
-            token,
-            createdAt: Date.now(),
-            expiresAt,
-        })
+        try {
+            await setDoc(doc(db, 'secrets', `session:${token}`), {
+                token,
+                createdAt: Date.now(),
+                expiresAt,
+            })
+        } catch (sessionError) {
+            console.warn('Firestore session write failed, using local session:', sessionError)
+        }
 
         createSessionWithToken(token, expiresAt)
         return { success: true }

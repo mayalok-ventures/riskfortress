@@ -212,19 +212,29 @@ export function verifyOTP(inputOtp: string): { success: boolean; error?: string 
 
 export async function verifyPasswordAsync(inputPassword: string): Promise<{ success: boolean; error?: string }> {
     try {
-        const configSnap = await getDoc(doc(db, 'secrets', 'admin_config'))
-        if (!configSnap.exists()) {
-            return { success: false, error: 'Admin config not found' }
-        }
+        const inputHash = await hashPassword(inputPassword)
+        let storedHash: string | undefined
 
-        const config = configSnap.data()
-        const storedHash = config.ADMIN_PASSWORD_HASH as string
+        const envHash = process.env.NEXT_PUBLIC_ADMIN_PASSWORD_HASH
+        if (envHash) {
+            storedHash = envHash
+        }
 
         if (!storedHash) {
-            return { success: false, error: 'Password not configured' }
+            try {
+                const configSnap = await getDoc(doc(db, 'secrets', 'admin_config'))
+                if (configSnap.exists()) {
+                    const config = configSnap.data()
+                    storedHash = config.ADMIN_PASSWORD_HASH as string
+                }
+            } catch (firestoreError) {
+                console.warn('Firestore secrets read failed:', firestoreError)
+            }
         }
 
-        const inputHash = await hashPassword(inputPassword)
+        if (!storedHash) {
+            return { success: false, error: 'Admin password not configured. Set NEXT_PUBLIC_ADMIN_PASSWORD_HASH in .env.local' }
+        }
 
         if (inputHash !== storedHash) {
             return { success: false, error: 'Invalid password' }
@@ -233,11 +243,15 @@ export async function verifyPasswordAsync(inputPassword: string): Promise<{ succ
         const token = crypto.randomUUID()
         const expiresAt = Date.now() + 10 * 60 * 60 * 1000
 
-        await setDoc(doc(db, 'sessions', token), {
-            token,
-            createdAt: Date.now(),
-            expiresAt
-        })
+        try {
+            await setDoc(doc(db, 'sessions', token), {
+                token,
+                createdAt: Date.now(),
+                expiresAt
+            })
+        } catch (sessionError) {
+            console.warn('Firestore session write failed, using local session:', sessionError)
+        }
 
         createSessionWithToken(token, expiresAt)
         return { success: true }
