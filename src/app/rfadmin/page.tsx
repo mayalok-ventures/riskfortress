@@ -17,7 +17,6 @@ import AdminDashboard from '@/components/AdminDashboard'
 
 import {
     type ContentItem,
-    getAllContent,
     createContent,
     updateContent,
     deleteContent,
@@ -26,6 +25,8 @@ import {
     validateSession,
     clearSession
 } from '@/lib/admin/api-store'
+
+import { getAllContent } from '@/lib/admin/client-store'
 
 type AuthStep = 'access' | 'password' | 'authenticated'
 type AdminView = 'dashboard' | 'content'
