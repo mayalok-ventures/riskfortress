@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { useEffect, useState } from 'react'
 
 export default function RedactionEffect() {
@@ -18,7 +18,7 @@ export default function RedactionEffect() {
     return (
         <div className="absolute inset-0 bg-gray-950/90 backdrop-blur-sm z-10 rounded-2xl overflow-hidden">
             {/* Animated scanning line */}
-            <motion.div
+            <MotionDiv
                 className="absolute left-0 right-0 h-0.5 bg-red-500/50"
                 animate={{ top: ['0%', '100%'] }}
                 transition={{
@@ -31,7 +31,7 @@ export default function RedactionEffect() {
 
             {/* Random redaction lines */}
             {lines.map((line, index) => (
-                <motion.div
+                <MotionDiv
                     key={index}
                     className="absolute h-3 bg-gray-900 rounded-sm"
                     style={{
@@ -67,7 +67,7 @@ export default function RedactionEffect() {
             </div>
 
             {/* Glitch effect */}
-            <motion.div
+            <MotionDiv
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/5 to-transparent"
                 animate={{
                     x: ['-100%', '100%'],

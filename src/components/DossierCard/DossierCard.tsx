@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { Lock, Eye, FileText, AlertTriangle, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 
@@ -42,7 +42,7 @@ export default function DossierCard({ dossier }: DossierCardProps) {
     }
 
     return (
-        <motion.div
+        <MotionDiv
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.02 }}
@@ -148,6 +148,6 @@ export default function DossierCard({ dossier }: DossierCardProps) {
             {isHovered && (
                 <div className="absolute inset-0 border-2 border-intelligence/20 rounded-2xl pointer-events-none" />
             )}
-        </motion.div>
+        </MotionDiv>
     )
 }

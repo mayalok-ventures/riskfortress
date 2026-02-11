@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { Quote, Building, Users, Shield } from 'lucide-react'
 
 const testimonials = [
@@ -39,7 +39,7 @@ export default function Testimonials() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {testimonials.map((testimonial, index) => (
-                        <motion.div
+                        <MotionDiv
                             key={testimonial.author}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -58,7 +58,7 @@ export default function Testimonials() {
                                     <div className="text-sm text-gray-400">{testimonial.company}</div>
                                 </div>
                             </div>
-                        </motion.div>
+                        </MotionDiv>
                     ))}
                 </div>
             </div>

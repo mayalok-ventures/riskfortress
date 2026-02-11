@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { Check, X, BarChart3, Cpu, Users, Shield, Lock, Zap, Globe } from 'lucide-react'
 
 const advantages = [
@@ -77,7 +77,7 @@ export default function RiskFortressEdge() {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-intelligence to-transparent animate-shimmer" />
 
             <div className="container relative z-10 mx-auto px-6">
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -97,12 +97,12 @@ export default function RiskFortressEdge() {
                     <p className="text-xl text-gray-400 max-w-3xl mx-auto">
                         Why Fortune 500 companies choose us over traditional security agencies for their most critical assets.
                     </p>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Advantages Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
                     {advantages.map((advantage, index) => (
-                        <motion.div
+                        <MotionDiv
                             key={advantage.title}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -122,12 +122,12 @@ export default function RiskFortressEdge() {
                                     </div>
                                 </div>
                             </div>
-                        </motion.div>
+                        </MotionDiv>
                     ))}
                 </div>
 
                 {/* Comparison Table */}
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -183,10 +183,10 @@ export default function RiskFortressEdge() {
                             </tbody>
                         </table>
                     </div>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Zero Compromise Section */}
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -239,7 +239,7 @@ export default function RiskFortressEdge() {
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                </MotionDiv>
             </div>
         </section>
     )

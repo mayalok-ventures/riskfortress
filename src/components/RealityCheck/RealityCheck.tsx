@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { X, Check, AlertTriangle, Shield, Lock, Users, Building } from 'lucide-react'
 
 const realities = [
@@ -66,7 +66,7 @@ export default function RealityCheck() {
             </div>
 
             <div className="container relative z-10 mx-auto px-6">
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -86,10 +86,10 @@ export default function RealityCheck() {
                     <p className="text-xl text-gray-400 max-w-3xl mx-auto">
                         You're attracting ₹15,000/month security guard inquiries. We help you target Crore+ budget clients instead.
                     </p>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Negative Keywords Grid */}
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
@@ -114,12 +114,12 @@ export default function RealityCheck() {
                     <p className="text-center text-gray-500 mt-6 text-sm">
                         ❌ These keywords attract low-budget clients. We help you avoid them completely.
                     </p>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Reality vs Myth */}
                 <div className="max-w-4xl mx-auto">
                     {realities.map((item, index) => (
-                        <motion.div
+                        <MotionDiv
                             key={item.myth}
                             initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -164,12 +164,12 @@ export default function RealityCheck() {
                                     </div>
                                 </div>
                             </div>
-                        </motion.div>
+                        </MotionDiv>
                     ))}
                 </div>
 
                 {/* Target Client Profile */}
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
@@ -217,7 +217,7 @@ export default function RealityCheck() {
                             Fortune 500, Industrial Conglomerates, Family Offices, HNIs
                         </p>
                     </div>
-                </motion.div>
+                </MotionDiv>
             </div>
         </section>
     )

@@ -17,16 +17,18 @@ import AdminDashboard from '@/components/AdminDashboard'
 
 import {
     type ContentItem,
+    getAllContent,
     createContent,
     updateContent,
     deleteContent,
+} from '@/lib/admin/client-store'
+
+import {
     verifyPasswordAsync,
     createSession,
     validateSession,
     clearSession
 } from '@/lib/admin/api-store'
-
-import { getAllContent } from '@/lib/admin/client-store'
 
 type AuthStep = 'access' | 'password' | 'authenticated'
 type AdminView = 'dashboard' | 'content'
@@ -105,17 +107,12 @@ export default function AdminPage() {
         setError('')
         setUploadProgress(null)
 
-        // Progress callback for chunked uploads
-        const onProgress = (progress: UploadProgress) => {
-            setUploadProgress(progress)
-        }
-
         try {
             let result
             if (item.id) {
-                result = await updateContent(item.id, item, onProgress)
+                result = await updateContent(item.id, item)
             } else {
-                result = await createContent(item as Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>, onProgress)
+                result = await createContent(item as Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>)
             }
 
             if (!result) {
@@ -130,15 +127,7 @@ export default function AdminPage() {
         } catch (err) {
             console.error('Save error:', err)
             const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-            
-            // Provide helpful error messages for size-related issues
-            if (errorMessage.includes('too large') || errorMessage.includes('413')) {
-                setError('Content is very large. If saving fails, try reducing embedded images or splitting into smaller sections.')
-            } else if (errorMessage.includes('chunk') || errorMessage.includes('upload')) {
-                setError('Upload interrupted. Please try saving again. Your content will resume from where it stopped.')
-            } else {
-                setError('Failed to save content: ' + errorMessage)
-            }
+            setError('Failed to save content: ' + errorMessage)
         } finally {
             setLoading(false)
         }

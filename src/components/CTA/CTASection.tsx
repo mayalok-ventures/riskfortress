@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { ArrowRight, Eye, Lock } from 'lucide-react'
 import Link from 'next/link'
 
@@ -19,7 +19,7 @@ export default function CTASection() {
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-champagne/3 rounded-full blur-3xl" />
 
             <div className="container relative z-10 mx-auto px-6">
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -27,7 +27,7 @@ export default function CTASection() {
                     className="max-w-4xl mx-auto text-center"
                 >
                     {/* Badge */}
-                    <motion.div
+                    <MotionDiv
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
@@ -38,7 +38,7 @@ export default function CTASection() {
                         <span className="text-xs tracking-[0.2em] uppercase text-champagne font-light">
                             ₹100Cr+ Assets Only
                         </span>
-                    </motion.div>
+                    </MotionDiv>
 
                     {/* Headline */}
                     <h2 className="text-4xl md:text-5xl font-light mb-8">
@@ -74,7 +74,7 @@ export default function CTASection() {
                     </div>
 
                     {/* The 1% Rule Notice */}
-                    <motion.div
+                    <MotionDiv
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4 }}
@@ -101,8 +101,8 @@ export default function CTASection() {
                                 <p className="text-xs text-gray-500 uppercase tracking-wider mt-1">Target Clients</p>
                             </div>
                         </div>
-                    </motion.div>
-                </motion.div>
+                    </MotionDiv>
+                </MotionDiv>
             </div>
         </section>
     )

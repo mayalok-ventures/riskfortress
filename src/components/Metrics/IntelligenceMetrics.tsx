@@ -1,6 +1,7 @@
 'use client'
 
-import { motion, useInView } from 'framer-motion'
+import { useInView } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { Shield, Users, Globe, Target } from 'lucide-react'
 import { useRef } from 'react'
 
@@ -22,7 +23,7 @@ export default function IntelligenceMetrics() {
             <div className="container relative z-10 mx-auto px-6">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                     {metrics.map((metric, index) => (
-                        <motion.div
+                        <MotionDiv
                             key={metric.label}
                             initial={{ opacity: 0, y: 20 }}
                             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -36,7 +37,7 @@ export default function IntelligenceMetrics() {
                                 {isInView ? metric.value : 0}{metric.suffix}
                             </div>
                             <div className="text-gray-400">{metric.label}</div>
-                        </motion.div>
+                        </MotionDiv>
                     ))}
                 </div>
             </div>

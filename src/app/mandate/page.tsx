@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { ArrowRight, Eye, Shield, Target, TrendingDown, CheckCircle } from 'lucide-react'
 import Head from 'next/head'
 import Link from 'next/link'
@@ -58,7 +58,7 @@ export default function MandatePage() {
 
             <div className="container relative z-10 mx-auto px-6">
                 {/* Header */}
-                <motion.div 
+                <MotionDiv 
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -81,12 +81,12 @@ export default function MandatePage() {
                         Our mandate ensures we only engage where stakes are existential 
                         and our success is directly tied to your protection.
                     </p>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Mandate Principles */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
                     {mandatePrinciples.map((principle, index) => (
-                        <motion.div
+                        <MotionDiv
                             key={principle.title}
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -98,12 +98,12 @@ export default function MandatePage() {
                             </div>
                             <h3 className="text-xl font-light text-white mb-4">{principle.title}</h3>
                             <p className="text-gray-400 text-sm leading-relaxed">{principle.description}</p>
-                        </motion.div>
+                        </MotionDiv>
                     ))}
                 </div>
 
                 {/* Why This Model Section */}
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -129,10 +129,10 @@ export default function MandatePage() {
                             ))}
                         </div>
                     </div>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Case Scenarios */}
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -150,7 +150,7 @@ export default function MandatePage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {caseScenarios.map((scenario, index) => (
-                            <motion.div
+                            <MotionDiv
                                 key={scenario.title}
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -167,13 +167,13 @@ export default function MandatePage() {
                                     <p className="text-xs text-gray-500 uppercase tracking-wider">Potential Prevention</p>
                                     <p className="text-lg font-light text-champagne mt-1">{scenario.prevented}</p>
                                 </div>
-                            </motion.div>
+                            </MotionDiv>
                         ))}
                     </div>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Final CTA */}
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -202,7 +202,7 @@ export default function MandatePage() {
                         RiskFortress is the specialized Risk Intelligence arm of Mayalok Ventures, 
                         dedicated to preserving wealth through advanced predictive forensics.
                     </p>
-                </motion.div>
+                </MotionDiv>
             </div>
         </div>
     )

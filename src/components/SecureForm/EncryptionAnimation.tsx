@@ -1,5 +1,5 @@
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { Lock, Shield, Key } from 'lucide-react'
 
 export default function EncryptionAnimation() {
@@ -8,7 +8,7 @@ export default function EncryptionAnimation() {
       <div className="text-center">
         {/* Animated Icons */}
         <div className="relative mb-8">
-          <motion.div
+          <MotionDiv
             animate={{
               rotate: 360,
               scale: [1, 1.1, 1],
@@ -28,10 +28,10 @@ export default function EncryptionAnimation() {
             className="mx-auto mb-6"
           >
             <Lock className="h-20 w-20 text-intelligence" />
-          </motion.div>
+          </MotionDiv>
 
           {/* Orbiting Keys */}
-          <motion.div
+          <MotionDiv
             animate={{
               rotate: 360,
             }}
@@ -49,11 +49,11 @@ export default function EncryptionAnimation() {
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
               <Shield className="h-6 w-6 text-purple-400" />
             </div>
-          </motion.div>
+          </MotionDiv>
         </div>
 
         {/* Encryption Text */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -65,12 +65,12 @@ export default function EncryptionAnimation() {
             Your information is being encrypted with AES-256-GCM military-grade encryption.
             This process ensures complete data confidentiality.
           </p>
-        </motion.div>
+        </MotionDiv>
 
         {/* Loading Dots */}
         <div className="flex justify-center space-x-2">
           {[0, 1, 2].map((i) => (
-            <motion.div
+            <MotionDiv
               key={i}
               className="w-2 h-2 bg-intelligence rounded-full"
               animate={{
@@ -87,7 +87,7 @@ export default function EncryptionAnimation() {
         </div>
 
         {/* Encryption Details */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
@@ -96,7 +96,7 @@ export default function EncryptionAnimation() {
           <div className="text-sm text-intelligence">
             <div className="font-mono">AES-256-GCM • 256-bit Key • Zero-Knowledge</div>
           </div>
-        </motion.div>
+        </MotionDiv>
       </div>
     </div>
   )

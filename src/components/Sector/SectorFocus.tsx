@@ -1,6 +1,8 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
+
+import { MotionDiv } from '@/lib/motion'
 import { Factory, Users, Cpu, ChevronRight, Shield, Lock, Target } from 'lucide-react'
 import { useState } from 'react'
 
@@ -75,7 +77,7 @@ export default function SectorFocus() {
             </div>
 
             <div className="container relative z-10 mx-auto px-6">
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -95,7 +97,7 @@ export default function SectorFocus() {
                     <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light">
                         Three core verticals where predictive forensics prevents catastrophic wealth destruction.
                     </p>
-                </motion.div>
+                </MotionDiv>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
                     {/* Sector Selector */}
@@ -131,7 +133,7 @@ export default function SectorFocus() {
                     {/* Active Sector Details */}
                     <div className="lg:col-span-3">
                         <AnimatePresence mode="wait">
-                            <motion.div
+                            <MotionDiv
                                 key={activeSector.id}
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -208,7 +210,7 @@ export default function SectorFocus() {
                                         </button>
                                     </div>
                                 </div>
-                            </motion.div>
+                            </MotionDiv>
                         </AnimatePresence>
                     </div>
                 </div>

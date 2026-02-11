@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { Lock, Shield, Building, User, Mail, Phone, Globe, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -151,7 +151,7 @@ export default function IntakeForm() {
     // Success State
     if (isSuccess) {
         return (
-            <motion.div
+            <MotionDiv
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="p-8 rounded-2xl glass-morphism border border-green-500/20 text-center"
@@ -183,7 +183,7 @@ export default function IntakeForm() {
                         Submit Another Intake
                     </button>
                 </div>
-            </motion.div>
+            </MotionDiv>
         )
     }
 
@@ -227,7 +227,7 @@ export default function IntakeForm() {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     {/* Step 1: Contact Information */}
                     {step === 1 && (
-                        <motion.div
+                        <MotionDiv
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
@@ -305,12 +305,12 @@ export default function IntakeForm() {
                             >
                                 Continue to Contact Details
                             </button>
-                        </motion.div>
+                        </MotionDiv>
                     )}
 
                     {/* Step 2: Contact Details */}
                     {step === 2 && (
-                        <motion.div
+                        <MotionDiv
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
@@ -416,12 +416,12 @@ export default function IntakeForm() {
                                     Continue to Requirements
                                 </button>
                             </div>
-                        </motion.div>
+                        </MotionDiv>
                     )}
 
                     {/* Step 3: Requirements */}
                     {step === 3 && (
-                        <motion.div
+                        <MotionDiv
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
@@ -506,7 +506,7 @@ export default function IntakeForm() {
                                     )}
                                 </button>
                             </div>
-                        </motion.div>
+                        </MotionDiv>
                     )}
                 </form>
 

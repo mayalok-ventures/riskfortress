@@ -1,6 +1,8 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
+
+import { MotionDiv } from '@/lib/motion'
 import { ChevronDown } from 'lucide-react'
 import { useState, ReactNode } from 'react'
 
@@ -76,7 +78,7 @@ export default function Accordion({
 
                         <AnimatePresence>
                             {isOpen && (
-                                <motion.div
+                                <MotionDiv
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
@@ -86,7 +88,7 @@ export default function Accordion({
                                     <div className="px-6 pb-6 pt-2 border-t border-gray-800">
                                         <div className="text-gray-300">{item.content}</div>
                                     </div>
-                                </motion.div>
+                                </MotionDiv>
                             )}
                         </AnimatePresence>
                     </div>

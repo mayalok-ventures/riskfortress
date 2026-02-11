@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { AlertTriangle, Shield, Users, Building, Cpu, Globe } from 'lucide-react'
 import { useState } from 'react'
 
@@ -100,7 +100,7 @@ export default function RadarScroll() {
                     ))}
 
                     {/* Scanning Line */}
-                    <motion.div
+                    <MotionDiv
                         className="absolute top-0 left-1/2 w-px h-1/2 origin-top"
                         style={{
                             background: 'linear-gradient(to bottom, transparent, #0ea5e9)',
@@ -116,7 +116,7 @@ export default function RadarScroll() {
             </div>
 
             <div className="container relative z-10 mx-auto px-6">
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
@@ -137,12 +137,12 @@ export default function RadarScroll() {
                         Predictive forensics across financial, statutory, and environmental domains.
                         We identify catastrophic risks before they materialize.
                     </p>
-                </motion.div>
+                </MotionDiv>
 
                 {/* Intelligence Verticals Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                     {intelligenceVerticals.map((risk, index) => (
-                        <motion.div
+                        <MotionDiv
                             key={risk.id}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -156,12 +156,12 @@ export default function RadarScroll() {
                                 {...risk}
                                 isActive={activeCard === risk.id}
                             />
-                        </motion.div>
+                        </MotionDiv>
                     ))}
                 </div>
 
                 {/* Legend */}
-                <motion.div
+                <MotionDiv
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -184,7 +184,7 @@ export default function RadarScroll() {
                             </div>
                         ))}
                     </div>
-                </motion.div>
+                </MotionDiv>
             </div>
         </section>
     )

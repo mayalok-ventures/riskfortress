@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { MotionDiv } from '@/lib/motion'
 import { AlertTriangle, Shield, Users, Building, Cpu, Globe, Target } from 'lucide-react'
 import { ReactNode } from 'react'
 
@@ -54,7 +54,7 @@ export default function RadarCard({
     const SectorIcon = sectorIcons[sector as keyof typeof sectorIcons] || AlertTriangle
 
     return (
-        <motion.div
+        <MotionDiv
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={cn(
@@ -140,6 +140,6 @@ export default function RadarCard({
             {isActive && (
                 <div className="absolute inset-0 border-2 border-intelligence/20 rounded-2xl pointer-events-none" />
             )}
-        </motion.div>
+        </MotionDiv>
     )
 }
