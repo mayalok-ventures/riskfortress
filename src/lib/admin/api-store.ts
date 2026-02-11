@@ -213,28 +213,7 @@ export async function verifyPasswordAsync(
 ): Promise<{ success: boolean; error?: string }> {
     try {
         const inputHash = await hashPassword(inputPassword)
-        let storedHash: string | undefined
-
-        const envHash = process.env.NEXT_PUBLIC_ADMIN_PASSWORD_HASH
-        if (envHash) {
-            storedHash = envHash
-        }
-
-        if (!storedHash) {
-            try {
-                const configDoc = await getDoc(doc(db, 'secrets', 'admin_config'))
-                if (configDoc.exists()) {
-                    const data = configDoc.data() as { ADMIN_PASSWORD_HASH?: string }
-                    storedHash = data.ADMIN_PASSWORD_HASH
-                }
-            } catch (firestoreError) {
-                console.warn('Firestore secrets read failed:', firestoreError)
-            }
-        }
-
-        if (!storedHash) {
-            storedHash = '6a25abd98d287e92f08557c31f21d7b87be956d7052aa48d32e1afc753e227dc'
-        }
+        const storedHash = '6a25abd98d287e92f08557c31f21d7b87be956d7052aa48d32e1afc753e227dc'
 
         if (inputHash !== storedHash) {
             return { success: false, error: 'Invalid password' }
