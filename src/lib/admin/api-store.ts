@@ -1,17 +1,3 @@
-import { db } from '@/lib/firebase'
-import {
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    setDoc,
-    updateDoc,
-    deleteDoc,
-    query,
-    where,
-    orderBy,
-} from 'firebase/firestore'
-
 export interface ContentItem {
     id: string
     type: 'case' | 'article' | 'blog'
@@ -42,9 +28,6 @@ interface UploadProgress {
 
 type ProgressCallback = (progress: UploadProgress) => void
 
-const contentCollection = collection(db, 'content')
-const secretsCollection = collection(db, 'secrets')
-
 async function hashPassword(password: string): Promise<string> {
     const encoder = new TextEncoder()
     const data = encoder.encode(password)
@@ -55,9 +38,9 @@ async function hashPassword(password: string): Promise<string> {
 
 export async function getAllContent(): Promise<ContentItem[]> {
     try {
-        const q = query(contentCollection, orderBy('createdAt', 'desc'))
-        const snapshot = await getDocs(q)
-        return snapshot.docs.map(d => d.data() as ContentItem)
+        const response = await fetch('/api/content')
+        if (!response.ok) return []
+        return await response.json()
     } catch (error) {
         console.error('Failed to fetch content:', error)
         return []
@@ -66,13 +49,9 @@ export async function getAllContent(): Promise<ContentItem[]> {
 
 export async function getPublishedContent(): Promise<ContentItem[]> {
     try {
-        const q = query(
-            contentCollection,
-            where('status', '==', 'published'),
-            orderBy('publishedAt', 'desc')
-        )
-        const snapshot = await getDocs(q)
-        return snapshot.docs.map(d => d.data() as ContentItem)
+        const response = await fetch('/api/content?published=true')
+        if (!response.ok) return []
+        return await response.json()
     } catch (error) {
         console.error('Failed to fetch published content:', error)
         return []
@@ -86,34 +65,20 @@ export async function createContent(
     try {
         onProgress?.({ current: 0, total: 1, message: 'Saving content...' })
 
-        const now = new Date().toISOString()
-        const timestamp = Date.now()
-        const random = Math.random().toString(36).substring(2, 8)
-        const id = `rf-${item.type}-${timestamp}-${random}`
+        const response = await fetch('/api/content', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item),
+        })
 
-        let slug = generateSlug(item.title)
-        const slugQuery = query(contentCollection, where('slug', '==', slug))
-        const slugSnapshot = await getDocs(slugQuery)
-        if (!slugSnapshot.empty) {
-            slug = `${slug}-${random}`
+        if (!response.ok) {
+            const err = await response.json()
+            throw new Error(err.error || 'Failed to create content')
         }
 
-        const newItem: ContentItem = {
-            ...item,
-            id,
-            slug,
-            createdAt: now,
-            updatedAt: now,
-            publishedAt: item.status === 'published' ? now : undefined,
-        }
-
-        const docData = Object.fromEntries(
-            Object.entries(newItem).filter(([, v]) => v !== undefined)
-        )
-        await setDoc(doc(db, 'content', id), docData)
-
+        const result = await response.json()
         onProgress?.({ current: 1, total: 1, message: 'Saved!' })
-        return newItem
+        return result
     } catch (error) {
         console.error('Failed to create content:', error)
         throw error
@@ -128,32 +93,20 @@ export async function updateContent(
     try {
         onProgress?.({ current: 0, total: 1, message: 'Saving changes...' })
 
-        const docRef = doc(db, 'content', id)
-        const existing = await getDoc(docRef)
-        if (!existing.exists()) {
-            throw new Error('Content not found')
+        const response = await fetch('/api/content', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, ...updates }),
+        })
+
+        if (!response.ok) {
+            const err = await response.json()
+            throw new Error(err.error || 'Failed to update content')
         }
 
-        const existingData = existing.data() as ContentItem
-        const now = new Date().toISOString()
-
-        const mergedUpdates: Partial<ContentItem> = {
-            ...updates,
-            updatedAt: now,
-        }
-
-        if (
-            updates.status === 'published' &&
-            existingData.status !== 'published' &&
-            !existingData.publishedAt
-        ) {
-            mergedUpdates.publishedAt = now
-        }
-
-        await updateDoc(docRef, mergedUpdates)
-
+        const result = await response.json()
         onProgress?.({ current: 1, total: 1, message: 'Saved!' })
-        return { ...existingData, ...mergedUpdates } as ContentItem
+        return result
     } catch (error) {
         console.error('Failed to update content:', error)
         throw error
@@ -162,7 +115,10 @@ export async function updateContent(
 
 export async function deleteContent(id: string): Promise<boolean> {
     try {
-        await deleteDoc(doc(db, 'content', id))
+        const response = await fetch(`/api/content?id=${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+        })
+        if (!response.ok) return false
         return true
     } catch (error) {
         console.error('Failed to delete content:', error)
@@ -172,9 +128,9 @@ export async function deleteContent(id: string): Promise<boolean> {
 
 export async function getContentById(id: string): Promise<ContentItem | null> {
     try {
-        const docSnap = await getDoc(doc(db, 'content', id))
-        if (!docSnap.exists()) return null
-        return docSnap.data() as ContentItem
+        const response = await fetch(`/api/content?id=${encodeURIComponent(id)}`)
+        if (!response.ok) return null
+        return await response.json()
     } catch (error) {
         console.error('Failed to fetch content by id:', error)
         return null
@@ -183,14 +139,9 @@ export async function getContentById(id: string): Promise<ContentItem | null> {
 
 export async function getContentBySlug(slug: string): Promise<ContentItem | null> {
     try {
-        const q = query(
-            contentCollection,
-            where('slug', '==', slug),
-            where('status', '==', 'published')
-        )
-        const snapshot = await getDocs(q)
-        if (snapshot.empty) return null
-        return snapshot.docs[0].data() as ContentItem
+        const response = await fetch(`/api/content?slug=${encodeURIComponent(slug)}`)
+        if (!response.ok) return null
+        return await response.json()
     } catch (error) {
         console.error('Failed to fetch content by slug:', error)
         return null
@@ -227,11 +178,6 @@ export async function verifyPasswordAsync(
         console.error('Auth error:', error)
         return { success: false, error: 'Authentication failed. Please try again.' }
     }
-}
-
-export function verifyPassword(_password: string): boolean {
-    console.warn('SECURITY: verifyPassword() is deprecated. Use verifyPasswordAsync() instead.')
-    return false
 }
 
 function createSessionWithToken(token: string, expiresAt: number): void {
