@@ -1,6 +1,16 @@
-// API-based content storage
-// Uses Cloudflare KV for content (up to 25MB) + D1 for metadata
-// SECURITY: Authentication handled via /api/auth endpoint with encrypted password hash
+import { db } from '@/lib/firebase'
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    query,
+    where,
+    orderBy,
+} from 'firebase/firestore'
 
 export interface ContentItem {
     id: string
@@ -30,14 +40,24 @@ interface UploadProgress {
     message: string
 }
 
-const API_URL = '/api/content'
-const AUTH_API_URL = '/api/auth'
+type ProgressCallback = (progress: UploadProgress) => void
+
+const contentCollection = collection(db, 'content')
+const secretsCollection = collection(db, 'secrets')
+
+async function hashPassword(password: string): Promise<string> {
+    const encoder = new TextEncoder()
+    const data = encoder.encode(password)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
 
 export async function getAllContent(): Promise<ContentItem[]> {
     try {
-        const response = await fetch(API_URL)
-        if (!response.ok) throw new Error('Failed to fetch')
-        return await response.json()
+        const q = query(contentCollection, orderBy('createdAt', 'desc'))
+        const snapshot = await getDocs(q)
+        return snapshot.docs.map(d => d.data() as ContentItem)
     } catch (error) {
         console.error('Failed to fetch content:', error)
         return []
@@ -46,20 +66,18 @@ export async function getAllContent(): Promise<ContentItem[]> {
 
 export async function getPublishedContent(): Promise<ContentItem[]> {
     try {
-        const response = await fetch(`${API_URL}?published=true`)
-        if (!response.ok) throw new Error('Failed to fetch')
-        const items: ContentItem[] = await response.json()
-        return items.sort((a, b) =>
-            new Date(b.publishedAt || b.createdAt).getTime() -
-            new Date(a.publishedAt || a.createdAt).getTime()
+        const q = query(
+            contentCollection,
+            where('status', '==', 'published'),
+            orderBy('publishedAt', 'desc')
         )
+        const snapshot = await getDocs(q)
+        return snapshot.docs.map(d => d.data() as ContentItem)
     } catch (error) {
         console.error('Failed to fetch published content:', error)
         return []
     }
 }
-
-type ProgressCallback = (progress: UploadProgress) => void
 
 export async function createContent(
     item: Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>,
@@ -67,20 +85,35 @@ export async function createContent(
 ): Promise<ContentItem | null> {
     try {
         onProgress?.({ current: 0, total: 1, message: 'Saving content...' })
-        
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item),
-        })
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            throw new Error(errorData.details || errorData.error || 'Failed to create')
+
+        const now = new Date().toISOString()
+        const timestamp = Date.now()
+        const random = Math.random().toString(36).substring(2, 8)
+        const id = `rf-${item.type}-${timestamp}-${random}`
+
+        let slug = generateSlug(item.title)
+        const slugQuery = query(contentCollection, where('slug', '==', slug))
+        const slugSnapshot = await getDocs(slugQuery)
+        if (!slugSnapshot.empty) {
+            slug = `${slug}-${random}`
         }
-        
+
+        const newItem: ContentItem = {
+            ...item,
+            id,
+            slug,
+            createdAt: now,
+            updatedAt: now,
+            publishedAt: item.status === 'published' ? now : undefined,
+        }
+
+        const docData = Object.fromEntries(
+            Object.entries(newItem).filter(([, v]) => v !== undefined)
+        )
+        await setDoc(doc(db, 'content', id), docData)
+
         onProgress?.({ current: 1, total: 1, message: 'Saved!' })
-        return await response.json()
+        return newItem
     } catch (error) {
         console.error('Failed to create content:', error)
         throw error
@@ -88,26 +121,39 @@ export async function createContent(
 }
 
 export async function updateContent(
-    id: string, 
+    id: string,
     updates: Partial<ContentItem>,
     onProgress?: ProgressCallback
 ): Promise<ContentItem | null> {
     try {
         onProgress?.({ current: 0, total: 1, message: 'Saving changes...' })
-        
-        const response = await fetch(API_URL, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, ...updates }),
-        })
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            throw new Error(errorData.details || errorData.error || 'Failed to update')
+
+        const docRef = doc(db, 'content', id)
+        const existing = await getDoc(docRef)
+        if (!existing.exists()) {
+            throw new Error('Content not found')
         }
-        
+
+        const existingData = existing.data() as ContentItem
+        const now = new Date().toISOString()
+
+        const mergedUpdates: Partial<ContentItem> = {
+            ...updates,
+            updatedAt: now,
+        }
+
+        if (
+            updates.status === 'published' &&
+            existingData.status !== 'published' &&
+            !existingData.publishedAt
+        ) {
+            mergedUpdates.publishedAt = now
+        }
+
+        await updateDoc(docRef, mergedUpdates)
+
         onProgress?.({ current: 1, total: 1, message: 'Saved!' })
-        return await response.json()
+        return { ...existingData, ...mergedUpdates } as ContentItem
     } catch (error) {
         console.error('Failed to update content:', error)
         throw error
@@ -116,10 +162,8 @@ export async function updateContent(
 
 export async function deleteContent(id: string): Promise<boolean> {
     try {
-        const response = await fetch(`${API_URL}?id=${id}`, {
-            method: 'DELETE',
-        })
-        return response.ok
+        await deleteDoc(doc(db, 'content', id))
+        return true
     } catch (error) {
         console.error('Failed to delete content:', error)
         return false
@@ -128,9 +172,9 @@ export async function deleteContent(id: string): Promise<boolean> {
 
 export async function getContentById(id: string): Promise<ContentItem | null> {
     try {
-        const response = await fetch(`${API_URL}?id=${id}`)
-        if (!response.ok) throw new Error('Failed to fetch')
-        return await response.json()
+        const docSnap = await getDoc(doc(db, 'content', id))
+        if (!docSnap.exists()) return null
+        return docSnap.data() as ContentItem
     } catch (error) {
         console.error('Failed to fetch content by id:', error)
         return null
@@ -139,9 +183,14 @@ export async function getContentById(id: string): Promise<ContentItem | null> {
 
 export async function getContentBySlug(slug: string): Promise<ContentItem | null> {
     try {
-        const response = await fetch(`${API_URL}?slug=${slug}`)
-        if (!response.ok) throw new Error('Failed to fetch')
-        return await response.json()
+        const q = query(
+            contentCollection,
+            where('slug', '==', slug),
+            where('status', '==', 'published')
+        )
+        const snapshot = await getDocs(q)
+        if (snapshot.empty) return null
+        return snapshot.docs[0].data() as ContentItem
     } catch (error) {
         console.error('Failed to fetch content by slug:', error)
         return null
@@ -157,39 +206,41 @@ export function generateSlug(title: string): string {
         .trim()
 }
 
-// =============================================================================
-// SECURE AUTHENTICATION
-// Password is stored as encrypted hash in Cloudflare environment variables
-// Never stored in source code
-// =============================================================================
-
 const AUTH_KEY = 'rf-admin-auth'
 
-// Secure async password verification via server-side API
-export async function verifyPasswordAsync(inputPassword: string): Promise<{ success: boolean; error?: string }> {
+export async function verifyPasswordAsync(
+    inputPassword: string
+): Promise<{ success: boolean; error?: string }> {
     try {
-        const response = await fetch(AUTH_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'verify', password: inputPassword })
-        })
-        
-        const data = await response.json()
-        
-        if (data.success && data.token) {
-            createSessionWithToken(data.token, data.expiresAt)
-            return { success: true }
+        const configDoc = await getDoc(doc(db, 'secrets', 'admin_config'))
+        if (!configDoc.exists()) {
+            return { success: false, error: 'Admin configuration not found' }
         }
-        
-        return { success: false, error: data.error || 'Authentication failed' }
+
+        const { ADMIN_PASSWORD_HASH } = configDoc.data() as { ADMIN_PASSWORD_HASH: string }
+        const inputHash = await hashPassword(inputPassword)
+
+        if (inputHash !== ADMIN_PASSWORD_HASH) {
+            return { success: false, error: 'Invalid password' }
+        }
+
+        const token = crypto.randomUUID()
+        const expiresAt = Date.now() + 10 * 60 * 60 * 1000
+
+        await setDoc(doc(db, 'secrets', `session:${token}`), {
+            token,
+            createdAt: Date.now(),
+            expiresAt,
+        })
+
+        createSessionWithToken(token, expiresAt)
+        return { success: true }
     } catch (error) {
-        console.error('Auth API error:', error)
-        return { success: false, error: 'Connection failed. Please try again.' }
+        console.error('Auth error:', error)
+        return { success: false, error: 'Authentication failed. Please try again.' }
     }
 }
 
-// DEPRECATED: Use verifyPasswordAsync instead
-// This function now always returns false for security - forces use of async API
 export function verifyPassword(_password: string): boolean {
     console.warn('SECURITY: verifyPassword() is deprecated. Use verifyPasswordAsync() instead.')
     return false
@@ -201,7 +252,7 @@ function createSessionWithToken(token: string, expiresAt: number): void {
         authenticated: true,
         token,
         createdAt: Date.now(),
-        expiresAt
+        expiresAt,
     }
     sessionStorage.setItem(AUTH_KEY, JSON.stringify(session))
 }
@@ -211,7 +262,7 @@ export function createSession(): void {
     const session = {
         authenticated: true,
         createdAt: Date.now(),
-        expiresAt: Date.now() + 10 * 60 * 60 * 1000
+        expiresAt: Date.now() + 10 * 60 * 60 * 1000,
     }
     sessionStorage.setItem(AUTH_KEY, JSON.stringify(session))
 }

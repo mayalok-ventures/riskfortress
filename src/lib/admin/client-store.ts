@@ -1,7 +1,5 @@
-// Client-side content storage using localStorage
-// This is suitable for static export deployments
-// SECURITY: Authentication is handled via /api/auth endpoint
-// Never store passwords or API keys in source code
+import { db } from '@/lib/firebase'
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, where, orderBy } from 'firebase/firestore'
 
 export interface ContentItem {
     id: string
@@ -25,51 +23,64 @@ export interface ContentItem {
     caseStatus?: 'Active' | 'Monitoring' | 'Neutralized' | 'Resolved' | 'Ongoing'
 }
 
-const STORAGE_KEY = 'rf-admin-content'
 const AUTH_KEY = 'rf-admin-auth'
-const AUTH_API_URL = '/api/auth'
 
-// =============================================================================
-// CONTENT MANAGEMENT (localStorage based)
-// =============================================================================
+async function hashPassword(password: string): Promise<string> {
+    const encoder = new TextEncoder()
+    const data = encoder.encode(password)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
 
-export function getAllContent(): ContentItem[] {
-    if (typeof window === 'undefined') return []
-
+export async function getAllContent(): Promise<ContentItem[]> {
     try {
-        const data = localStorage.getItem(STORAGE_KEY)
-        return data ? JSON.parse(data) : []
+        const snapshot = await getDocs(collection(db, 'content'))
+        return snapshot.docs.map(d => d.data() as ContentItem)
     } catch {
         return []
     }
 }
 
-export function getPublishedContent(type?: ContentItem['type']): ContentItem[] {
-    const items = getAllContent().filter(item => item.status === 'published')
-
-    if (type) {
-        return items.filter(item => item.type === type)
+export async function getPublishedContent(type?: ContentItem['type']): Promise<ContentItem[]> {
+    try {
+        let q
+        if (type) {
+            q = query(
+                collection(db, 'content'),
+                where('status', '==', 'published'),
+                where('type', '==', type),
+                orderBy('createdAt', 'desc')
+            )
+        } else {
+            q = query(
+                collection(db, 'content'),
+                where('status', '==', 'published'),
+                orderBy('createdAt', 'desc')
+            )
+        }
+        const snapshot = await getDocs(q)
+        const items = snapshot.docs.map(d => d.data() as ContentItem)
+        return items.sort((a, b) =>
+            new Date(b.publishedAt || b.createdAt).getTime() -
+            new Date(a.publishedAt || a.createdAt).getTime()
+        )
+    } catch {
+        return []
     }
-
-    return items.sort((a, b) =>
-        new Date(b.publishedAt || b.createdAt).getTime() -
-        new Date(a.publishedAt || a.createdAt).getTime()
-    )
 }
 
-export function getContentById(id: string): ContentItem | null {
-    return getAllContent().find(item => item.id === id) || null
+export async function getContentById(id: string): Promise<ContentItem | null> {
+    try {
+        const snap = await getDoc(doc(db, 'content', id))
+        if (!snap.exists()) return null
+        return snap.data() as ContentItem
+    } catch {
+        return null
+    }
 }
 
-export function saveContent(items: ContentItem[]): void {
-    if (typeof window === 'undefined') return
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-}
-
-export function createContent(item: Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>): ContentItem {
-    const items = getAllContent()
-
+export async function createContent(item: Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContentItem> {
     const newItem: ContentItem = {
         ...item,
         id: `rf-${item.type}-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`,
@@ -78,80 +89,82 @@ export function createContent(item: Omit<ContentItem, 'id' | 'createdAt' | 'upda
         publishedAt: item.status === 'published' ? new Date().toISOString() : undefined
     }
 
-    items.push(newItem)
-    saveContent(items)
-
+    const docData = Object.fromEntries(
+        Object.entries(newItem).filter(([, v]) => v !== undefined)
+    )
+    await setDoc(doc(db, 'content', newItem.id), docData)
     return newItem
 }
 
-export function updateContent(id: string, updates: Partial<ContentItem>): ContentItem | null {
-    const items = getAllContent()
-    const index = items.findIndex(item => item.id === id)
+export async function updateContent(id: string, updates: Partial<ContentItem>): Promise<ContentItem | null> {
+    const existing = await getContentById(id)
+    if (!existing) return null
 
-    if (index === -1) return null
-
-    const existingItem = items[index]
-    const wasPublished = existingItem.status === 'published'
+    const wasPublished = existing.status === 'published'
     const isNowPublished = updates.status === 'published'
 
-    items[index] = {
-        ...existingItem,
+    const merged: ContentItem = {
+        ...existing,
         ...updates,
-        id: existingItem.id,
-        createdAt: existingItem.createdAt,
+        id: existing.id,
+        createdAt: existing.createdAt,
         updatedAt: new Date().toISOString(),
         publishedAt: isNowPublished && !wasPublished
             ? new Date().toISOString()
-            : existingItem.publishedAt
+            : existing.publishedAt
     }
 
-    saveContent(items)
-
-    return items[index]
+    await updateDoc(doc(db, 'content', id), { ...merged })
+    return merged
 }
 
-export function deleteContent(id: string): boolean {
-    const items = getAllContent()
-    const index = items.findIndex(item => item.id === id)
-
-    if (index === -1) return false
-
-    items.splice(index, 1)
-    saveContent(items)
-
-    return true
+export async function deleteContent(id: string): Promise<boolean> {
+    try {
+        const existing = await getContentById(id)
+        if (!existing) return false
+        await deleteDoc(doc(db, 'content', id))
+        return true
+    } catch {
+        return false
+    }
 }
-
-// =============================================================================
-// SECURE AUTHENTICATION VIA API
-// Password and API keys are stored in Cloudflare KV (encrypted)
-// =============================================================================
-
-// OTP Generation via server-side API
-let currentOTPState: { expiresAt: number; attempts: number } | null = null
 
 export async function generateOTP(): Promise<{ phone: string; success: boolean; error?: string }> {
     try {
-        const response = await fetch(AUTH_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'generate-otp' })
+        const configSnap = await getDoc(doc(db, 'secrets', 'admin_config'))
+        if (!configSnap.exists()) {
+            return { phone: '****', success: false, error: 'Admin config not found' }
+        }
+
+        const config = configSnap.data()
+        const phone = config.ADMIN_PHONE as string
+        const apiKey = config.MTALKZ_API_KEY as string
+        const senderId = config.MTALKZ_SENDER_ID as string
+
+        if (!phone || !apiKey || !senderId) {
+            return { phone: '****', success: false, error: 'Missing SMS configuration' }
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString()
+
+        await setDoc(doc(db, 'secrets', 'current_otp'), {
+            code: otp,
+            expiresAt: Date.now() + 5 * 60 * 1000,
+            attempts: 0,
+            createdAt: Date.now()
         })
-        
-        const data = await response.json()
-        
-        if (data.success) {
-            currentOTPState = {
-                expiresAt: Date.now() + 5 * 60 * 1000,
-                attempts: 0
-            }
+
+        const maskedPhone = '****' + phone.slice(-4)
+
+        const smsResponse = await fetch(
+            `https://msgn.mtalkz.com/api?apikey=${encodeURIComponent(apiKey)}&senderid=${encodeURIComponent(senderId)}&number=${encodeURIComponent(phone)}&message=${encodeURIComponent(`Your RiskFortress admin OTP is: ${otp}. Valid for 5 minutes.`)}&format=json`
+        )
+
+        if (!smsResponse.ok) {
+            return { phone: maskedPhone, success: false, error: 'Failed to send SMS' }
         }
-        
-        return {
-            phone: data.phone || '****',
-            success: data.success,
-            error: data.error
-        }
+
+        return { phone: maskedPhone, success: true }
     } catch (error) {
         console.error('OTP generation failed:', error)
         return { phone: '****', success: false, error: 'Failed to generate OTP' }
@@ -160,58 +173,84 @@ export async function generateOTP(): Promise<{ phone: string; success: boolean; 
 
 export async function verifyOTPAsync(inputOtp: string): Promise<{ success: boolean; error?: string }> {
     try {
-        const response = await fetch(AUTH_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'verify-otp', otp: inputOtp })
-        })
-        
-        const data = await response.json()
-        return { success: data.success, error: data.error }
+        const otpRef = doc(db, 'secrets', 'current_otp')
+        const otpSnap = await getDoc(otpRef)
+
+        if (!otpSnap.exists()) {
+            return { success: false, error: 'No OTP found. Please generate a new one.' }
+        }
+
+        const otpData = otpSnap.data()
+
+        if (Date.now() > otpData.expiresAt) {
+            await deleteDoc(otpRef)
+            return { success: false, error: 'OTP has expired. Please generate a new one.' }
+        }
+
+        if (otpData.attempts >= 3) {
+            await deleteDoc(otpRef)
+            return { success: false, error: 'Too many attempts. Please generate a new OTP.' }
+        }
+
+        if (otpData.code !== inputOtp) {
+            await updateDoc(otpRef, { attempts: otpData.attempts + 1 })
+            return { success: false, error: `Invalid OTP. ${2 - otpData.attempts} attempts remaining.` }
+        }
+
+        await deleteDoc(otpRef)
+        return { success: true }
     } catch (error) {
         console.error('OTP verification failed:', error)
         return { success: false, error: 'Verification failed' }
     }
 }
 
-// Legacy OTP verification (for backwards compatibility)
 export function verifyOTP(inputOtp: string): { success: boolean; error?: string } {
     console.warn('DEPRECATED: verifyOTP() is deprecated. Use verifyOTPAsync() instead.')
     return { success: false, error: 'Use verifyOTPAsync instead' }
 }
 
-// Secure password verification via API
 export async function verifyPasswordAsync(inputPassword: string): Promise<{ success: boolean; error?: string }> {
     try {
-        const response = await fetch(AUTH_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'verify', password: inputPassword })
-        })
-        
-        const data = await response.json()
-        
-        if (data.success && data.token) {
-            createSessionWithToken(data.token, data.expiresAt)
-            return { success: true }
+        const configSnap = await getDoc(doc(db, 'secrets', 'admin_config'))
+        if (!configSnap.exists()) {
+            return { success: false, error: 'Admin config not found' }
         }
-        
-        return { success: false, error: data.error || 'Authentication failed' }
+
+        const config = configSnap.data()
+        const storedHash = config.ADMIN_PASSWORD_HASH as string
+
+        if (!storedHash) {
+            return { success: false, error: 'Password not configured' }
+        }
+
+        const inputHash = await hashPassword(inputPassword)
+
+        if (inputHash !== storedHash) {
+            return { success: false, error: 'Invalid password' }
+        }
+
+        const token = crypto.randomUUID()
+        const expiresAt = Date.now() + 10 * 60 * 60 * 1000
+
+        await setDoc(doc(db, 'sessions', token), {
+            token,
+            createdAt: Date.now(),
+            expiresAt
+        })
+
+        createSessionWithToken(token, expiresAt)
+        return { success: true }
     } catch (error) {
         console.error('Auth error:', error)
-        return { success: false, error: 'Connection failed' }
+        return { success: false, error: 'Authentication failed' }
     }
 }
 
-// DEPRECATED: Use verifyPasswordAsync instead
 export function verifyPassword(_password: string): boolean {
     console.warn('SECURITY: verifyPassword() is deprecated. Use verifyPasswordAsync() instead.')
     return false
 }
-
-// =============================================================================
-// SESSION MANAGEMENT
-// =============================================================================
 
 function createSessionWithToken(token: string, expiresAt: number): void {
     if (typeof window === 'undefined') return
@@ -230,7 +269,7 @@ export function createSession(): void {
     const session = {
         authenticated: true,
         createdAt: Date.now(),
-        expiresAt: Date.now() + 10 * 60 * 60 * 1000 // 10 hours
+        expiresAt: Date.now() + 10 * 60 * 60 * 1000
     }
 
     sessionStorage.setItem(AUTH_KEY, JSON.stringify(session))
