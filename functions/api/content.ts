@@ -87,21 +87,29 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       return jsonResponse({ id: d.id, ...d.data() } as ContentItem)
     }
 
-    let q
-    if (publishedOnly) {
-      q = query(
-        contentCollection,
-        where('status', '==', 'published'),
-        orderBy('createdAt', 'desc')
-      )
-    } else {
-      q = query(contentCollection, orderBy('createdAt', 'desc'))
+    let items: ContentItem[] = []
+    try {
+      let q
+      if (publishedOnly) {
+        q = query(
+          contentCollection,
+          where('status', '==', 'published'),
+          orderBy('createdAt', 'desc')
+        )
+      } else {
+        q = query(contentCollection, orderBy('createdAt', 'desc'))
+      }
+      const snap = await getDocs(q)
+      items = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ContentItem)
+    } catch (queryError) {
+      console.warn('Ordered query failed, falling back to unordered:', queryError)
+      const snap = await getDocs(contentCollection)
+      items = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ContentItem)
+      items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      if (publishedOnly) {
+        items = items.filter((item) => item.status === 'published')
+      }
     }
-
-    const snap = await getDocs(q)
-    const items: ContentItem[] = snap.docs.map(
-      (d) => ({ id: d.id, ...d.data() }) as ContentItem
-    )
 
     return jsonResponse(items)
   } catch (error) {
