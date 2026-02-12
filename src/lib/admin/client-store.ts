@@ -157,3 +157,94 @@ export async function deleteContent(id: string): Promise<boolean> {
     await deleteDoc(doc(db, 'content', id))
     return true
 }
+
+export interface ContactSettings {
+    email: string
+    phone: string
+    address: string
+    mapUrl?: string
+    officeHours?: string
+    whatsapp?: string
+}
+
+export interface SEOSettings {
+    metaTitle: string
+    metaDescription: string
+    keywords: string[]
+    ogImage?: string
+    canonicalUrl?: string
+    robotsTxt?: string
+    googleVerification?: string
+    bingVerification?: string
+    structuredData?: string
+}
+
+export interface SocialLinks {
+    linkedin?: string
+    twitter?: string
+    instagram?: string
+    facebook?: string
+    youtube?: string
+    github?: string
+    telegram?: string
+    whatsapp?: string
+}
+
+export interface SiteSettings {
+    contact: ContactSettings
+    seo: SEOSettings
+    social: SocialLinks
+    updatedAt: string
+}
+
+export async function getSiteSettings(): Promise<SiteSettings | null> {
+    const snap = await getDoc(doc(db, 'settings', 'site'))
+    if (!snap.exists()) return null
+    return snap.data() as SiteSettings
+}
+
+export async function updateSiteSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
+    const existing = await getSiteSettings()
+    const merged: SiteSettings = {
+        contact: { ...existing?.contact, ...settings.contact } as ContactSettings,
+        seo: { ...existing?.seo, ...settings.seo } as SEOSettings,
+        social: { ...existing?.social, ...settings.social } as SocialLinks,
+        updatedAt: new Date().toISOString()
+    }
+    const docData = stripUndefined(merged as unknown as Record<string, unknown>)
+    await setDoc(doc(db, 'settings', 'site'), docData)
+    return merged
+}
+
+export async function updateContactSettings(contact: Partial<ContactSettings>): Promise<void> {
+    const existing = await getSiteSettings()
+    const updatedContact = { ...existing?.contact, ...contact } as ContactSettings
+    const docData = stripUndefined({ contact: updatedContact, updatedAt: new Date().toISOString() } as unknown as Record<string, unknown>)
+    if (existing) {
+        await updateDoc(doc(db, 'settings', 'site'), docData as Record<string, never>)
+    } else {
+        await setDoc(doc(db, 'settings', 'site'), { ...docData, seo: {}, social: {} })
+    }
+}
+
+export async function updateSEOSettings(seo: Partial<SEOSettings>): Promise<void> {
+    const existing = await getSiteSettings()
+    const updatedSeo = { ...existing?.seo, ...seo } as SEOSettings
+    const docData = stripUndefined({ seo: updatedSeo, updatedAt: new Date().toISOString() } as unknown as Record<string, unknown>)
+    if (existing) {
+        await updateDoc(doc(db, 'settings', 'site'), docData as Record<string, never>)
+    } else {
+        await setDoc(doc(db, 'settings', 'site'), { ...docData, contact: {}, social: {} })
+    }
+}
+
+export async function updateSocialLinks(social: Partial<SocialLinks>): Promise<void> {
+    const existing = await getSiteSettings()
+    const updatedSocial = { ...existing?.social, ...social } as SocialLinks
+    const docData = stripUndefined({ social: updatedSocial, updatedAt: new Date().toISOString() } as unknown as Record<string, unknown>)
+    if (existing) {
+        await updateDoc(doc(db, 'settings', 'site'), docData as Record<string, never>)
+    } else {
+        await setDoc(doc(db, 'settings', 'site'), { ...docData, contact: {}, seo: {} })
+    }
+}
