@@ -33,6 +33,15 @@ function estimateDocSize(data: Record<string, unknown>): number {
 
 const MAX_DOC_SIZE = 900_000 // ~900KB, leaving margin under Firestore's 1MB limit
 
+export function generateSlug(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
+}
+
 const AUTH_KEY = 'rf-admin-auth'
 
 async function hashPassword(password: string): Promise<string> {

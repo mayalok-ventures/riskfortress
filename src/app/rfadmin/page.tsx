@@ -21,6 +21,7 @@ import {
     createContent,
     updateContent,
     deleteContent,
+    generateSlug,
 } from '@/lib/admin/client-store'
 
 import {
@@ -113,6 +114,16 @@ export default function AdminPage() {
         setUploadProgress(null)
 
         try {
+            if (!item.title?.trim()) {
+                setError('Title is required')
+                setLoading(false)
+                return
+            }
+
+            if (!item.slug) {
+                item.slug = generateSlug(item.title)
+            }
+
             let result
             if (item.id) {
                 result = await updateContent(item.id, item)
