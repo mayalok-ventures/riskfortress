@@ -4,12 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Shield, Lock, Eye, FileText, Building, Cpu, BookOpen, Newspaper, Search, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-
 import { getPublishedContent, type ContentItem } from '@/lib/admin/api-store'
-import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
-
-const VERIFIED_EMAIL_KEY = 'rf-verified-email'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {
@@ -31,17 +26,11 @@ const getThreatLevelColor = (level?: string) => {
 }
 
 export default function DossiersPage() {
-    const router = useRouter()
     const [activeTab, setActiveTab] = useState('cases')
     const [cases, setCases] = useState<ContentItem[]>([])
     const [articles, setArticles] = useState<ContentItem[]>([])
     const [blogs, setBlogs] = useState<ContentItem[]>([])
     const [loading, setLoading] = useState(true)
-    
-    // Email verification state for cases
-    const [showEmailModal, setShowEmailModal] = useState(false)
-    const [selectedCase, setSelectedCase] = useState<ContentItem | null>(null)
-    const [isEmailVerified, setIsEmailVerified] = useState(false)
     
     // Search state for each section
     const [casesSearch, setCasesSearch] = useState('')
@@ -69,13 +58,6 @@ export default function DossiersPage() {
 
     useEffect(() => {
         loadPublishedContent()
-        // Check if user already verified email
-        if (typeof window !== 'undefined') {
-            const verified = sessionStorage.getItem(VERIFIED_EMAIL_KEY)
-            if (verified) {
-                setIsEmailVerified(true)
-            }
-        }
     }, [])
 
     const loadPublishedContent = async (retryCount = 0) => {
@@ -93,29 +75,6 @@ export default function DossiersPage() {
             }
         } finally {
             setLoading(false)
-        }
-    }
-
-    const handleCaseClick = (caseItem: ContentItem) => {
-        if (isEmailVerified) {
-            // Already verified, go directly to case
-            router.push(`/dossiers/${caseItem.slug}/`)
-        } else {
-            // Show email verification modal
-            setSelectedCase(caseItem)
-            setShowEmailModal(true)
-        }
-    }
-
-    const handleEmailVerified = () => {
-        // Mark as verified for this session
-        if (typeof window !== 'undefined') {
-            sessionStorage.setItem(VERIFIED_EMAIL_KEY, 'true')
-        }
-        setIsEmailVerified(true)
-        // Navigate to the case
-        if (selectedCase) {
-            router.push(`/dossiers/${selectedCase.slug}/`)
         }
     }
 
@@ -243,10 +202,9 @@ export default function DossiersPage() {
                                         {filteredCases.map((item) => {
                                             const Icon = getIconForSector(item.sector)
                                             return (
-                                                <button
-                                                    onClick={() => handleCaseClick(item)}
+                                                <div
                                                     key={item.id}
-                                                    className="group p-6 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all cursor-pointer text-left w-full"
+                                                    className="p-6 rounded-2xl glass-morphism border border-gray-800 transition-all w-full"
                                                 >
                                                     <div className="flex items-start justify-between mb-4">
                                                         <div className="flex items-center space-x-3">
@@ -255,7 +213,7 @@ export default function DossiersPage() {
                                                             </div>
                                                             <div>
                                                                 <span className="text-xs text-gray-500 font-mono">{item.id.toUpperCase()}</span>
-                                                                <h3 className="font-bold text-white group-hover:text-intelligence transition-colors">
+                                                                <h3 className="font-bold text-white">
                                                                     {item.title}
                                                                 </h3>
                                                             </div>
@@ -299,7 +257,12 @@ export default function DossiersPage() {
                                                             ))}
                                                         </div>
                                                     )}
-                                                </button>
+
+                                                    <div className="flex items-center space-x-2 mt-4 pt-4 border-t border-gray-800">
+                                                        <Lock className="h-3.5 w-3.5 text-gray-500" />
+                                                        <span className="text-xs text-gray-500">Accessible via secure link only</span>
+                                                    </div>
+                                                </div>
                                             )
                                         })}
                                     </div>
@@ -504,17 +467,6 @@ export default function DossiersPage() {
                     </>
                 )}
             </div>
-
-            {/* Professional Email Verification Modal for Cases */}
-            <ProfessionalEmailModal
-                isOpen={showEmailModal}
-                onClose={() => {
-                    setShowEmailModal(false)
-                    setSelectedCase(null)
-                }}
-                caseTitle={selectedCase?.title || ''}
-                onSuccess={handleEmailVerified}
-            />
         </div>
     )
 }

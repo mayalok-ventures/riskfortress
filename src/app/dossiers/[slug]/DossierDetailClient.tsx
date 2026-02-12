@@ -7,9 +7,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { getContentBySlug, type ContentItem } from '@/lib/admin/api-store'
-import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
-
-const VERIFIED_EMAIL_KEY = 'rf-verified-email'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {
@@ -43,31 +40,15 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
     const pathname = usePathname()
     const [content, setContent] = useState<ContentItem | null>(null)
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(false)
-    
-    // Email verification state for cases
-    const [showEmailModal, setShowEmailModal] = useState(false)
-    const [isEmailVerified, setIsEmailVerified] = useState(false)
-    const [checkingEmail, setCheckingEmail] = useState(true)
+    const [accessDenied, setAccessDenied] = useState(false)
 
-    // Extract actual slug from pathname
     const cleanPath = pathname?.replace(/\/$/, '') || ''
     const actualSlug = cleanPath.split('/').filter(Boolean).pop() || initialSlug
-
-    // Check email verification status on mount
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const verified = sessionStorage.getItem(VERIFIED_EMAIL_KEY)
-            setIsEmailVerified(!!verified)
-        }
-        setCheckingEmail(false)
-    }, [])
 
     useEffect(() => {
         if (actualSlug && actualSlug !== '_placeholder') {
             loadContent(actualSlug)
         } else if (actualSlug === '_placeholder') {
-            setError(true)
             setLoading(false)
         }
     }, [actualSlug])
@@ -78,35 +59,26 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
             const item = await getContentBySlug(slugToLoad)
             if (item) {
                 setContent(item)
-                setLoading(false)
+                setAccessDenied(false)
             } else {
                 if (retryCount < 1) {
                     setTimeout(() => loadContent(slugToLoad, retryCount + 1), 1000)
                     return
                 }
-                setError(true)
-                setLoading(false)
+                setAccessDenied(true)
             }
         } catch {
             if (retryCount < 1) {
                 setTimeout(() => loadContent(slugToLoad, retryCount + 1), 1000)
                 return
             }
-            setError(true)
+            setAccessDenied(true)
+        } finally {
             setLoading(false)
         }
     }
 
-    const handleEmailVerified = () => {
-        if (typeof window !== 'undefined') {
-            sessionStorage.setItem(VERIFIED_EMAIL_KEY, 'true')
-        }
-        setIsEmailVerified(true)
-        setShowEmailModal(false)
-    }
-
-    // Loading state
-    if (loading || checkingEmail) {
+    if (loading) {
         return (
             <div className="min-h-screen py-32">
                 <div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950" />
@@ -118,34 +90,7 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
         )
     }
 
-    // Error state
-    if (error || !content) {
-        return (
-            <div className="min-h-screen py-32">
-                <div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950" />
-                <div className="container mx-auto px-6 text-center">
-                    <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-                    <h1 className="text-3xl font-bold text-white mb-4">Content Not Found</h1>
-                    <p className="text-gray-400 mb-8">The requested dossier could not be found or may have been removed.</p>
-                    <Link
-                        href="/dossiers/"
-                        className="inline-flex items-center space-x-2 px-6 py-3 bg-intelligence text-white rounded-lg font-semibold hover:bg-intelligence/90 transition-colors"
-                    >
-                        <ArrowLeft className="h-5 w-5" />
-                        <span>Back to Dossiers</span>
-                    </Link>
-                </div>
-            </div>
-        )
-    }
-
-    // For CASE type: Require email verification before showing content
-    // Articles and blogs are open access
-    const requiresEmailVerification = content.type === 'case'
-    const canViewContent = !requiresEmailVerification || isEmailVerified
-
-    // If case and not verified, show verification gate
-    if (requiresEmailVerification && !canViewContent) {
+    if (accessDenied || !content) {
         return (
             <div className="min-h-screen py-32">
                 <div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
@@ -153,7 +98,6 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                         <div className="absolute inset-0 bg-grid-pattern" />
                     </div>
                 </div>
-
                 <div className="container relative z-10 mx-auto px-6 max-w-2xl">
                     <Link
                         href="/dossiers/"
@@ -164,53 +108,26 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                     </Link>
 
                     <div className="p-8 rounded-2xl glass-morphism border border-intelligence/20 text-center">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-intelligence/10 border border-intelligence/20 mb-6">
-                            <Lock className="h-8 w-8 text-intelligence" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 mb-6">
+                            <Lock className="h-8 w-8 text-red-400" />
                         </div>
-
                         <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                            Access Restricted
+                            Access Denied
                         </h1>
-
-                        <p className="text-gray-400 mb-2">
-                            This intelligence dossier requires professional verification.
+                        <p className="text-gray-400 mb-6">
+                            This content is restricted. You need a secure access link from a RiskFortress administrator to view this dossier.
                         </p>
-                        
-                        <h2 className="text-xl font-semibold text-intelligence mb-6">
-                            &quot;{content.title}&quot;
-                        </h2>
-
-                        <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700 mb-6">
+                        <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700">
                             <p className="text-sm text-gray-400">
-                                To access confidential case studies, please verify your professional email address. 
-                                This helps us ensure our intelligence reports reach authorized professionals only.
+                                If you believe you should have access, please contact your RiskFortress administrator for a secure viewing link.
                             </p>
                         </div>
-
-                        <button
-                            onClick={() => setShowEmailModal(true)}
-                            className="px-8 py-3 bg-gradient-to-r from-intelligence to-industrial text-white rounded-lg font-semibold hover:shadow-intelligence transition-all"
-                        >
-                            Verify Professional Email
-                        </button>
-
-                        <p className="text-xs text-gray-500 mt-4">
-                            Personal email domains (Gmail, Yahoo, etc.) are not supported.
-                        </p>
                     </div>
                 </div>
-
-                <ProfessionalEmailModal
-                    isOpen={showEmailModal}
-                    onClose={() => setShowEmailModal(false)}
-                    caseTitle={content.title}
-                    onSuccess={handleEmailVerified}
-                />
             </div>
         )
     }
 
-    // Full content view (for verified cases, articles, and blogs)
     const Icon = getIconForSector(content.sector)
 
     return (
@@ -352,25 +269,13 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                 )}
 
                 <div className="mt-12 pt-8 border-t border-gray-800">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <Link
-                            href="/dossiers/"
-                            className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-800 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors"
-                        >
-                            <ArrowLeft className="h-5 w-5" />
-                            <span>Back to All Dossiers</span>
-                        </Link>
-
-                        <button
-                            onClick={() => {
-                                navigator.clipboard.writeText(window.location.href)
-                                alert('Link copied to clipboard!')
-                            }}
-                            className="inline-flex items-center space-x-2 px-6 py-3 bg-intelligence text-white rounded-lg font-semibold hover:bg-intelligence/90 transition-colors"
-                        >
-                            <span>Share This {content.type === 'case' ? 'Dossier' : content.type === 'article' ? 'Article' : 'Blog'}</span>
-                        </button>
-                    </div>
+                    <Link
+                        href="/dossiers/"
+                        className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-800 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                        <span>Back to All Dossiers</span>
+                    </Link>
                 </div>
             </div>
         </div>
