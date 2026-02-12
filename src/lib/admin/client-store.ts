@@ -197,23 +197,12 @@ export interface SiteSettings {
     updatedAt: string
 }
 
-function deepClean(obj: Record<string, unknown>): Record<string, unknown> {
-    const result: Record<string, unknown> = {}
-    for (const [key, val] of Object.entries(obj)) {
-        if (val === undefined) continue
-        if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
-            result[key] = deepClean(val as Record<string, unknown>)
-        } else {
-            result[key] = val === undefined ? '' : val
-        }
-    }
-    return result
-}
+import { restGetDoc, restSetDoc } from './firestore-rest'
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {
-    const snap = await getDoc(doc(db, 'settings', 'site'))
-    if (!snap.exists()) return null
-    return snap.data() as SiteSettings
+    const data = await restGetDoc('settings', 'site')
+    if (!data) return null
+    return data as unknown as SiteSettings
 }
 
 export async function updateSiteSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
@@ -224,28 +213,39 @@ export async function updateSiteSettings(settings: Partial<SiteSettings>): Promi
         social: { ...existing?.social, ...settings.social } as SocialLinks,
         updatedAt: new Date().toISOString()
     }
-    const docData = deepClean(merged as unknown as Record<string, unknown>)
-    await setDoc(doc(db, 'settings', 'site'), docData, { merge: true })
+    await restSetDoc('settings', 'site', merged as unknown as Record<string, unknown>)
     return merged
 }
 
 export async function updateContactSettings(contact: Partial<ContactSettings>): Promise<void> {
     const existing = await getSiteSettings()
-    const updatedContact = { ...existing?.contact, ...contact } as ContactSettings
-    const docData = deepClean({ contact: updatedContact, updatedAt: new Date().toISOString() } as unknown as Record<string, unknown>)
-    await setDoc(doc(db, 'settings', 'site'), docData, { merge: true })
+    const merged = {
+        contact: { ...existing?.contact, ...contact },
+        seo: existing?.seo || {},
+        social: existing?.social || {},
+        updatedAt: new Date().toISOString()
+    }
+    await restSetDoc('settings', 'site', merged as unknown as Record<string, unknown>)
 }
 
 export async function updateSEOSettings(seo: Partial<SEOSettings>): Promise<void> {
     const existing = await getSiteSettings()
-    const updatedSeo = { ...existing?.seo, ...seo } as SEOSettings
-    const docData = deepClean({ seo: updatedSeo, updatedAt: new Date().toISOString() } as unknown as Record<string, unknown>)
-    await setDoc(doc(db, 'settings', 'site'), docData, { merge: true })
+    const merged = {
+        contact: existing?.contact || {},
+        seo: { ...existing?.seo, ...seo },
+        social: existing?.social || {},
+        updatedAt: new Date().toISOString()
+    }
+    await restSetDoc('settings', 'site', merged as unknown as Record<string, unknown>)
 }
 
 export async function updateSocialLinks(social: Partial<SocialLinks>): Promise<void> {
     const existing = await getSiteSettings()
-    const updatedSocial = { ...existing?.social, ...social } as SocialLinks
-    const docData = deepClean({ social: updatedSocial, updatedAt: new Date().toISOString() } as unknown as Record<string, unknown>)
-    await setDoc(doc(db, 'settings', 'site'), docData, { merge: true })
+    const merged = {
+        contact: existing?.contact || {},
+        seo: existing?.seo || {},
+        social: { ...existing?.social, ...social },
+        updatedAt: new Date().toISOString()
+    }
+    await restSetDoc('settings', 'site', merged as unknown as Record<string, unknown>)
 }
