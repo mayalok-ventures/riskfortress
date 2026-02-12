@@ -1,5 +1,4 @@
-import { db } from '../firebase'
-import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore'
+import { getDoc, setDoc, deleteDoc } from '../lib/firestore'
 
 interface Env {}
 
@@ -54,11 +53,10 @@ const WINDOW_MS = 15 * 60 * 1000
 
 async function checkRateLimit(ip: string): Promise<{ allowed: boolean; remaining: number }> {
     const ipHash = await hashString(ip)
-    const ref = doc(db, 'rate_limits', ipHash)
 
     try {
-        const snap = await getDoc(ref)
-        if (!snap.exists()) return { allowed: true, remaining: MAX_ATTEMPTS }
+        const snap = await getDoc('rate_limits', ipHash)
+        if (!snap.exists) return { allowed: true, remaining: MAX_ATTEMPTS }
 
         const data = snap.data() as { failedCount: number; windowStart: number; lockedUntil?: number }
 
@@ -67,12 +65,12 @@ async function checkRateLimit(ip: string): Promise<{ allowed: boolean; remaining
         }
 
         if (Date.now() - data.windowStart > WINDOW_MS) {
-            await deleteDoc(ref)
+            await deleteDoc('rate_limits', ipHash)
             return { allowed: true, remaining: MAX_ATTEMPTS }
         }
 
         if (data.failedCount >= MAX_ATTEMPTS) {
-            await setDoc(ref, { ...data, lockedUntil: Date.now() + WINDOW_MS })
+            await setDoc('rate_limits', ipHash, { ...data, lockedUntil: Date.now() + WINDOW_MS })
             return { allowed: false, remaining: 0 }
         }
 
@@ -84,19 +82,18 @@ async function checkRateLimit(ip: string): Promise<{ allowed: boolean; remaining
 
 async function recordFailedAttempt(ip: string): Promise<void> {
     const ipHash = await hashString(ip)
-    const ref = doc(db, 'rate_limits', ipHash)
 
     try {
-        const snap = await getDoc(ref)
-        if (!snap.exists()) {
-            await setDoc(ref, { failedCount: 1, windowStart: Date.now() })
+        const snap = await getDoc('rate_limits', ipHash)
+        if (!snap.exists) {
+            await setDoc('rate_limits', ipHash, { failedCount: 1, windowStart: Date.now() })
             return
         }
 
         const data = snap.data() as { failedCount: number; windowStart: number }
 
         if (Date.now() - data.windowStart > WINDOW_MS) {
-            await setDoc(ref, { failedCount: 1, windowStart: Date.now() })
+            await setDoc('rate_limits', ipHash, { failedCount: 1, windowStart: Date.now() })
             return
         }
 
@@ -108,7 +105,7 @@ async function recordFailedAttempt(ip: string): Promise<void> {
         if (newCount >= MAX_ATTEMPTS) {
             updates.lockedUntil = Date.now() + WINDOW_MS
         }
-        await setDoc(ref, updates)
+        await setDoc('rate_limits', ipHash, updates)
     } catch {
         // silently fail
     }
@@ -117,7 +114,7 @@ async function recordFailedAttempt(ip: string): Promise<void> {
 async function clearRateLimit(ip: string): Promise<void> {
     const ipHash = await hashString(ip)
     try {
-        await deleteDoc(doc(db, 'rate_limits', ipHash))
+        await deleteDoc('rate_limits', ipHash)
     } catch {
         // silently fail
     }
@@ -130,7 +127,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
         if (action === 'logout' && token) {
             try {
-                await deleteDoc(doc(db, 'sessions', token))
+                await deleteDoc('sessions', token)
             } catch {
                 // session might already be gone
             }
@@ -148,8 +145,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 )
             }
 
-            const configSnap = await getDoc(doc(db, 'secrets', 'admin_config'))
-            const config = configSnap.exists() ? configSnap.data() : null
+            const configSnap = await getDoc('secrets', 'admin_config')
+            const config = configSnap.exists ? configSnap.data() : null
             const storedHash = config?.ADMIN_PASSWORD_HASH as string | undefined
 
             if (!storedHash) {
@@ -169,7 +166,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 const sessionToken = generateSessionToken()
                 const expiry = Date.now() + 10 * 60 * 60 * 1000
 
-                await setDoc(doc(db, 'sessions', sessionToken), {
+                await setDoc('sessions', sessionToken, {
                     createdAt: Date.now(),
                     expiresAt: expiry,
                     ip,

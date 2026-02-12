@@ -1,5 +1,4 @@
-import { db } from '../firebase'
-import { doc, getDoc, deleteDoc } from 'firebase/firestore'
+import { getDoc, deleteDoc } from './firestore'
 
 export interface AuthResult {
     ok: boolean
@@ -18,15 +17,15 @@ export async function requireAdminSession(request: Request): Promise<AuthResult>
     }
 
     try {
-        const snap = await getDoc(doc(db, 'sessions', token))
-        if (!snap.exists()) {
+        const snap = await getDoc('sessions', token)
+        if (!snap.exists) {
             return { ok: false, status: 401, error: 'Invalid session' }
         }
 
         const session = snap.data() as { expiresAt: number; createdAt: number }
 
         if (Date.now() > session.expiresAt) {
-            await deleteDoc(doc(db, 'sessions', token))
+            await deleteDoc('sessions', token)
             return { ok: false, status: 401, error: 'Session expired' }
         }
 

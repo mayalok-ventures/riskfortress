@@ -1,11 +1,4 @@
-import { db } from '../firebase'
-import {
-  doc,
-  getDoc,
-  setDoc,
-  collection,
-  addDoc,
-} from 'firebase/firestore'
+import { getDoc, setDoc, addDoc } from '../lib/firestore'
 
 interface Env {}
 
@@ -46,15 +39,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const dateKey = getDateKey()
 
-    await addDoc(collection(db, 'analytics_events'), {
+    await addDoc('analytics_events', {
       ...event,
       dateKey,
       recordedAt: new Date().toISOString(),
     })
 
-    const statsRef = doc(db, 'analytics_stats', dateKey)
-    const statsSnap = await getDoc(statsRef)
-    const stats = statsSnap.exists()
+    const statsSnap = await getDoc('analytics_stats', dateKey)
+    const stats = statsSnap.exists
       ? (statsSnap.data() as Record<string, unknown>)
       : {
           date: dateKey,
@@ -176,7 +168,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     stats.contentTypeExits = contentTypeExits
     stats.activeUsers = activeUsers
 
-    await setDoc(statsRef, stats)
+    await setDoc('analytics_stats', dateKey, stats)
 
     return jsonResponse({ success: true })
   } catch (error) {
@@ -245,9 +237,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       const dateKey = getDateKey(date)
       stats.dates.push(dateKey)
 
-      const daySnap = await getDoc(doc(db, 'analytics_stats', dateKey))
-      if (daySnap.exists()) {
-        const parsed = daySnap.data()
+      const daySnap = await getDoc('analytics_stats', dateKey)
+      if (daySnap.exists) {
+        const parsed = daySnap.data()!
 
         stats.totalPageviews += (parsed.totalPageviews as number) || 0
         stats.newVisitors += (parsed.newVisitors as number) || 0

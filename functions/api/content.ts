@@ -1,16 +1,4 @@
-import { db } from '../firebase'
-import {
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    setDoc,
-    updateDoc,
-    deleteDoc,
-    query,
-    where,
-    orderBy,
-} from 'firebase/firestore'
+import { getDoc, setDoc, updateDoc, deleteDoc, queryDocs } from '../lib/firestore'
 import { requireAdminSession } from '../lib/admin-auth'
 
 interface Env {}
@@ -89,19 +77,17 @@ function stripContentForListing(item: Record<string, unknown>): Record<string, u
     return result
 }
 
-const contentCollection = collection(db, 'content')
-
 async function validateCaseGrant(request: Request, contentId: string): Promise<boolean> {
     const grantToken = request.headers.get('x-case-grant')
     if (!grantToken) return false
 
     try {
-        const snap = await getDoc(doc(db, 'case_grants', grantToken))
-        if (!snap.exists()) return false
+        const snap = await getDoc('case_grants', grantToken)
+        if (!snap.exists) return false
 
         const grant = snap.data() as { contentId: string; expiresAt: number }
         if (Date.now() > grant.expiresAt) {
-            await deleteDoc(doc(db, 'case_grants', grantToken))
+            await deleteDoc('case_grants', grantToken)
             return false
         }
         return grant.contentId === contentId
@@ -123,18 +109,16 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                 return jsonResponse({ error: auth.error }, auth.status)
             }
 
-            const snap = await getDoc(doc(db, 'content', id))
-            if (!snap.exists()) return jsonResponse({ error: 'Not found' }, 404)
+            const snap = await getDoc('content', id)
+            if (!snap.exists) return jsonResponse({ error: 'Not found' }, 404)
             return jsonResponse({ id: snap.id, ...snap.data() } as ContentItem)
         }
 
         if (slug) {
-            const q = query(
-                contentCollection,
-                where('slug', '==', slug),
-                where('status', '==', 'published')
-            )
-            const snap = await getDocs(q)
+            const snap = await queryDocs('content', [
+                { field: 'slug', op: '==', value: slug },
+                { field: 'status', op: '==', value: 'published' },
+            ])
             if (snap.empty) return jsonResponse({ error: 'Not found' }, 404)
 
             const d = snap.docs[0]
@@ -162,27 +146,27 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         const isAdmin = (await requireAdminSession(context.request)).ok
 
         try {
-            let q
+            let snap
             if (publishedOnly) {
-                q = query(
-                    contentCollection,
-                    where('status', '==', 'published'),
-                    orderBy('createdAt', 'desc')
+                snap = await queryDocs(
+                    'content',
+                    [{ field: 'status', op: '==', value: 'published' }],
+                    'createdAt',
+                    'desc'
                 )
             } else {
                 if (!isAdmin) {
                     return jsonResponse({ error: 'Authentication required' }, 401)
                 }
-                q = query(contentCollection, orderBy('createdAt', 'desc'))
+                snap = await queryDocs('content', [], 'createdAt', 'desc')
             }
-            const snap = await getDocs(q)
             items = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ContentItem)
         } catch (queryError) {
             console.warn('Ordered query failed, falling back:', queryError)
             if (!publishedOnly && !isAdmin) {
                 return jsonResponse({ error: 'Authentication required' }, 401)
             }
-            const snap = await getDocs(contentCollection)
+            const snap = await queryDocs('content', [])
             items = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ContentItem)
             items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             if (publishedOnly) {
@@ -217,8 +201,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         let counter = 1
 
         while (true) {
-            const q = query(contentCollection, where('slug', '==', slug))
-            const existing = await getDocs(q)
+            const existing = await queryDocs('content', [{ field: 'slug', op: '==', value: slug }])
             if (existing.empty) break
             slug = `${baseSlug}-${counter}`
             counter++
@@ -227,8 +210,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         let accessToken = generateAccessToken()
         let tokenUnique = false
         for (let i = 0; i < 10; i++) {
-            const q = query(contentCollection, where('accessToken', '==', accessToken))
-            const existing = await getDocs(q)
+            const existing = await queryDocs('content', [{ field: 'accessToken', op: '==', value: accessToken }])
             if (existing.empty) {
                 tokenUnique = true
                 break
@@ -268,7 +250,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const docData = Object.fromEntries(
             Object.entries(data).filter(([, v]) => v !== undefined)
         )
-        await setDoc(doc(db, 'content', id), docData)
+        await setDoc('content', id, docData)
 
         return jsonResponse(data)
     } catch (error) {
@@ -286,11 +268,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     try {
         const body = (await context.request.json()) as { id: string } & Partial<ContentItem>
 
-        const ref = doc(db, 'content', body.id)
-        const snap = await getDoc(ref)
-        if (!snap.exists()) return jsonResponse({ error: 'Not found' }, 404)
+        const snap = await getDoc('content', body.id)
+        if (!snap.exists) return jsonResponse({ error: 'Not found' }, 404)
 
-        const existing = snap.data() as ContentItem
+        const existing = snap.data() as unknown as ContentItem
         const now = new Date().toISOString()
         const wasPublished = existing.status === 'published'
         const isNowPublished = body.status === 'published'
@@ -321,9 +302,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
             updates.accessToken = generateAccessToken()
         }
 
-        await updateDoc(ref, updates)
+        await updateDoc('content', body.id, updates)
 
-        const updated = await getDoc(ref)
+        const updated = await getDoc('content', body.id)
         return jsonResponse({ id: updated.id, ...updated.data() } as ContentItem)
     } catch (error) {
         console.error('PUT error:', error)
@@ -343,7 +324,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
 
         if (!id) return jsonResponse({ error: 'ID required' }, 400)
 
-        await deleteDoc(doc(db, 'content', id))
+        await deleteDoc('content', id)
 
         return jsonResponse({ success: true })
     } catch (error) {

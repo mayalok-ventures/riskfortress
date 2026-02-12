@@ -1,12 +1,4 @@
-import { db } from '../firebase'
-import {
-    doc,
-    setDoc,
-    getDocs,
-    collection,
-    query,
-    where,
-} from 'firebase/firestore'
+import { setDoc, queryDocs } from '../lib/firestore'
 
 interface Env {}
 
@@ -40,12 +32,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             return jsonResponse({ error: 'Invalid token' }, 400)
         }
 
-        const q = query(
-            collection(db, 'content'),
-            where('accessToken', '==', token),
-            where('status', '==', 'published')
-        )
-        const snap = await getDocs(q)
+        const snap = await queryDocs('content', [
+            { field: 'accessToken', op: '==', value: token },
+            { field: 'status', op: '==', value: 'published' },
+        ])
 
         if (snap.empty) {
             return jsonResponse({ error: 'Not found' }, 404)
@@ -57,7 +47,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         if (data.type === 'case') {
             const grantToken = generateGrantToken()
 
-            await setDoc(doc(db, 'case_grants', grantToken), {
+            await setDoc('case_grants', grantToken, {
                 contentId: d.id,
                 slug: data.slug,
                 expiresAt: Date.now() + 30 * 60 * 1000,
