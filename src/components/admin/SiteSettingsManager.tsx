@@ -34,15 +34,17 @@ export default function SiteSettingsManager() {
 
     const loadSettings = useCallback(async () => {
         setLoading(true)
+        setError('')
         try {
             const settings = await getSiteSettings()
             if (settings) {
                 if (settings.contact) setContact(prev => ({ ...prev, ...settings.contact }))
-                if (settings.seo) setSeo(prev => ({ ...prev, ...settings.seo }))
+                if (settings.seo) setSeo(prev => ({ ...prev, ...settings.seo, keywords: settings.seo?.keywords || [] }))
                 if (settings.social) setSocial(prev => ({ ...prev, ...settings.social }))
             }
-        } catch {
-            setError('Failed to load settings')
+        } catch (err) {
+            console.error('Settings load error:', err)
+            setError('Failed to load settings. Check Firestore rules allow read on "settings" collection.')
         } finally {
             setLoading(false)
         }
@@ -53,21 +55,21 @@ export default function SiteSettingsManager() {
     const saveContact = async () => {
         setSaving(true); setError('')
         try { await updateContactSettings(contact); setSaved(true); setTimeout(() => setSaved(false), 2000) }
-        catch { setError('Failed to save contact settings') }
+        catch (err) { console.error('Save contact error:', err); setError(err instanceof Error ? err.message : 'Failed to save contact settings') }
         finally { setSaving(false) }
     }
 
     const saveSeo = async () => {
         setSaving(true); setError('')
         try { await updateSEOSettings(seo); setSaved(true); setTimeout(() => setSaved(false), 2000) }
-        catch { setError('Failed to save SEO settings') }
+        catch (err) { console.error('Save SEO error:', err); setError(err instanceof Error ? err.message : 'Failed to save SEO settings') }
         finally { setSaving(false) }
     }
 
     const saveSocial = async () => {
         setSaving(true); setError('')
         try { await updateSocialLinks(social); setSaved(true); setTimeout(() => setSaved(false), 2000) }
-        catch { setError('Failed to save social links') }
+        catch (err) { console.error('Save social error:', err); setError(err instanceof Error ? err.message : 'Failed to save social links') }
         finally { setSaving(false) }
     }
 
