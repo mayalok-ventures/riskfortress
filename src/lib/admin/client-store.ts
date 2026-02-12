@@ -23,6 +23,16 @@ export interface ContentItem {
     caseStatus?: 'Active' | 'Monitoring' | 'Neutralized' | 'Resolved' | 'Ongoing'
 }
 
+function stripUndefined(obj: Record<string, unknown>): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined))
+}
+
+function estimateDocSize(data: Record<string, unknown>): number {
+    return new Blob([JSON.stringify(data)]).size
+}
+
+const MAX_DOC_SIZE = 900_000 // ~900KB, leaving margin under Firestore's 1MB limit
+
 const AUTH_KEY = 'rf-admin-auth'
 
 async function hashPassword(password: string): Promise<string> {
@@ -34,50 +44,38 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 export async function getAllContent(): Promise<ContentItem[]> {
-    try {
-        const snapshot = await getDocs(collection(db, 'content'))
-        return snapshot.docs.map(d => d.data() as ContentItem)
-    } catch {
-        return []
-    }
+    const snapshot = await getDocs(collection(db, 'content'))
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as ContentItem))
 }
 
 export async function getPublishedContent(type?: ContentItem['type']): Promise<ContentItem[]> {
-    try {
-        let q
-        if (type) {
-            q = query(
-                collection(db, 'content'),
-                where('status', '==', 'published'),
-                where('type', '==', type),
-                orderBy('createdAt', 'desc')
-            )
-        } else {
-            q = query(
-                collection(db, 'content'),
-                where('status', '==', 'published'),
-                orderBy('createdAt', 'desc')
-            )
-        }
-        const snapshot = await getDocs(q)
-        const items = snapshot.docs.map(d => d.data() as ContentItem)
-        return items.sort((a, b) =>
-            new Date(b.publishedAt || b.createdAt).getTime() -
-            new Date(a.publishedAt || a.createdAt).getTime()
+    let q
+    if (type) {
+        q = query(
+            collection(db, 'content'),
+            where('status', '==', 'published'),
+            where('type', '==', type),
+            orderBy('createdAt', 'desc')
         )
-    } catch {
-        return []
+    } else {
+        q = query(
+            collection(db, 'content'),
+            where('status', '==', 'published'),
+            orderBy('createdAt', 'desc')
+        )
     }
+    const snapshot = await getDocs(q)
+    const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as ContentItem))
+    return items.sort((a, b) =>
+        new Date(b.publishedAt || b.createdAt).getTime() -
+        new Date(a.publishedAt || a.createdAt).getTime()
+    )
 }
 
 export async function getContentById(id: string): Promise<ContentItem | null> {
-    try {
-        const snap = await getDoc(doc(db, 'content', id))
-        if (!snap.exists()) return null
-        return snap.data() as ContentItem
-    } catch {
-        return null
-    }
+    const snap = await getDoc(doc(db, 'content', id))
+    if (!snap.exists()) return null
+    return snap.data() as ContentItem
 }
 
 export async function createContent(item: Omit<ContentItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContentItem> {
@@ -89,9 +87,11 @@ export async function createContent(item: Omit<ContentItem, 'id' | 'createdAt' |
         publishedAt: item.status === 'published' ? new Date().toISOString() : undefined
     }
 
-    const docData = Object.fromEntries(
-        Object.entries(newItem).filter(([, v]) => v !== undefined)
-    )
+    const docData = stripUndefined(newItem as unknown as Record<string, unknown>)
+    const size = estimateDocSize(docData)
+    if (size > MAX_DOC_SIZE) {
+        throw new Error(`Content too large (${Math.round(size / 1024)}KB). Remove some images or reduce image sizes to save.`)
+    }
     await setDoc(doc(db, 'content', newItem.id), docData)
     return newItem
 }
@@ -114,19 +114,20 @@ export async function updateContent(id: string, updates: Partial<ContentItem>): 
             : existing.publishedAt
     }
 
-    await updateDoc(doc(db, 'content', id), { ...merged })
+    const docData = stripUndefined(merged as unknown as Record<string, unknown>)
+    const size = estimateDocSize(docData)
+    if (size > MAX_DOC_SIZE) {
+        throw new Error(`Content too large (${Math.round(size / 1024)}KB). Remove some images or reduce image sizes to save.`)
+    }
+    await updateDoc(doc(db, 'content', id), docData as Record<string, never>)
     return merged
 }
 
 export async function deleteContent(id: string): Promise<boolean> {
-    try {
-        const existing = await getContentById(id)
-        if (!existing) return false
-        await deleteDoc(doc(db, 'content', id))
-        return true
-    } catch {
-        return false
-    }
+    const existing = await getContentById(id)
+    if (!existing) return false
+    await deleteDoc(doc(db, 'content', id))
+    return true
 }
 
 export async function generateOTP(): Promise<{ phone: string; success: boolean; error?: string }> {

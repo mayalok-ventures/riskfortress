@@ -61,8 +61,13 @@ export default function AdminPage() {
     }, [])
 
     const loadContent = async () => {
-        const content = await getAllContent()
-        setItems(content)
+        try {
+            const content = await getAllContent()
+            setItems(content)
+        } catch (err) {
+            console.error('Failed to load content:', err)
+            setError(err instanceof Error ? err.message : 'Failed to load content from database')
+        }
     }
 
     const handleAccessClick = () => {
@@ -135,9 +140,13 @@ export default function AdminPage() {
 
     const handleDeleteContent = async (id: string) => {
         if (!confirm('Are you sure you want to delete this item?')) return
-
-        await deleteContent(id)
-        await loadContent()
+        try {
+            await deleteContent(id)
+            await loadContent()
+        } catch (err) {
+            console.error('Delete failed:', err)
+            setError(err instanceof Error ? err.message : 'Failed to delete content')
+        }
     }
 
     if (authStep !== 'authenticated') {

@@ -1,384 +1,326 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { getAllContent, ContentItem } from '@/lib/admin/client-store'
 import {
-    BarChart3, Users, Eye, Clock, ArrowUpRight, ArrowDownRight,
-    Globe, RefreshCw, TrendingUp, MousePointer, LogOut as ExitIcon,
-    UserCheck, UserPlus, Activity, Layers
+    BarChart3, FileText, RefreshCw, BookOpen, Briefcase, PenTool,
+    Clock, CheckCircle, Archive, AlertCircle
 } from 'lucide-react'
 
-interface AnalyticsData {
-    totalPageviews: number
-    uniqueVisitors: number
-    uniqueSessions: number
-    newVisitors: number
-    returningVisitors: number
-    sources: Record<string, number>
-    topPages: Array<{
-        path: string
-        title: string
-        views: number
-        avgScrollDepth: number
-        avgEngagement: number
-        exitRate: number
-    }>
-    contentTypeExits: Record<string, number>
-    activeUsers: number
-    dailyStats: Array<{
-        date: string
-        pageviews: number
-        visitors: number
-        sessions: number
-    }>
+interface TypeStats {
+    total: number
+    published: number
+    draft: number
+    archived: number
+    lastUpdated: string | null
 }
 
-type Role = 'executive' | 'analyst'
+function computeTypeStats(items: ContentItem[], type: ContentItem['type']): TypeStats {
+    const filtered = items.filter(i => i.type === type)
+    const published = filtered.filter(i => i.status === 'published').length
+    const draft = filtered.filter(i => i.status === 'draft').length
+    const archived = filtered.filter(i => i.status === 'archived').length
+    const sorted = [...filtered].sort((a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )
+    return {
+        total: filtered.length,
+        published,
+        draft,
+        archived,
+        lastUpdated: sorted[0]?.updatedAt ?? null,
+    }
+}
+
+function formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    })
+}
+
+function StatusBadge({ status }: { status: ContentItem['status'] }) {
+    const styles: Record<string, string> = {
+        published: 'bg-green-500/15 text-green-400 border-green-500/20',
+        draft: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
+        archived: 'bg-gray-500/15 text-gray-400 border-gray-500/20',
+    }
+    return (
+        <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${styles[status]}`}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+        </span>
+    )
+}
+
+const typeIcons: Record<ContentItem['type'], typeof Briefcase> = {
+    case: Briefcase,
+    article: BookOpen,
+    blog: PenTool,
+}
+
+const typeLabels: Record<ContentItem['type'], string> = {
+    case: 'Cases',
+    article: 'Articles',
+    blog: 'Blogs',
+}
 
 export default function AdminDashboard() {
-    const [role, setRole] = useState<Role>('executive')
-    const [days, setDays] = useState(7)
+    const [items, setItems] = useState<ContentItem[]>([])
     const [loading, setLoading] = useState(true)
-    const [data, setData] = useState<AnalyticsData | null>(null)
-    const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+    const [error, setError] = useState<string | null>(null)
+    const [lastFetched, setLastFetched] = useState<Date | null>(null)
 
-    const fetchAnalytics = async () => {
+    const fetchContent = useCallback(async () => {
         setLoading(true)
+        setError(null)
         try {
-            const response = await fetch(`/api/analytics?days=${days}&role=${role}`)
-            if (response.ok) {
-                const result = await response.json()
-                setData(result)
-                setLastUpdated(new Date())
-            }
-        } catch (error) {
-            console.error('Failed to fetch analytics:', error)
+            const data = await getAllContent()
+            setItems(data)
+            setLastFetched(new Date())
+        } catch {
+            setError('Failed to load content from Firestore.')
         } finally {
             setLoading(false)
         }
-    }
+    }, [])
 
     useEffect(() => {
-        fetchAnalytics()
-        // Auto-refresh every 60 seconds
-        const interval = setInterval(fetchAnalytics, 60000)
-        return () => clearInterval(interval)
-    }, [days, role])
+        fetchContent()
+    }, [fetchContent])
 
-    const formatNumber = (num: number): string => {
-        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
-        if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
-        return num.toString()
-    }
-
-    const formatTime = (seconds: number): string => {
-        if (seconds < 60) return `${seconds}s`
-        const mins = Math.floor(seconds / 60)
-        const secs = seconds % 60
-        return `${mins}m ${secs}s`
-    }
-
-    const getSourceColor = (source: string): string => {
-        const colors: Record<string, string> = {
-            'Organic Search': 'bg-green-500',
-            'Direct': 'bg-blue-500',
-            'LinkedIn': 'bg-sky-500',
-            'Twitter/X': 'bg-gray-500',
-            'Facebook': 'bg-indigo-500',
-            'Referral': 'bg-purple-500',
-            'Internal': 'bg-gray-600',
-        }
-        return colors[source] || 'bg-gray-500'
-    }
-
-    const getScrollDepthColor = (depth: number): string => {
-        if (depth >= 75) return 'text-green-400'
-        if (depth >= 50) return 'text-yellow-400'
-        if (depth >= 25) return 'text-orange-400'
-        return 'text-red-400'
-    }
-
-    if (loading && !data) {
+    if (loading && items.length === 0) {
         return (
             <div className="p-8 text-center">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-intelligence"></div>
-                <p className="text-gray-400 mt-4">Loading analytics...</p>
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-intelligence" />
+                <p className="text-gray-400 mt-4">Loading content stats...</p>
             </div>
         )
     }
 
-    const totalSources = Object.values(data?.sources || {}).reduce((a, b) => a + b, 0)
-    const returningRate = data && data.uniqueVisitors > 0 
-        ? Math.round((data.returningVisitors / data.uniqueVisitors) * 100) 
-        : 0
+    if (error && items.length === 0) {
+        return (
+            <div className="p-8 text-center">
+                <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+                <p className="text-red-400 font-medium">{error}</p>
+                <button
+                    onClick={fetchContent}
+                    className="mt-4 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition-colors"
+                >
+                    Retry
+                </button>
+            </div>
+        )
+    }
+
+    const totalCount = items.length
+    const publishedCount = items.filter(i => i.status === 'published').length
+    const draftCount = items.filter(i => i.status === 'draft').length
+    const archivedCount = items.filter(i => i.status === 'archived').length
+
+    const caseStats = computeTypeStats(items, 'case')
+    const articleStats = computeTypeStats(items, 'article')
+    const blogStats = computeTypeStats(items, 'blog')
+
+    const recentItems = [...items]
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, 10)
+
+    const pctPublished = totalCount ? Math.round((publishedCount / totalCount) * 100) : 0
+    const pctDraft = totalCount ? Math.round((draftCount / totalCount) * 100) : 0
+    const pctArchived = totalCount ? 100 - pctPublished - pctDraft : 0
 
     return (
         <div className="space-y-6">
-            {/* Header with Role Toggle and Controls */}
+            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                         <BarChart3 className="h-6 w-6 text-intelligence" />
-                        Analytics Dashboard
+                        Content Dashboard
                     </h2>
                     <p className="text-sm text-gray-400 mt-1">
-                        {lastUpdated && `Last updated: ${lastUpdated.toLocaleTimeString()}`}
+                        {lastFetched && `Last updated: ${lastFetched.toLocaleTimeString()}`}
                     </p>
                 </div>
-                
-                <div className="flex items-center gap-4">
-                    {/* Role Toggle */}
-                    <div className="flex rounded-lg overflow-hidden border border-gray-700">
-                        <button
-                            onClick={() => setRole('executive')}
-                            className={`px-4 py-2 text-sm font-medium transition-colors ${
-                                role === 'executive' 
-                                    ? 'bg-intelligence text-white' 
-                                    : 'bg-gray-800 text-gray-400 hover:text-white'
-                            }`}
-                        >
-                            Executive View
-                        </button>
-                        <button
-                            onClick={() => setRole('analyst')}
-                            className={`px-4 py-2 text-sm font-medium transition-colors ${
-                                role === 'analyst' 
-                                    ? 'bg-intelligence text-white' 
-                                    : 'bg-gray-800 text-gray-400 hover:text-white'
-                            }`}
-                        >
-                            Analyst View
-                        </button>
-                    </div>
-                    
-                    {/* Time Range */}
-                    <select
-                        value={days}
-                        onChange={(e) => setDays(parseInt(e.target.value))}
-                        className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
-                    >
-                        <option value={7}>Last 7 days</option>
-                        <option value={14}>Last 14 days</option>
-                        <option value={30}>Last 30 days</option>
-                    </select>
-                    
-                    {/* Refresh Button */}
-                    <button
-                        onClick={fetchAnalytics}
-                        disabled={loading}
-                        className="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 hover:text-white transition-colors disabled:opacity-50"
-                    >
-                        <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
-                    </button>
-                </div>
+                <button
+                    onClick={fetchContent}
+                    disabled={loading}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+                >
+                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    Refresh
+                </button>
             </div>
 
-            {/* Active Users Banner */}
-            {data && data.activeUsers > 0 && (
-                <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center gap-3">
-                    <div className="relative">
-                        <Activity className="h-6 w-6 text-green-400" />
-                        <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse" />
-                    </div>
-                    <div>
-                        <span className="text-green-400 font-semibold">{data.activeUsers} active user{data.activeUsers > 1 ? 's' : ''}</span>
-                        <span className="text-gray-400 ml-2">right now</span>
-                    </div>
+            {error && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                    {error}
                 </div>
             )}
 
-            {/* Key Metrics Grid */}
+            {/* Content Overview Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Total Sessions */}
                 <div className="p-6 rounded-xl glass-morphism border border-gray-800">
                     <div className="flex items-center justify-between mb-2">
-                        <Eye className="h-5 w-5 text-intelligence" />
-                        <span className="text-xs text-gray-500">Sessions</span>
+                        <FileText className="h-5 w-5 text-intelligence" />
+                        <span className="text-xs text-gray-500">Total</span>
                     </div>
-                    <div className="text-3xl font-bold text-white">{formatNumber(data?.uniqueSessions || 0)}</div>
-                    <div className="text-sm text-gray-400 mt-1">{formatNumber(data?.totalPageviews || 0)} pageviews</div>
+                    <div className="text-3xl font-bold text-white">{totalCount}</div>
+                    <div className="text-sm text-gray-400 mt-1">content items</div>
                 </div>
-                
-                {/* Unique Visitors */}
                 <div className="p-6 rounded-xl glass-morphism border border-gray-800">
                     <div className="flex items-center justify-between mb-2">
-                        <Users className="h-5 w-5 text-green-400" />
-                        <span className="text-xs text-gray-500">Visitors</span>
+                        <CheckCircle className="h-5 w-5 text-green-400" />
+                        <span className="text-xs text-gray-500">Published</span>
                     </div>
-                    <div className="text-3xl font-bold text-white">{formatNumber(data?.uniqueVisitors || 0)}</div>
-                    <div className="text-sm text-gray-400 mt-1">unique visitors</div>
+                    <div className="text-3xl font-bold text-white">{publishedCount}</div>
+                    <div className="text-sm text-gray-400 mt-1">live on site</div>
                 </div>
-                
-                {/* New Visitors */}
                 <div className="p-6 rounded-xl glass-morphism border border-gray-800">
                     <div className="flex items-center justify-between mb-2">
-                        <UserPlus className="h-5 w-5 text-blue-400" />
-                        <span className="text-xs text-gray-500">New</span>
+                        <Clock className="h-5 w-5 text-yellow-400" />
+                        <span className="text-xs text-gray-500">Drafts</span>
                     </div>
-                    <div className="text-3xl font-bold text-white">{formatNumber(data?.newVisitors || 0)}</div>
-                    <div className="text-sm text-gray-400 mt-1">new visitors</div>
+                    <div className="text-3xl font-bold text-white">{draftCount}</div>
+                    <div className="text-sm text-gray-400 mt-1">in progress</div>
                 </div>
-                
-                {/* Returning Visitors */}
                 <div className="p-6 rounded-xl glass-morphism border border-gray-800">
                     <div className="flex items-center justify-between mb-2">
-                        <UserCheck className="h-5 w-5 text-purple-400" />
-                        <span className="text-xs text-gray-500">Returning</span>
+                        <BarChart3 className="h-5 w-5 text-purple-400" />
+                        <span className="text-xs text-gray-500">Breakdown</span>
                     </div>
-                    <div className="text-3xl font-bold text-white">{returningRate}%</div>
-                    <div className="text-sm text-gray-400 mt-1">{formatNumber(data?.returningVisitors || 0)} returning</div>
+                    <div className="text-lg font-bold text-white mt-1">
+                        {caseStats.total}C / {articleStats.total}A / {blogStats.total}B
+                    </div>
+                    <div className="text-sm text-gray-400 mt-1">cases / articles / blogs</div>
                 </div>
             </div>
 
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Traffic Sources */}
-                <div className="p-6 rounded-xl glass-morphism border border-gray-800">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <Globe className="h-5 w-5 text-intelligence" />
-                        Traffic Sources
-                    </h3>
-                    <div className="space-y-3">
-                        {Object.entries(data?.sources || {})
-                            .sort(([, a], [, b]) => b - a)
-                            .map(([source, count]) => {
-                                const percentage = totalSources > 0 ? Math.round((count / totalSources) * 100) : 0
+            {/* Content by Type */}
+            <div>
+                <h3 className="text-lg font-semibold text-white mb-4">Content by Type</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {(['case', 'article', 'blog'] as const).map(type => {
+                        const stats = { case: caseStats, article: articleStats, blog: blogStats }[type]
+                        const Icon = typeIcons[type]
+                        return (
+                            <div key={type} className="p-6 rounded-xl glass-morphism border border-gray-800">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <Icon className="h-5 w-5 text-intelligence" />
+                                    <h4 className="text-white font-semibold">{typeLabels[type]}</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-400">Total</span>
+                                        <span className="text-white font-medium">{stats.total}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-400">Published</span>
+                                        <span className="text-green-400 font-medium">{stats.published}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-400">Drafts</span>
+                                        <span className="text-yellow-400 font-medium">{stats.draft}</span>
+                                    </div>
+                                    <div className="flex justify-between pt-2 border-t border-gray-800">
+                                        <span className="text-gray-500">Last Updated</span>
+                                        <span className="text-gray-400">
+                                            {stats.lastUpdated ? formatDate(stats.lastUpdated) : '—'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+
+            {/* Recent Content */}
+            <div className="p-6 rounded-xl glass-morphism border border-gray-800">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-intelligence" />
+                    Recent Content
+                </h3>
+                {recentItems.length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">No content items yet.</p>
+                ) : (
+                    <>
+                        <div className="hidden md:grid grid-cols-12 gap-4 text-xs text-gray-500 uppercase tracking-wider pb-3 border-b border-gray-800">
+                            <div className="col-span-5">Title</div>
+                            <div className="col-span-2 text-center">Type</div>
+                            <div className="col-span-2 text-center">Status</div>
+                            <div className="col-span-3 text-right">Last Updated</div>
+                        </div>
+                        <div className="space-y-1 mt-2">
+                            {recentItems.map(item => {
+                                const Icon = typeIcons[item.type]
                                 return (
-                                    <div key={source}>
-                                        <div className="flex items-center justify-between text-sm mb-1">
-                                            <span className="text-gray-300">{source}</span>
-                                            <span className="text-gray-400">{count} ({percentage}%)</span>
+                                    <div
+                                        key={item.id}
+                                        className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-3 rounded-lg bg-gray-800/30 hover:bg-gray-800/50 transition-colors"
+                                    >
+                                        <div className="col-span-5 text-white font-medium truncate">
+                                            {item.title}
                                         </div>
-                                        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                                            <div 
-                                                className={`h-full ${getSourceColor(source)} transition-all duration-500`}
-                                                style={{ width: `${percentage}%` }}
-                                            />
+                                        <div className="col-span-2 flex items-center justify-center gap-1.5">
+                                            <Icon className="h-3.5 w-3.5 text-gray-400" />
+                                            <span className="text-gray-300 text-sm capitalize">{item.type}</span>
+                                        </div>
+                                        <div className="col-span-2 flex items-center justify-center">
+                                            <StatusBadge status={item.status} />
+                                        </div>
+                                        <div className="col-span-3 text-right text-sm text-gray-400">
+                                            {formatDate(item.updatedAt)}
                                         </div>
                                     </div>
                                 )
                             })}
-                        {Object.keys(data?.sources || {}).length === 0 && (
-                            <p className="text-gray-500 text-center py-4">No traffic data yet</p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Exit Rate by Content Type */}
-                <div className="p-6 rounded-xl glass-morphism border border-gray-800">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <ExitIcon className="h-5 w-5 text-red-400" />
-                        Exit Rate by Content Type
-                    </h3>
-                    <div className="space-y-3">
-                        {Object.entries(data?.contentTypeExits || {})
-                            .sort(([, a], [, b]) => b - a)
-                            .map(([type, count]) => (
-                                <div key={type} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <Layers className="h-4 w-4 text-gray-400" />
-                                        <span className="text-gray-300 capitalize">{type}</span>
-                                    </div>
-                                    <span className="text-red-400 font-semibold">{count} exits</span>
-                                </div>
-                            ))}
-                        {Object.keys(data?.contentTypeExits || {}).length === 0 && (
-                            <p className="text-gray-500 text-center py-4">No exit data yet</p>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Top Landing Pages - Full Width */}
-            <div className="p-6 rounded-xl glass-morphism border border-gray-800">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-intelligence" />
-                    Top Landing Pages
-                    <span className="text-xs text-gray-500 font-normal ml-2">
-                        ({role === 'executive' ? 'Top 5' : 'Top 20'})
-                    </span>
-                </h3>
-                
-                {/* Table Header */}
-                <div className="hidden md:grid grid-cols-12 gap-4 text-xs text-gray-500 uppercase tracking-wider pb-3 border-b border-gray-800">
-                    <div className="col-span-5">Page</div>
-                    <div className="col-span-2 text-center">Views</div>
-                    <div className="col-span-2 text-center">Scroll Depth</div>
-                    <div className="col-span-2 text-center">Avg. Time</div>
-                    <div className="col-span-1 text-center">Exit %</div>
-                </div>
-                
-                {/* Table Body */}
-                <div className="space-y-2 mt-3">
-                    {(data?.topPages || []).map((page, index) => (
-                        <div 
-                            key={page.path}
-                            className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 p-3 rounded-lg bg-gray-800/30 hover:bg-gray-800/50 transition-colors"
-                        >
-                            <div className="col-span-5 flex items-center gap-3">
-                                <span className="text-gray-500 text-sm w-6">{index + 1}.</span>
-                                <div className="min-w-0">
-                                    <div className="text-white font-medium truncate">{page.title}</div>
-                                    <div className="text-xs text-gray-500 truncate">{page.path}</div>
-                                </div>
-                            </div>
-                            <div className="col-span-2 flex items-center justify-center md:justify-center">
-                                <span className="text-intelligence font-semibold">{formatNumber(page.views)}</span>
-                                <span className="text-gray-500 text-xs ml-1 md:hidden">views</span>
-                            </div>
-                            <div className="col-span-2 flex items-center justify-center md:justify-center gap-1">
-                                <MousePointer className="h-3 w-3 text-gray-500" />
-                                <span className={`font-semibold ${getScrollDepthColor(page.avgScrollDepth)}`}>
-                                    {page.avgScrollDepth}%
-                                </span>
-                            </div>
-                            <div className="col-span-2 flex items-center justify-center md:justify-center gap-1">
-                                <Clock className="h-3 w-3 text-gray-500" />
-                                <span className="text-gray-300">{formatTime(page.avgEngagement)}</span>
-                            </div>
-                            <div className="col-span-1 flex items-center justify-center md:justify-center">
-                                <span className={`font-semibold ${page.exitRate > 50 ? 'text-red-400' : 'text-gray-400'}`}>
-                                    {page.exitRate}%
-                                </span>
-                            </div>
                         </div>
-                    ))}
-                    {(data?.topPages || []).length === 0 && (
-                        <p className="text-gray-500 text-center py-8">No page data yet. Analytics will appear as visitors browse the site.</p>
-                    )}
-                </div>
+                    </>
+                )}
             </div>
 
-            {/* Daily Trend Chart - Analyst View Only */}
-            {role === 'analyst' && (
+            {/* Content Status Overview */}
+            {totalCount > 0 && (
                 <div className="p-6 rounded-xl glass-morphism border border-gray-800">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5 text-intelligence" />
-                        Daily Trend
+                        <Archive className="h-5 w-5 text-intelligence" />
+                        Content Status Overview
                     </h3>
-                    <div className="h-64 flex items-end gap-1">
-                        {(data?.dailyStats || []).map((day, index) => {
-                            const maxPageviews = Math.max(...(data?.dailyStats || []).map(d => d.pageviews), 1)
-                            const height = (day.pageviews / maxPageviews) * 100
-                            return (
-                                <div 
-                                    key={day.date}
-                                    className="flex-1 flex flex-col items-center gap-1 group"
-                                >
-                                    <div className="relative w-full">
-                                        <div 
-                                            className="w-full bg-intelligence/80 hover:bg-intelligence rounded-t transition-all cursor-pointer"
-                                            style={{ height: `${Math.max(height, 2)}%`, minHeight: '4px' }}
-                                        />
-                                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 px-2 py-1 rounded text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                            {day.pageviews} views
-                                        </div>
-                                    </div>
-                                    <span className="text-xs text-gray-500 transform -rotate-45 origin-top-left mt-2">
-                                        {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                    </span>
-                                </div>
-                            )
-                        })}
+                    <div className="h-4 rounded-full overflow-hidden flex bg-gray-800">
+                        {pctPublished > 0 && (
+                            <div
+                                className="bg-green-500 transition-all duration-500"
+                                style={{ width: `${pctPublished}%` }}
+                            />
+                        )}
+                        {pctDraft > 0 && (
+                            <div
+                                className="bg-yellow-500 transition-all duration-500"
+                                style={{ width: `${pctDraft}%` }}
+                            />
+                        )}
+                        {pctArchived > 0 && (
+                            <div
+                                className="bg-gray-500 transition-all duration-500"
+                                style={{ width: `${pctArchived}%` }}
+                            />
+                        )}
+                    </div>
+                    <div className="flex items-center gap-6 mt-3 text-sm">
+                        <div className="flex items-center gap-2">
+                            <span className="h-3 w-3 rounded-full bg-green-500" />
+                            <span className="text-gray-400">Published {pctPublished}%</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="h-3 w-3 rounded-full bg-yellow-500" />
+                            <span className="text-gray-400">Draft {pctDraft}%</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="h-3 w-3 rounded-full bg-gray-500" />
+                            <span className="text-gray-400">Archived {pctArchived}%</span>
+                        </div>
                     </div>
                 </div>
             )}
