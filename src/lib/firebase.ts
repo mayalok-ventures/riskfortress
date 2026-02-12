@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, memoryLocalCache, type Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCwJTYBxGlTdIxxowpt5sMpJHJBikneYOE',
@@ -13,6 +13,13 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-const db = getFirestore(app, 'risk-fortress');
+let db: Firestore;
+try {
+  db = initializeFirestore(app, {
+    localCache: memoryLocalCache(),
+  }, 'risk-fortress');
+} catch {
+  db = getFirestore(app, 'risk-fortress');
+}
 
 export { app, db };

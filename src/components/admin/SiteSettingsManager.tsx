@@ -32,22 +32,29 @@ export default function SiteSettingsManager() {
     })
     const [seoKeywordInput, setSeoKeywordInput] = useState('')
 
-    const loadSettings = useCallback(async () => {
+    const loadSettings = useCallback(async (retries = 3) => {
         setLoading(true)
         setError('')
-        try {
-            const settings = await getSiteSettings()
-            if (settings) {
-                if (settings.contact) setContact(prev => ({ ...prev, ...settings.contact }))
-                if (settings.seo) setSeo(prev => ({ ...prev, ...settings.seo, keywords: settings.seo?.keywords || [] }))
-                if (settings.social) setSocial(prev => ({ ...prev, ...settings.social }))
+        for (let attempt = 0; attempt < retries; attempt++) {
+            try {
+                const settings = await getSiteSettings()
+                if (settings) {
+                    if (settings.contact) setContact(prev => ({ ...prev, ...settings.contact }))
+                    if (settings.seo) setSeo(prev => ({ ...prev, ...settings.seo, keywords: settings.seo?.keywords || [] }))
+                    if (settings.social) setSocial(prev => ({ ...prev, ...settings.social }))
+                }
+                setLoading(false)
+                return
+            } catch (err) {
+                console.error(`Settings load attempt ${attempt + 1} failed:`, err)
+                if (attempt < retries - 1) {
+                    await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+                } else {
+                    setError(err instanceof Error ? err.message : 'Failed to load settings')
+                }
             }
-        } catch (err) {
-            console.error('Settings load error:', err)
-            setError('Failed to load settings. Check Firestore rules allow read on "settings" collection.')
-        } finally {
-            setLoading(false)
         }
+        setLoading(false)
     }, [])
 
     useEffect(() => { loadSettings() }, [loadSettings])
