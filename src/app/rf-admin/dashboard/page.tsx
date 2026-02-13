@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation'
 import {
     LayoutDashboard, FileText, BookOpen, Newspaper, Phone, Search, Share2,
     LogOut, Menu, X, Plus, Edit3, Trash2, Eye, EyeOff, Shield, Loader2,
-    Save, ExternalLink, Globe, Mail, MapPin
+    Save, ExternalLink, Globe, Mail, MapPin, BarChart3
 } from 'lucide-react'
 import ContentEditor from '@/components/Admin/ContentEditor'
+import AnalyticsDashboard from '@/components/Admin/AnalyticsDashboard'
 
 interface ContentItem {
     id: string; type: string; title: string; slug: string; status: string
@@ -24,10 +25,11 @@ interface SiteSettings {
     general?: { siteName?: string; tagline?: string; maintenanceMode?: boolean }
 }
 
-type Section = 'dashboard' | 'cases' | 'articles' | 'blogs' | 'contact' | 'seo' | 'social'
+type Section = 'dashboard' | 'analytics' | 'cases' | 'articles' | 'blogs' | 'contact' | 'seo' | 'social'
 
 const NAV_ITEMS: { id: Section; label: string; icon: React.ElementType }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'cases', label: 'Cases', icon: FileText },
     { id: 'articles', label: 'Articles', icon: BookOpen },
     { id: 'blogs', label: 'Blogs', icon: Newspaper },
@@ -211,6 +213,10 @@ export default function AdminDashboard() {
                             cases={cases.length} articles={articles.length} blogs={blogs.length}
                             published={published} drafts={drafts} loading={loading}
                         />
+                    )}
+
+                    {section === 'analytics' && token && (
+                        <AnalyticsDashboard token={token} />
                     )}
 
                     {(section === 'cases' || section === 'articles' || section === 'blogs') && (

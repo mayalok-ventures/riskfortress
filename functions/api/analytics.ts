@@ -3,7 +3,7 @@ import { getDoc, setDoc, addDoc } from '../lib/firestore'
 interface Env {}
 
 interface AnalyticsEvent {
-  type: 'pageview' | 'scroll' | 'engagement' | 'exit' | 'heartbeat'
+  type: 'pageview' | 'scroll' | 'engagement' | 'exit' | 'heartbeat' | 'share'
   visitorId: string
   sessionId: string
   path: string
@@ -106,6 +106,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const source = (event.source as string) || 'Direct'
         sources[source] = (sources[source] || 0) + 1
 
+        const platform = (event.platform as string) || source
+        const platforms = (stats.platforms || {}) as Record<string, number>
+        platforms[platform] = (platforms[platform] || 0) + 1
+        stats.platforms = platforms
+
         const path = event.path as string
         if (!pages[path]) {
           pages[path] = {
@@ -159,6 +164,39 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         activeUsers[event.visitorId] = event.timestamp
         break
       }
+
+      case 'share': {
+        const sharePath = event.path as string
+        const sharePlatform = (event.platform as string) || 'Unknown'
+        const shareTitle = (event.title as string) || sharePath
+
+        // Track shares in pages
+        if (!pages[sharePath]) {
+          pages[sharePath] = {
+            views: 0,
+            title: shareTitle,
+            avgScrollDepth: 0,
+            scrollCount: 0,
+            totalEngagement: 0,
+            engagementCount: 0,
+            exits: 0,
+          }
+        }
+
+        // Track shares
+        const shares = (stats.shares || {}) as Record<string, { count: number; title: string; contentType: string; platforms: Record<string, number> }>
+        const shareKey = sharePath
+        if (!shares[shareKey]) {
+          shares[shareKey] = { count: 0, title: shareTitle, contentType: (event.contentType as string) || 'page', platforms: {} }
+        }
+        shares[shareKey].count++
+        shares[shareKey].platforms[sharePlatform] = (shares[shareKey].platforms[sharePlatform] || 0) + 1
+        stats.shares = shares
+
+        // Track total shares count
+        stats.totalShares = ((stats.totalShares as number) || 0) + 1
+        break
+      }
     }
 
     stats.uniqueVisitors = uniqueVisitors
@@ -202,6 +240,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       contentTypeExits: Record<string, number>
       activeUsers: number
       dailyStats: Array<{ date: string; pageviews: number; visitors: number; sessions: number }>
+      topShared: Array<{ path: string; title: string; contentType: string; shares: number; platforms: Record<string, number> }>
+      platforms: Record<string, number>
+      todayPageviews: number
     } = {
       dates: [],
       totalPageviews: 0,
@@ -214,6 +255,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       contentTypeExits: {},
       activeUsers: 0,
       dailyStats: [],
+      topShared: [],
+      platforms: {},
+      todayPageviews: 0,
     }
 
     const allVisitors = new Set<string>()
@@ -230,6 +274,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         exits: number
       }
     > = {}
+
+    const shareAggregates: Record<string, { count: number; title: string; contentType: string; platforms: Record<string, number> }> = {}
+    const allPlatforms: Record<string, number> = {}
 
     for (let i = 0; i < days; i++) {
       const date = new Date()
@@ -292,6 +339,26 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           stats.contentTypeExits[type] = (stats.contentTypeExits[type] || 0) + (count as number)
         }
 
+        // Aggregate shares
+        for (const [path, shareData] of Object.entries(
+          (parsed.shares as Record<string, { count: number; title: string; contentType: string; platforms: Record<string, number> }>) || {}
+        )) {
+          if (!shareAggregates[path]) {
+            shareAggregates[path] = { count: 0, title: shareData.title, contentType: shareData.contentType, platforms: {} }
+          }
+          shareAggregates[path].count += shareData.count
+          for (const [platform, count] of Object.entries(shareData.platforms || {})) {
+            shareAggregates[path].platforms[platform] = (shareAggregates[path].platforms[platform] || 0) + count
+          }
+        }
+
+        // Aggregate platforms
+        for (const [platform, count] of Object.entries(
+          (parsed.platforms as Record<string, number>) || {}
+        )) {
+          allPlatforms[platform] = (allPlatforms[platform] || 0) + (count as number)
+        }
+
         if (i === 0) {
           const now = Date.now()
           for (const timestamp of Object.values(
@@ -338,6 +405,24 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       }))
       .sort((a, b) => b.views - a.views)
       .slice(0, role === 'executive' ? 5 : 20)
+
+    stats.topShared = Object.entries(shareAggregates)
+      .map(([path, data]) => ({
+        path,
+        title: data.title,
+        contentType: data.contentType,
+        shares: data.count,
+        platforms: data.platforms,
+      }))
+      .sort((a, b) => b.shares - a.shares)
+      .slice(0, 20)
+
+    stats.platforms = allPlatforms
+
+    // Today's pageviews
+    if (stats.dailyStats.length > 0) {
+      stats.todayPageviews = stats.dailyStats[stats.dailyStats.length - 1]?.pageviews || 0
+    }
 
     stats.dailyStats.reverse()
 

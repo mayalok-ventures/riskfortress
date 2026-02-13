@@ -87,6 +87,7 @@ export async function trackPageView(path: string, title: string, contentType?: s
             title,
             contentType: contentType || 'page',
             source: getTrafficSource(),
+            platform: getDetailedPlatform(),
             referrer: document.referrer || '',
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
@@ -232,6 +233,78 @@ export async function trackPageExit(path: string, contentType: string): Promise<
         })
     } catch (error) {
         console.error('Exit tracking error:', error)
+    }
+}
+
+// Detect traffic source from referrer - enhanced with more platforms
+function getDetailedPlatform(): string {
+    if (typeof window === 'undefined') return 'Direct'
+    
+    const referrer = document.referrer
+    const urlParams = new URLSearchParams(window.location.search)
+    
+    // Check UTM source first
+    const utmSource = urlParams.get('utm_source')
+    if (utmSource) {
+        const s = utmSource.toLowerCase()
+        if (s.includes('linkedin')) return 'LinkedIn'
+        if (s.includes('twitter') || s.includes('x.com')) return 'Twitter/X'
+        if (s.includes('facebook') || s.includes('fb')) return 'Facebook'
+        if (s.includes('instagram')) return 'Instagram'
+        if (s.includes('whatsapp')) return 'WhatsApp'
+        if (s.includes('telegram')) return 'Telegram'
+        if (s.includes('youtube')) return 'YouTube'
+        if (s.includes('reddit')) return 'Reddit'
+        if (s.includes('email') || s.includes('newsletter')) return 'Email'
+        return utmSource
+    }
+    
+    if (!referrer) return 'Direct'
+    
+    try {
+        const url = new URL(referrer)
+        const host = url.hostname.toLowerCase()
+        
+        if (host.includes('google')) return 'Google'
+        if (host.includes('bing')) return 'Bing'
+        if (host.includes('yahoo')) return 'Yahoo'
+        if (host.includes('duckduckgo')) return 'DuckDuckGo'
+        if (host.includes('linkedin')) return 'LinkedIn'
+        if (host.includes('twitter') || host.includes('x.com') || host.includes('t.co')) return 'Twitter/X'
+        if (host.includes('facebook') || host.includes('fb.com') || host.includes('fbcdn')) return 'Facebook'
+        if (host.includes('instagram')) return 'Instagram'
+        if (host.includes('whatsapp') || host.includes('wa.me')) return 'WhatsApp'
+        if (host.includes('telegram') || host.includes('t.me')) return 'Telegram'
+        if (host.includes('youtube')) return 'YouTube'
+        if (host.includes('reddit')) return 'Reddit'
+        if (host.includes('riskfortress')) return 'Internal'
+        
+        return host // Return the actual domain for unknown referrers
+    } catch {
+        return 'Direct'
+    }
+}
+
+// Track share events
+export async function trackShare(path: string, title: string, platform: string, contentType?: string, contentId?: string): Promise<void> {
+    try {
+        await fetch(ANALYTICS_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'share',
+                visitorId: getVisitorId(),
+                sessionId: getSessionId(),
+                path,
+                title,
+                platform,
+                contentType: contentType || 'page',
+                contentId: contentId || '',
+                timestamp: new Date().toISOString(),
+            }),
+        })
+    } catch (error) {
+        console.error('Share tracking error:', error)
     }
 }
 

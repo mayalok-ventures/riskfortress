@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, AlertTriangle } from 'lucide-react'
+import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, AlertTriangle, Share2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
 import { getContentBySlug, type ContentItem } from '@/lib/content'
+import { trackShare } from '@/lib/analytics'
 import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
 
 const getIconForSector = (sector?: string) => {
@@ -328,7 +329,36 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                     </div>
                 )}
 
+                {/* Share Buttons */}
                 <div className="mt-12 pt-8 border-t border-gray-800">
+                    <div className="flex items-center space-x-3 mb-6">
+                        <Share2 className="h-5 w-5 text-intelligence" />
+                        <span className="text-sm font-semibold text-gray-400">Share this {getTypeLabel(content.type).toLowerCase()}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                        {[
+                            { name: 'LinkedIn', color: 'bg-[#0A66C2] hover:bg-[#004182]', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}` },
+                            { name: 'Twitter/X', color: 'bg-[#1DA1F2] hover:bg-[#0d8bd9]', url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}&text=${encodeURIComponent(content.title)}` },
+                            { name: 'Facebook', color: 'bg-[#1877F2] hover:bg-[#0d65d9]', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}` },
+                            { name: 'WhatsApp', color: 'bg-[#25D366] hover:bg-[#1da851]', url: `https://wa.me/?text=${encodeURIComponent(content.title + ' ' + (typeof window !== 'undefined' ? window.location.href : ''))}` },
+                            { name: 'Telegram', color: 'bg-[#26A5E4] hover:bg-[#1e8abf]', url: `https://t.me/share/url?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}&text=${encodeURIComponent(content.title)}` },
+                            { name: 'Email', color: 'bg-[#EA4335] hover:bg-[#c5372c]', url: `mailto:?subject=${encodeURIComponent(content.title)}&body=${encodeURIComponent('Check out this intelligence report: ' + (typeof window !== 'undefined' ? window.location.href : ''))}` },
+                        ].map(platform => (
+                            <a
+                                key={platform.name}
+                                href={platform.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => trackShare(pathname || '', content.title, platform.name, content.type, content.id)}
+                                className={`px-4 py-2 rounded-lg text-white text-sm font-semibold transition-colors ${platform.color}`}
+                            >
+                                {platform.name}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="mt-8 pt-8 border-t border-gray-800">
                     <Link
                         href="/dossiers/"
                         className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-800 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors"
