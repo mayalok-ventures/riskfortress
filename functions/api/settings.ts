@@ -1,4 +1,4 @@
-import { getDoc, setDoc, updateDoc } from '../lib/firestore'
+import { getDoc, setDoc } from '../lib/firestore'
 import { requireAdminSession } from '../lib/admin-auth'
 
 interface Env {}
@@ -54,12 +54,32 @@ const COLLECTION = 'site_settings'
 const DOC_ID = 'riskfortress'
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-    const auth = await requireAdminSession(context.request)
-    if (!auth.ok) {
-        return jsonResponse({ error: auth.error }, auth.status)
-    }
-
     try {
+        const url = new URL(context.request.url)
+        const publicOnly = url.searchParams.get('public') === 'true'
+
+        if (publicOnly) {
+            // Public endpoint: no auth required, returns only public-safe fields
+            const snap = await getDoc(COLLECTION, DOC_ID)
+            if (!snap.exists) {
+                return jsonResponse({})
+            }
+            const data = snap.data() as Record<string, unknown>
+            // Only return public-safe fields
+            return jsonResponse({
+                contact: data.contact || {},
+                social: data.social || {},
+                seo: data.seo || {},
+                general: data.general || {},
+            })
+        }
+
+        // Admin endpoint: requires auth, returns everything
+        const auth = await requireAdminSession(context.request)
+        if (!auth.ok) {
+            return jsonResponse({ error: auth.error }, auth.status)
+        }
+
         const snap = await getDoc(COLLECTION, DOC_ID)
         if (!snap.exists) {
             return jsonResponse({})
@@ -81,19 +101,35 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         const body = (await context.request.json()) as Partial<SiteSettings>
         const now = new Date().toISOString()
 
+        // Read existing settings
         const snap = await getDoc(COLLECTION, DOC_ID)
+        const existing = snap.exists ? (snap.data() as Record<string, unknown>) : {}
 
-        if (!snap.exists) {
-            const data = { ...body, updatedAt: now }
-            await setDoc(COLLECTION, DOC_ID, data as Record<string, unknown>)
-            return jsonResponse(data)
+        // Deep merge: for each top-level key in body, merge nested objects
+        const merged: Record<string, unknown> = { ...existing }
+        for (const [key, value] of Object.entries(body)) {
+            if (value && typeof value === 'object' && !Array.isArray(value) && existing[key] && typeof existing[key] === 'object') {
+                // Merge nested objects (e.g., social, contact, seo)
+                const existingNested = existing[key] as Record<string, unknown>
+                const newNested = value as Record<string, unknown>
+                // Strip undefined values and merge
+                const mergedNested: Record<string, unknown> = { ...existingNested }
+                for (const [nk, nv] of Object.entries(newNested)) {
+                    if (nv !== undefined) {
+                        mergedNested[nk] = nv
+                    }
+                }
+                merged[key] = mergedNested
+            } else if (value !== undefined) {
+                merged[key] = value
+            }
         }
+        merged.updatedAt = now
 
-        const updates: Record<string, unknown> = { ...body, updatedAt: now }
-        await updateDoc(COLLECTION, DOC_ID, updates)
+        // Write the fully merged document
+        await setDoc(COLLECTION, DOC_ID, merged)
 
-        const updated = await getDoc(COLLECTION, DOC_ID)
-        return jsonResponse(updated.data())
+        return jsonResponse(merged)
     } catch (error) {
         console.error('PUT settings error:', error)
         return jsonResponse({ error: 'Failed to update settings' }, 500)

@@ -67,7 +67,7 @@ async function main() {
         console.log('Hash:', hash);
         console.log('\nDocument: secrets/admin_config');
         console.log('Database: riskfortress');
-        console.log('\nYou can now log in to the admin panel at /rfadmin\n');
+        console.log('\nYou can now log in to the admin panel at /rf-admin\n');
         
         process.exit(0);
     } catch (error) {

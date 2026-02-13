@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { Shield, Lock, Eye, FileText, Building, Cpu, BookOpen, Newspaper, Search, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPublishedContent, type ContentItem } from '@/lib/content'
+import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {
@@ -26,11 +28,14 @@ const getThreatLevelColor = (level?: string) => {
 }
 
 export default function DossiersPage() {
+    const router = useRouter()
     const [activeTab, setActiveTab] = useState('cases')
     const [cases, setCases] = useState<ContentItem[]>([])
     const [articles, setArticles] = useState<ContentItem[]>([])
     const [blogs, setBlogs] = useState<ContentItem[]>([])
     const [loading, setLoading] = useState(true)
+    const [emailModalOpen, setEmailModalOpen] = useState(false)
+    const [selectedCase, setSelectedCase] = useState<ContentItem | null>(null)
     
     // Search state for each section
     const [casesSearch, setCasesSearch] = useState('')
@@ -204,7 +209,16 @@ export default function DossiersPage() {
                                             return (
                                                 <div
                                                     key={item.id}
-                                                    className="p-6 rounded-2xl glass-morphism border border-gray-800 transition-all w-full"
+                                                    onClick={() => {
+                                                        const verified = sessionStorage.getItem('rf-email-verified')
+                                                        if (verified) {
+                                                            router.push(`/dossiers/${item.slug}/`)
+                                                        } else {
+                                                            setSelectedCase(item)
+                                                            setEmailModalOpen(true)
+                                                        }
+                                                    }}
+                                                    className="p-6 rounded-2xl glass-morphism border border-gray-800 transition-all w-full cursor-pointer hover:border-intelligence/30"
                                                 >
                                                     <div className="flex items-start justify-between mb-4">
                                                         <div className="flex items-center space-x-3">
@@ -467,6 +481,18 @@ export default function DossiersPage() {
                     </>
                 )}
             </div>
+
+            <ProfessionalEmailModal
+                isOpen={emailModalOpen}
+                onClose={() => { setEmailModalOpen(false); setSelectedCase(null) }}
+                caseTitle={selectedCase?.title || ''}
+                onSuccess={() => {
+                    sessionStorage.setItem('rf-email-verified', 'true')
+                    if (selectedCase) {
+                        router.push(`/dossiers/${selectedCase.slug}/`)
+                    }
+                }}
+            />
         </div>
     )
 }

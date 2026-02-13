@@ -7,6 +7,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { getContentBySlug, type ContentItem } from '@/lib/content'
+import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {
@@ -41,6 +42,8 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
     const [content, setContent] = useState<ContentItem | null>(null)
     const [loading, setLoading] = useState(true)
     const [accessDenied, setAccessDenied] = useState(false)
+    const [emailVerified, setEmailVerified] = useState(false)
+    const [showEmailModal, setShowEmailModal] = useState(false)
 
     const cleanPath = pathname?.replace(/\/$/, '') || ''
     const actualSlug = cleanPath.split('/').filter(Boolean).pop() || initialSlug
@@ -60,6 +63,14 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
             if (item) {
                 setContent(item)
                 setAccessDenied(false)
+                if (item.type !== 'case') {
+                    setEmailVerified(true)
+                } else {
+                    const verified = sessionStorage.getItem('rf-email-verified')
+                    if (verified) {
+                        setEmailVerified(true)
+                    }
+                }
             } else {
                 if (retryCount < 1) {
                     setTimeout(() => loadContent(slugToLoad, retryCount + 1), 1000)
@@ -124,6 +135,55 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                         </div>
                     </div>
                 </div>
+            </div>
+        )
+    }
+
+    if (content && content.type === 'case' && !emailVerified) {
+        return (
+            <div className="min-h-screen py-32">
+                <div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-grid-pattern" />
+                    </div>
+                </div>
+                <div className="container relative z-10 mx-auto px-6 max-w-2xl">
+                    <Link
+                        href="/dossiers/"
+                        className="inline-flex items-center space-x-2 text-gray-400 hover:text-intelligence transition-colors mb-8"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                        <span>Back to Dossiers</span>
+                    </Link>
+
+                    <div className="p-8 rounded-2xl glass-morphism border border-intelligence/20 text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-intelligence/10 border border-intelligence/20 mb-6">
+                            <Shield className="h-8 w-8 text-intelligence" />
+                        </div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                            Professional Verification Required
+                        </h1>
+                        <p className="text-gray-400 mb-6">
+                            To access this intelligence dossier, please verify your professional email address.
+                        </p>
+                        <button
+                            onClick={() => setShowEmailModal(true)}
+                            className="px-8 py-3 bg-gradient-to-r from-intelligence to-industrial text-white rounded-lg font-semibold hover:shadow-intelligence transition-all"
+                        >
+                            Verify Professional Email
+                        </button>
+                    </div>
+                </div>
+                <ProfessionalEmailModal
+                    isOpen={showEmailModal}
+                    onClose={() => setShowEmailModal(false)}
+                    caseTitle={content.title}
+                    onSuccess={() => {
+                        sessionStorage.setItem('rf-email-verified', 'true')
+                        setEmailVerified(true)
+                        setShowEmailModal(false)
+                    }}
+                />
             </div>
         )
     }

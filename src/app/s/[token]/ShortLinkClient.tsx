@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Shield, AlertTriangle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
 
 interface ResolveResult {
     type: string
@@ -17,6 +18,8 @@ export default function ShortLinkClient({ token }: { token: string }) {
     const router = useRouter()
     const [error, setError] = useState<string | null>(null)
     const [resolving, setResolving] = useState(true)
+    const [showEmailModal, setShowEmailModal] = useState(false)
+    const [pendingRedirect, setPendingRedirect] = useState<{slug: string, title: string} | null>(null)
 
     useEffect(() => {
         async function resolve() {
@@ -30,8 +33,17 @@ export default function ShortLinkClient({ token }: { token: string }) {
 
                 const data: ResolveResult = await res.json()
 
-                if (data.type === 'case' && data.grantToken) {
-                    sessionStorage.setItem('rf-case-grant', data.grantToken)
+                if (data.type === 'case') {
+                    if (data.grantToken) {
+                        sessionStorage.setItem('rf-case-grant', data.grantToken)
+                    }
+                    const verified = sessionStorage.getItem('rf-email-verified')
+                    if (!verified) {
+                        setPendingRedirect({ slug: data.slug, title: data.title })
+                        setShowEmailModal(true)
+                        setResolving(false)
+                        return
+                    }
                 }
 
                 router.replace(`/dossiers/${data.slug}/`)
@@ -43,6 +55,26 @@ export default function ShortLinkClient({ token }: { token: string }) {
 
         resolve()
     }, [token, router])
+
+    if (showEmailModal && pendingRedirect) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+                <ProfessionalEmailModal
+                    isOpen={showEmailModal}
+                    onClose={() => {
+                        setShowEmailModal(false)
+                        setError('Professional email verification is required to view this case.')
+                    }}
+                    caseTitle={pendingRedirect.title}
+                    onSuccess={() => {
+                        sessionStorage.setItem('rf-email-verified', 'true')
+                        setShowEmailModal(false)
+                        router.replace(`/dossiers/${pendingRedirect.slug}/`)
+                    }}
+                />
+            </div>
+        )
+    }
 
     if (error) {
         return (
