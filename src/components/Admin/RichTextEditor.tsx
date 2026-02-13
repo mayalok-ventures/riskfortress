@@ -25,7 +25,8 @@ import {
     Superscript as SupIcon, AlignLeft, AlignCenter, AlignRight, AlignJustify,
     List, ListOrdered, ListChecks, Quote, Code, Minus, Link as LinkIcon,
     Image as ImageIcon, Table as TableIcon, Undo2, Redo2, RemoveFormatting,
-    ChevronDown, Type, Palette, Highlighter
+    ChevronDown, Type, Palette, Highlighter, Upload, MousePointer2,
+    Rows3, Columns3, Trash2, Plus, ArrowRight
 } from 'lucide-react'
 
 interface RichTextEditorProps {
@@ -59,6 +60,22 @@ const HIGHLIGHT_COLORS = [
     '#FFF9C4','#DCEDC8','#B2DFDB','#BBDEFB','#E1BEE7','#FFCCBC',
     '#F48FB1','#B39DDB','#81D4FA','#A5D6A7','#FFE0B2','#FFCDD2',
 ]
+
+const IMAGE_SIZES = [
+    { label: 'Small (25%)', value: '25%' },
+    { label: 'Medium (50%)', value: '50%' },
+    { label: 'Large (75%)', value: '75%' },
+    { label: 'Full Width', value: '100%' },
+    { label: '200px', value: '200px' },
+    { label: '300px', value: '300px' },
+    { label: '400px', value: '400px' },
+    { label: '500px', value: '500px' },
+    { label: '600px', value: '600px' },
+]
+
+/* ================================================================== */
+/*  Sub-components                                                     */
+/* ================================================================== */
 
 function ToolbarButton({ onClick, active, disabled, title, children }: {
     onClick: () => void; active?: boolean; disabled?: boolean; title: string; children: React.ReactNode
@@ -177,7 +194,406 @@ function Dropdown({ label, options, value, onChange }: {
     )
 }
 
+/* ================================================================== */
+/*  Modal: Table Insert                                                */
+/* ================================================================== */
+
+function TableInsertModal({ open, onClose, onInsert }: {
+    open: boolean; onClose: () => void; onInsert: (rows: number, cols: number) => void
+}) {
+    const [rows, setRows] = useState(3)
+    const [cols, setCols] = useState(3)
+
+    if (!open) return null
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+                <h3 className="text-white font-semibold text-lg mb-4">Insert Table</h3>
+
+                <div className="space-y-4 mb-6">
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1.5">Rows</label>
+                        <div className="flex items-center space-x-3">
+                            <button type="button" onClick={() => setRows(Math.max(1, rows - 1))}
+                                className="p-1.5 rounded bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
+                                <Minus className="h-4 w-4" />
+                            </button>
+                            <input type="number" min={1} max={50} value={rows}
+                                onChange={e => setRows(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+                                className="w-20 text-center px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-intelligence focus:outline-none"
+                            />
+                            <button type="button" onClick={() => setRows(Math.min(50, rows + 1))}
+                                className="p-1.5 rounded bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
+                                <Plus className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1.5">Columns</label>
+                        <div className="flex items-center space-x-3">
+                            <button type="button" onClick={() => setCols(Math.max(1, cols - 1))}
+                                className="p-1.5 rounded bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
+                                <Minus className="h-4 w-4" />
+                            </button>
+                            <input type="number" min={1} max={20} value={cols}
+                                onChange={e => setCols(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+                                className="w-20 text-center px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-intelligence focus:outline-none"
+                            />
+                            <button type="button" onClick={() => setCols(Math.min(20, cols + 1))}
+                                className="p-1.5 rounded bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
+                                <Plus className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Grid preview */}
+                <div className="mb-6 p-3 rounded-lg bg-gray-800 border border-gray-700 overflow-auto max-h-32">
+                    <div className="inline-grid gap-0.5" style={{ gridTemplateColumns: `repeat(${Math.min(cols, 10)}, 1fr)` }}>
+                        {Array.from({ length: Math.min(rows, 8) * Math.min(cols, 10) }).map((_, i) => (
+                            <div key={i} className={`w-6 h-4 rounded-sm border ${
+                                i < Math.min(cols, 10) ? 'bg-intelligence/20 border-intelligence/30' : 'bg-gray-700 border-gray-600'
+                            }`} />
+                        ))}
+                    </div>
+                    {(rows > 8 || cols > 10) && (
+                        <p className="text-xs text-gray-500 mt-1">Preview truncated ({rows}×{cols})</p>
+                    )}
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                    <button type="button" onClick={onClose}
+                        className="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm">
+                        Cancel
+                    </button>
+                    <button type="button" onClick={() => { onInsert(rows, cols); onClose() }}
+                        className="px-5 py-2 bg-intelligence text-obsidian rounded-lg font-semibold text-sm hover:bg-intelligence-light transition-colors">
+                        Insert {rows}×{cols} Table
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Modal: Image Insert (Upload or URL)                                */
+/* ================================================================== */
+
+function ImageInsertModal({ open, onClose, onInsert }: {
+    open: boolean; onClose: () => void; onInsert: (url: string, width?: string) => void
+}) {
+    const [tab, setTab] = useState<'upload' | 'url'>('upload')
+    const [url, setUrl] = useState('')
+    const [uploading, setUploading] = useState(false)
+    const [uploadError, setUploadError] = useState('')
+    const [previewUrl, setPreviewUrl] = useState('')
+    const [selectedWidth, setSelectedWidth] = useState('100%')
+    const fileRef = useRef<HTMLInputElement>(null)
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploadError('')
+        setUploading(true)
+
+        // Show local preview immediately
+        const localPreview = URL.createObjectURL(file)
+        setPreviewUrl(localPreview)
+
+        try {
+            const token = sessionStorage.getItem('rf-admin-token')
+            const formData = new FormData()
+            formData.append('image', file)
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                setUploadError(data.error || 'Upload failed')
+                setPreviewUrl('')
+                return
+            }
+
+            setPreviewUrl(data.url)
+            setUrl(data.url)
+        } catch {
+            setUploadError('Network error. Please try again.')
+            setPreviewUrl('')
+        } finally {
+            setUploading(false)
+        }
+    }
+
+    const handleUrlChange = (newUrl: string) => {
+        setUrl(newUrl)
+        setPreviewUrl(newUrl)
+    }
+
+    const handleInsert = () => {
+        const finalUrl = tab === 'url' ? url : (previewUrl || url)
+        if (finalUrl) {
+            onInsert(finalUrl, selectedWidth)
+            onClose()
+            setUrl('')
+            setPreviewUrl('')
+            setUploadError('')
+        }
+    }
+
+    if (!open) return null
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
+                <h3 className="text-white font-semibold text-lg mb-4">Insert Image</h3>
+
+                {/* Tabs */}
+                <div className="flex rounded-lg bg-gray-800 border border-gray-700 p-1 mb-5">
+                    <button type="button" onClick={() => setTab('upload')}
+                        className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
+                            tab === 'upload' ? 'bg-intelligence text-obsidian' : 'text-gray-400 hover:text-white'
+                        }`}>
+                        <Upload className="h-4 w-4" />
+                        <span>Upload</span>
+                    </button>
+                    <button type="button" onClick={() => setTab('url')}
+                        className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
+                            tab === 'url' ? 'bg-intelligence text-obsidian' : 'text-gray-400 hover:text-white'
+                        }`}>
+                        <LinkIcon className="h-4 w-4" />
+                        <span>URL</span>
+                    </button>
+                </div>
+
+                {tab === 'upload' ? (
+                    <div className="space-y-4">
+                        <div
+                            onClick={() => fileRef.current?.click()}
+                            className="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-intelligence/50 transition-colors"
+                        >
+                            {uploading ? (
+                                <div className="flex flex-col items-center">
+                                    <div className="h-8 w-8 border-2 border-intelligence border-t-transparent rounded-full animate-spin mb-3" />
+                                    <p className="text-gray-400 text-sm">Uploading...</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <Upload className="h-10 w-10 text-gray-500 mx-auto mb-3" />
+                                    <p className="text-gray-300 text-sm font-medium">Click to upload an image</p>
+                                    <p className="text-gray-500 text-xs mt-1">PNG, JPG, GIF, WebP, SVG — Max 5MB</p>
+                                </>
+                            )}
+                        </div>
+                        <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                    </div>
+                ) : (
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1.5">Image URL</label>
+                        <input type="text" value={url} onChange={e => handleUrlChange(e.target.value)}
+                            placeholder="https://example.com/image.png"
+                            className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-intelligence focus:outline-none text-sm"
+                        />
+                    </div>
+                )}
+
+                {uploadError && (
+                    <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                        <p className="text-red-400 text-sm">{uploadError}</p>
+                    </div>
+                )}
+
+                {/* Preview */}
+                {previewUrl && !uploading && (
+                    <div className="mt-4 rounded-lg overflow-hidden border border-gray-700 bg-gray-800 p-2">
+                        <img src={previewUrl} alt="Preview" className="max-h-40 mx-auto object-contain rounded"
+                            onError={() => { if (tab === 'url') setPreviewUrl('') }} />
+                    </div>
+                )}
+
+                {/* Size selector */}
+                <div className="mt-4">
+                    <label className="block text-sm text-gray-400 mb-1.5">Image Width</label>
+                    <div className="flex flex-wrap gap-2">
+                        {IMAGE_SIZES.map(s => (
+                            <button key={s.value} type="button" onClick={() => setSelectedWidth(s.value)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                                    selectedWidth === s.value
+                                        ? 'bg-intelligence/20 border-intelligence/40 text-intelligence'
+                                        : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white hover:border-gray-600'
+                                }`}>
+                                {s.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                    <button type="button" onClick={onClose}
+                        className="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm">
+                        Cancel
+                    </button>
+                    <button type="button" onClick={handleInsert}
+                        disabled={!(previewUrl || url) || uploading}
+                        className="px-5 py-2 bg-intelligence text-obsidian rounded-lg font-semibold text-sm hover:bg-intelligence-light transition-colors disabled:opacity-50">
+                        Insert Image
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Modal: CTA Button Insert                                           */
+/* ================================================================== */
+
+function CTAButtonModal({ open, onClose, onInsert }: {
+    open: boolean; onClose: () => void; onInsert: (html: string) => void
+}) {
+    const [text, setText] = useState('Learn More')
+    const [href, setHref] = useState('')
+    const [bgColor, setBgColor] = useState('#D4AF37')
+    const [textColor, setTextColor] = useState('#000000')
+    const [size, setSize] = useState<'sm' | 'md' | 'lg'>('md')
+    const [align, setAlign] = useState<'left' | 'center' | 'right'>('center')
+
+    const sizeClasses: Record<string, string> = {
+        sm: 'padding:8px 16px;font-size:13px;',
+        md: 'padding:12px 28px;font-size:15px;',
+        lg: 'padding:16px 36px;font-size:17px;',
+    }
+
+    const handleInsert = () => {
+        if (!text.trim() || !href.trim()) return
+        const html = `<div style="text-align:${align};margin:24px 0;"><a href="${href}" target="_blank" rel="noopener noreferrer" style="display:inline-block;${sizeClasses[size]}background-color:${bgColor};color:${textColor};text-decoration:none;border-radius:8px;font-weight:600;letter-spacing:0.5px;">${text}</a></div>`
+        onInsert(html)
+        onClose()
+        setText('Learn More')
+        setHref('')
+    }
+
+    if (!open) return null
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <h3 className="text-white font-semibold text-lg mb-4">Insert CTA Button</h3>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1.5">Button Text</label>
+                        <input type="text" value={text} onChange={e => setText(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-intelligence focus:outline-none text-sm"
+                            placeholder="e.g. Schedule Consultation" />
+                    </div>
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1.5">Link URL</label>
+                        <input type="text" value={href} onChange={e => setHref(e.target.value)}
+                            className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-intelligence focus:outline-none text-sm"
+                            placeholder="https://..." />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-1.5">Background Color</label>
+                            <div className="flex items-center space-x-2">
+                                <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)}
+                                    className="h-9 w-9 rounded border border-gray-700 bg-gray-800 cursor-pointer" />
+                                <input type="text" value={bgColor} onChange={e => setBgColor(e.target.value)}
+                                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-xs font-mono focus:border-intelligence focus:outline-none" />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-1.5">Text Color</label>
+                            <div className="flex items-center space-x-2">
+                                <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)}
+                                    className="h-9 w-9 rounded border border-gray-700 bg-gray-800 cursor-pointer" />
+                                <input type="text" value={textColor} onChange={e => setTextColor(e.target.value)}
+                                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-xs font-mono focus:border-intelligence focus:outline-none" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1.5">Size</label>
+                        <div className="flex rounded-lg bg-gray-800 border border-gray-700 p-1">
+                            {(['sm', 'md', 'lg'] as const).map(s => (
+                                <button key={s} type="button" onClick={() => setSize(s)}
+                                    className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                                        size === s ? 'bg-intelligence text-obsidian' : 'text-gray-400 hover:text-white'
+                                    }`}>
+                                    {s === 'sm' ? 'Small' : s === 'md' ? 'Medium' : 'Large'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1.5">Alignment</label>
+                        <div className="flex rounded-lg bg-gray-800 border border-gray-700 p-1">
+                            {(['left', 'center', 'right'] as const).map(a => (
+                                <button key={a} type="button" onClick={() => setAlign(a)}
+                                    className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                                        align === a ? 'bg-intelligence text-obsidian' : 'text-gray-400 hover:text-white'
+                                    }`}>
+                                    {a.charAt(0).toUpperCase() + a.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Live Preview */}
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1.5">Preview</label>
+                        <div className="p-4 rounded-lg bg-white border border-gray-700" style={{ textAlign: align }}>
+                            <span style={{
+                                display: 'inline-block',
+                                padding: size === 'sm' ? '8px 16px' : size === 'lg' ? '16px 36px' : '12px 28px',
+                                fontSize: size === 'sm' ? '13px' : size === 'lg' ? '17px' : '15px',
+                                backgroundColor: bgColor,
+                                color: textColor,
+                                borderRadius: '8px',
+                                fontWeight: 600,
+                                letterSpacing: '0.5px',
+                            }}>
+                                {text || 'Button Text'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                    <button type="button" onClick={onClose}
+                        className="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm">
+                        Cancel
+                    </button>
+                    <button type="button" onClick={handleInsert} disabled={!text.trim() || !href.trim()}
+                        className="px-5 py-2 bg-intelligence text-obsidian rounded-lg font-semibold text-sm hover:bg-intelligence-light transition-colors disabled:opacity-50">
+                        Insert Button
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Main Editor Component                                              */
+/* ================================================================== */
+
 export default function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
+    const [showTableModal, setShowTableModal] = useState(false)
+    const [showImageModal, setShowImageModal] = useState(false)
+    const [showCTAModal, setShowCTAModal] = useState(false)
+
     const editor = useEditor({
         extensions: [
             StarterKit.configure({ heading: { levels: [1, 2, 3, 4] } }),
@@ -188,7 +604,10 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
             Highlight.configure({ multicolor: true }),
             TextAlign.configure({ types: ['heading', 'paragraph'] }),
             Link.configure({ openOnClick: false }),
-            TipTapImage,
+            TipTapImage.configure({
+                HTMLAttributes: { class: 'editor-image' },
+                allowBase64: true,
+            }),
             Table.configure({ resizable: true }),
             TableRow,
             TableCell,
@@ -214,15 +633,25 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
         if (url) editor.chain().focus().setLink({ href: url }).run()
     }, [editor])
 
-    const addImage = useCallback(() => {
+    const insertImage = useCallback((url: string, width?: string) => {
         if (!editor) return
-        const url = window.prompt('Enter image URL:')
-        if (url) editor.chain().focus().setImage({ src: url }).run()
+        if (width && width !== '100%') {
+            // Insert image with custom width via HTML
+            const html = `<img src="${url}" style="width:${width};max-width:100%;height:auto;" />`
+            editor.chain().focus().insertContent(html).run()
+        } else {
+            editor.chain().focus().setImage({ src: url }).run()
+        }
     }, [editor])
 
-    const addTable = useCallback(() => {
+    const insertTable = useCallback((rows: number, cols: number) => {
         if (!editor) return
-        editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+        editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run()
+    }, [editor])
+
+    const insertCTA = useCallback((html: string) => {
+        if (!editor) return
+        editor.chain().focus().insertContent(html).run()
     }, [editor])
 
     if (!editor) return <div className="h-[700px] bg-gray-800 rounded-xl animate-pulse" />
@@ -232,6 +661,8 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
         : editor.isActive('heading', { level: 3 }) ? '3'
         : editor.isActive('heading', { level: 4 }) ? '4'
         : '0'
+
+    const isInTable = editor.isActive('table')
 
     return (
         <div className="rounded-xl border border-gray-700 overflow-hidden">
@@ -346,11 +777,14 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                 <ToolbarButton onClick={addLink} active={editor.isActive('link')} title="Insert Link">
                     <LinkIcon className="h-4 w-4" />
                 </ToolbarButton>
-                <ToolbarButton onClick={addImage} title="Insert Image">
+                <ToolbarButton onClick={() => setShowImageModal(true)} title="Insert Image (Upload or URL)">
                     <ImageIcon className="h-4 w-4" />
                 </ToolbarButton>
-                <ToolbarButton onClick={addTable} title="Insert Table">
+                <ToolbarButton onClick={() => setShowTableModal(true)} title="Insert Table">
                     <TableIcon className="h-4 w-4" />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => setShowCTAModal(true)} title="Insert CTA Button">
+                    <ArrowRight className="h-4 w-4" />
                 </ToolbarButton>
 
                 <div className="w-px h-6 bg-gray-700 mx-1" />
@@ -365,6 +799,49 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     <RemoveFormatting className="h-4 w-4" />
                 </ToolbarButton>
             </div>
+
+            {/* Table Controls Row (shown only when cursor is in a table) */}
+            {isInTable && (
+                <div className="flex flex-wrap items-center gap-1 px-3 py-1.5 bg-gray-850 bg-intelligence/5 border-b border-intelligence/20">
+                    <span className="text-xs text-intelligence font-semibold mr-2">TABLE:</span>
+                    <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()} title="Add Row Above">
+                        <span className="text-xs font-bold">+↑</span>
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} title="Add Row Below">
+                        <span className="text-xs font-bold">+↓</span>
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => editor.chain().focus().deleteRow().run()} title="Delete Row">
+                        <span className="text-xs font-bold text-red-400">−Row</span>
+                    </ToolbarButton>
+
+                    <div className="w-px h-5 bg-gray-700 mx-1" />
+
+                    <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()} title="Add Column Left">
+                        <span className="text-xs font-bold">+←</span>
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} title="Add Column Right">
+                        <span className="text-xs font-bold">+→</span>
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => editor.chain().focus().deleteColumn().run()} title="Delete Column">
+                        <span className="text-xs font-bold text-red-400">−Col</span>
+                    </ToolbarButton>
+
+                    <div className="w-px h-5 bg-gray-700 mx-1" />
+
+                    <ToolbarButton onClick={() => editor.chain().focus().mergeCells().run()} title="Merge Cells">
+                        <span className="text-xs font-bold">Merge</span>
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => editor.chain().focus().splitCell().run()} title="Split Cell">
+                        <span className="text-xs font-bold">Split</span>
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => editor.chain().focus().toggleHeaderRow().run()} title="Toggle Header Row">
+                        <span className="text-xs font-bold">Header</span>
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => editor.chain().focus().deleteTable().run()} title="Delete Table">
+                        <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                    </ToolbarButton>
+                </div>
+            )}
 
             {/* Editor Content */}
             <div className="bg-white min-h-[600px]">
@@ -384,19 +861,29 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     .ProseMirror pre { background: #1a1a2e; color: #e0e0e0; padding: 1em; border-radius: 8px; overflow-x: auto; }
                     .ProseMirror code { background: #f0f0f0; padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.9em; }
                     .ProseMirror pre code { background: none; padding: 0; }
-                    .ProseMirror img { max-width: 100%; height: auto; border-radius: 8px; margin: 1em 0; }
+                    .ProseMirror img { max-width: 100%; height: auto; border-radius: 8px; margin: 1em auto; display: block; cursor: pointer; }
+                    .ProseMirror img.ProseMirror-selectednode { outline: 3px solid #D4AF37; outline-offset: 3px; }
                     .ProseMirror hr { border: none; border-top: 2px solid #e0e0e0; margin: 2em 0; }
                     .ProseMirror a { color: #1155CC; text-decoration: underline; }
-                    .ProseMirror table { border-collapse: collapse; width: 100%; margin: 1em 0; }
-                    .ProseMirror th, .ProseMirror td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+                    .ProseMirror table { border-collapse: collapse; width: 100%; margin: 1em 0; table-layout: fixed; }
+                    .ProseMirror th, .ProseMirror td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; position: relative; min-width: 60px; }
                     .ProseMirror th { background: #f5f5f5; font-weight: 600; }
+                    .ProseMirror .selectedCell { background: rgba(212,175,55,0.15); }
+                    .ProseMirror .column-resize-handle { position: absolute; right: -2px; top: 0; bottom: 0; width: 4px; background: #D4AF37; cursor: col-resize; }
                     .ProseMirror ul[data-type="taskList"] { list-style: none; padding-left: 0; }
                     .ProseMirror ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 8px; }
                     .ProseMirror ul[data-type="taskList"] li label { margin-top: 3px; }
                     .ProseMirror mark { padding: 0.1em 0.2em; border-radius: 2px; }
+                    .tableWrapper { overflow-x: auto; margin: 1em 0; }
+                    .resize-cursor { cursor: col-resize; }
                 `}</style>
                 <EditorContent editor={editor} />
             </div>
+
+            {/* Modals */}
+            <TableInsertModal open={showTableModal} onClose={() => setShowTableModal(false)} onInsert={insertTable} />
+            <ImageInsertModal open={showImageModal} onClose={() => setShowImageModal(false)} onInsert={insertImage} />
+            <CTAButtonModal open={showCTAModal} onClose={() => setShowCTAModal(false)} onInsert={insertCTA} />
         </div>
     )
 }

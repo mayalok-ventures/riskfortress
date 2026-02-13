@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Save, Send, X, Plus, Loader2, CheckCircle2, Image as ImageIcon } from 'lucide-react'
+import { ArrowLeft, Save, Send, X, Plus, Loader2, CheckCircle2, Image as ImageIcon, Upload } from 'lucide-react'
 import RichTextEditor from './RichTextEditor'
 
 interface ContentEditorProps {
@@ -33,6 +33,7 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
     const [saveSuccess, setSaveSuccess] = useState(false)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(!!editId)
+    const [thumbnailUploading, setThumbnailUploading] = useState(false)
 
     const token = typeof window !== 'undefined' ? sessionStorage.getItem('rf-admin-token') : null
 
@@ -258,6 +259,34 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
                     {/* Thumbnail */}
                     <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
                         <label className="block text-sm text-gray-400 mb-2">Thumbnail</label>
+                        {/* Upload button */}
+                        <label className="flex items-center justify-center space-x-2 px-3 py-3 mb-3 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-intelligence/50 transition-colors">
+                            {thumbnailUploading ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-intelligence" />
+                            ) : (
+                                <Upload className="h-4 w-4 text-gray-500" />
+                            )}
+                            <span className="text-sm text-gray-400">{thumbnailUploading ? 'Uploading...' : 'Upload image'}</span>
+                            <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                const file = e.target.files?.[0]
+                                if (!file) return
+                                setThumbnailUploading(true)
+                                try {
+                                    const formData = new FormData()
+                                    formData.append('image', file)
+                                    const res = await fetch('/api/upload', {
+                                        method: 'POST',
+                                        headers: { Authorization: `Bearer ${token}` },
+                                        body: formData,
+                                    })
+                                    const data = await res.json()
+                                    if (res.ok) setThumbnail(data.url)
+                                    else setError(data.error || 'Upload failed')
+                                } catch { setError('Upload failed') }
+                                finally { setThumbnailUploading(false) }
+                            }} />
+                        </label>
+                        {/* Or paste URL */}
                         <div className="flex items-center space-x-2">
                             <ImageIcon className="h-4 w-4 text-gray-500 flex-shrink-0" />
                             <input
@@ -265,12 +294,16 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
                                 value={thumbnail}
                                 onChange={(e) => setThumbnail(e.target.value)}
                                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm placeholder-gray-500 focus:border-intelligence focus:outline-none"
-                                placeholder="Image URL..."
+                                placeholder="Or paste image URL..."
                             />
                         </div>
                         {thumbnail && (
-                            <div className="mt-3 rounded-lg overflow-hidden border border-gray-700">
+                            <div className="mt-3 rounded-lg overflow-hidden border border-gray-700 relative group">
                                 <img src={thumbnail} alt="Thumbnail preview" className="w-full h-32 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                <button type="button" onClick={() => setThumbnail('')}
+                                    className="absolute top-2 right-2 p-1 rounded-full bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <X className="h-3 w-3" />
+                                </button>
                             </div>
                         )}
                     </div>
