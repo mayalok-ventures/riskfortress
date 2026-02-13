@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Shield, Lock, Eye, FileText, Building, Cpu, BookOpen, Newspaper, Search, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getPublishedContent, type ContentItem } from '@/lib/admin/api-store'
+import { getPublishedContent, type ContentItem } from '@/lib/content'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {

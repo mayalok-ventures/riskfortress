@@ -17,9 +17,9 @@ let db: Firestore;
 try {
   db = initializeFirestore(app, {
     localCache: memoryLocalCache(),
-  }, 'risk-fortress');
+  }, 'riskfortress');
 } catch {
-  db = getFirestore(app, 'risk-fortress');
+  db = getFirestore(app, 'riskfortress');
 }
 
 export { app, db };

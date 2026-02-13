@@ -6,7 +6,7 @@ import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, 
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { getContentBySlug, type ContentItem } from '@/lib/admin/api-store'
+import { getContentBySlug, type ContentItem } from '@/lib/content'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {

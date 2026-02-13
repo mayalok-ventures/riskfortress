@@ -29,7 +29,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app, 'risk-fortress');
+const db = getFirestore(app, 'riskfortress');
 
 function generateHash(password) {
     return crypto.createHash('sha256').update(password).digest('hex');
@@ -66,7 +66,7 @@ async function main() {
         console.log('Password:', '*'.repeat(password.length));
         console.log('Hash:', hash);
         console.log('\nDocument: secrets/admin_config');
-        console.log('Database: risk-fortress');
+        console.log('Database: riskfortress');
         console.log('\nYou can now log in to the admin panel at /rfadmin\n');
         
         process.exit(0);

@@ -3,11 +3,11 @@
  * RiskFortress Migration Script: Cloudflare D1 + KV -> Firebase Firestore
  * 
  * This script fetches all content from the old Cloudflare API endpoints
- * and writes them to the Firebase Firestore 'risk-fortress' database.
+ * and writes them to the Firebase Firestore 'riskfortress' database.
  * 
  * Prerequisites:
  *   - The old Cloudflare site must still be accessible (or use a backup)
- *   - Firebase Firestore 'risk-fortress' database must exist with open rules
+ *   - Firebase Firestore 'riskfortress' database must exist with open rules
  * 
  * Usage:
  *   node scripts/migrate-d1-to-firebase.js
@@ -28,7 +28,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app, 'risk-fortress');
+const db = getFirestore(app, 'riskfortress');
 
 const fs = require('fs');
 const path = require('path');

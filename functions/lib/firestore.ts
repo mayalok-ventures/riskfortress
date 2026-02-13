@@ -1,5 +1,5 @@
 const BASE_URL =
-  'https://firestore.googleapis.com/v1/projects/mayalok-ventures/databases/risk-fortress/documents'
+  'https://firestore.googleapis.com/v1/projects/mayalok-ventures/databases/riskfortress/documents'
 
 // ---------------------------------------------------------------------------
 // Types
