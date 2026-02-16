@@ -60,7 +60,7 @@
         "critters": "^0.0.23",
         "crypto-js": "4.2.0",
         "cssnano": "^7.1.2",
-        "date-fns": "3.3.1",
+        "date-fns": "4.1.0",
         "firebase": "^12.9.0",
         "framer-motion": "10.16.16",
         "lucide-react": "0.344.0",
