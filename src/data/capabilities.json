@@ -1,0 +1,140 @@
+{
+    "capabilities": [
+        {
+            "id": "erm",
+            "title": "Enterprise Risk Management",
+            "description": "Comprehensive risk assessment and mitigation strategies for Fortune 500 companies",
+            "icon": "Shield",
+            "features": [
+                "Risk Identification & Assessment",
+                "Business Continuity Planning",
+                "Crisis Management Framework",
+                "Regulatory Compliance Advisory"
+            ],
+            "clients": [
+                "Fortune 500 Companies",
+                "Industrial Conglomerates"
+            ],
+            "budgetRange": "₹50L - ₹50Cr",
+            "keywords": [
+                "Enterprise Risk Management India",
+                "Corporate Risk Framework"
+            ]
+        },
+        {
+            "id": "land",
+            "title": "Land Due Diligence",
+            "description": "End-to-end land verification and encroachment prevention for industrial projects",
+            "icon": "Building",
+            "features": [
+                "Title Verification & Chain Analysis",
+                "Encroachment Risk Assessment",
+                "Environmental Compliance Check",
+                "Political Risk Analysis"
+            ],
+            "clients": [
+                "Real Estate Developers",
+                "Infrastructure Companies"
+            ],
+            "budgetRange": "₹10L - ₹5Cr",
+            "keywords": [
+                "Land Due Diligence India",
+                "Industrial Land Verification"
+            ]
+        },
+        {
+            "id": "tscm",
+            "title": "TSCM Services",
+            "description": "Technical Surveillance Counter-Measures for corporate espionage prevention",
+            "icon": "Cpu",
+            "features": [
+                "Bug Sweeping & Detection",
+                "Electronic Surveillance Audit",
+                "Secure Communication Setup",
+                "Cybersecurity Threat Assessment"
+            ],
+            "clients": [
+                "Technology Companies",
+                "Financial Institutions"
+            ],
+            "budgetRange": "₹25L - ₹10Cr",
+            "keywords": [
+                "TSCM Services India",
+                "Bug Sweeping"
+            ]
+        },
+        {
+            "id": "family",
+            "title": "Family Office Security",
+            "description": "Complete security architecture for ultra-high-net-worth families",
+            "icon": "Users",
+            "features": [
+                "Legacy Succession Security",
+                "Digital Footprint Management",
+                "Executive Protection Planning",
+                "Reputation Risk Management"
+            ],
+            "clients": [
+                "Family Offices",
+                "Industrial Dynasties"
+            ],
+            "budgetRange": "₹1Cr - ₹20Cr",
+            "keywords": [
+                "Family Office Risk Management",
+                "HNI Security"
+            ]
+        }
+    ],
+    "sectors": {
+        "industrial": {
+            "title": "Industrial & Manufacturing",
+            "capabilities": [
+                "Land Due Diligence",
+                "Labor Intelligence",
+                "Supply Chain Security"
+            ],
+            "caseStudies": 15
+        },
+        "corporate": {
+            "title": "Corporate & Technology",
+            "capabilities": [
+                "TSCM Services",
+                "Insider Threat Detection",
+                "Digital Espionage Defense"
+            ],
+            "caseStudies": 12
+        },
+        "familyOffice": {
+            "title": "Family Offices & HNIs",
+            "capabilities": [
+                "Legacy Security",
+                "Executive Protection",
+                "Digital Footprint Management"
+            ],
+            "caseStudies": 8
+        }
+    },
+    "differentiators": {
+        "focus": "Exclusively serves Fortune 500 and HNI clients",
+        "technology": "AI-driven predictive analytics and military-grade TSCM",
+        "team": "Former intelligence officers and security experts",
+        "approach": "Predictive intelligence over reactive security"
+    },
+    "pricingModels": {
+        "retainer": {
+            "name": "Enterprise Retainer",
+            "description": "Annual comprehensive security coverage",
+            "startingPrice": "₹50L"
+        },
+        "project": {
+            "name": "Project-Based",
+            "description": "Specific threat assessment or due diligence",
+            "startingPrice": "₹10L"
+        },
+        "consultation": {
+            "name": "Executive Consultation",
+            "description": "Strategy sessions with security council",
+            "startingPrice": "₹5L"
+        }
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "module": "commonjs",
+        "target": "es2015",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "types": [
+            "jest",
+            "node",
+            "@testing-library/jest-dom"
+        ]
+    },
+    "include": [
+        "src/**/*",
+        "tests/**/*",
+        "jest.setup.ts",
+        "next-env.d.ts",
+        ".next/types/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

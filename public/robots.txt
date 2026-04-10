@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /secure-intake/
+Disallow: /api/
+Disallow: /rf-admin/
+Disallow: /s/
+
+Sitemap: https://riskfortress.in/sitemap.xml

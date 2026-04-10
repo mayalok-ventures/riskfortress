@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+.env*
+*.log
+.DS_Store
+.vercel
+.netlify
+dist
+build
+coverage
+.nyc_output

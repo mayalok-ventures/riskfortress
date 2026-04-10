@@ -1,0 +1,121 @@
+{
+    "dossiers": [
+        {
+            "id": "RF-2024-001",
+            "title": "Industrial Land Encroachment - Western Maharashtra",
+            "sector": "Industrial",
+            "threatLevel": "High",
+            "confidence": 92,
+            "date": "2024-01-15",
+            "location": "Pune, Maharashtra",
+            "summary": "Systematic land encroachment targeting 500+ acre industrial park through fraudulent land records and political pressure.",
+            "details": {
+                "threatActors": [
+                    "Local Land Mafia",
+                    "Corrupt Officials"
+                ],
+                "assetsAtRisk": [
+                    "₹2,500Cr Industrial Park",
+                    "Critical Infrastructure"
+                ],
+                "timeline": {
+                    "detected": "2024-01-10",
+                    "escalated": "2024-01-12",
+                    "resolved": "2024-01-20"
+                }
+            },
+            "status": "Neutralized",
+            "keywords": [
+                "Land Due Diligence",
+                "Factory Encroachment",
+                "Industrial Risk"
+            ]
+        },
+        {
+            "id": "RF-2024-002",
+            "title": "Corporate Espionage Network - Bengaluru Tech Hub",
+            "sector": "Technical",
+            "threatLevel": "Critical",
+            "confidence": 88,
+            "date": "2024-01-10",
+            "location": "Bengaluru, Karnataka",
+            "summary": "Organized TSCM breach in 3 major technology companies involving sophisticated listening devices and insider collaboration.",
+            "details": {
+                "threatActors": [
+                    "Competitor Intelligence Unit",
+                    "Insider Threats"
+                ],
+                "assetsAtRisk": [
+                    "₹500Cr Intellectual Property",
+                    "Strategic Roadmaps"
+                ],
+                "techniques": [
+                    "Hardware Bugs",
+                    "Network Penetration",
+                    "Social Engineering"
+                ]
+            },
+            "status": "Neutralized",
+            "keywords": [
+                "TSCM Services",
+                "Digital Espionage",
+                "Insider Threat"
+            ]
+        },
+        {
+            "id": "RF-2024-003",
+            "title": "Labor Unrest Prediction - Auto Manufacturing Belt",
+            "sector": "Industrial",
+            "threatLevel": "Medium",
+            "confidence": 85,
+            "date": "2024-01-05",
+            "location": "Chennai, Tamil Nadu",
+            "summary": "Predictive analytics indicating 65% probability of major strike across 5 manufacturing plants within 90 days.",
+            "details": {
+                "indicators": [
+                    "Union Activity",
+                    "Social Media Sentiment",
+                    "Historical Patterns"
+                ],
+                "affectedCompanies": [
+                    "Major Auto Manufacturers",
+                    "Component Suppliers"
+                ],
+                "recommendedActions": [
+                    "Pre-emptive Negotiation",
+                    "Security Enhancement"
+                ]
+            },
+            "status": "Monitoring",
+            "keywords": [
+                "Labor Unrest Prediction",
+                "Supply Chain Security",
+                "Industrial Intelligence"
+            ]
+        }
+    ],
+    "categories": {
+        "industrial": {
+            "title": "Industrial Intelligence",
+            "description": "Land disputes, labor unrest, supply chain threats",
+            "count": 45
+        },
+        "technical": {
+            "title": "Technical Threats",
+            "description": "Corporate espionage, cyber threats, TSCM breaches",
+            "count": 32
+        },
+        "hni": {
+            "title": "HNI & Family Office",
+            "description": "Executive protection, digital footprint, legacy security",
+            "count": 28
+        }
+    },
+    "statistics": {
+        "totalDossiers": 105,
+        "neutralizedThreats": 89,
+        "activeMonitoring": 12,
+        "averageConfidence": 87.5,
+        "responseTime": "48 hours"
+    }
+}

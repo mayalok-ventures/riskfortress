@@ -1,0 +1,256 @@
+Request Body:
+
+json
+{
+  "familyName": "Sharma Family Office",
+  "assetsUnderManagement": "₹5,000Cr",
+  "locations": [
+    {
+      "type": "primary_residence",
+      "address": "Mumbai, Maharashtra"
+    },
+    {
+      "type": "business_headquarters",
+      "address": "Delhi, India"
+    }
+  ],
+  "familyMembers": 12,
+  "executives": 3,
+  "concerns": ["digital_footprint", "legacy_security", "executive_protection"]
+}
+Response:
+
+json
+{
+  "assessmentId": "FO-2024-001-DEF789",
+  "recommendations": [
+    {
+      "category": "digital_security",
+      "priority": "high",
+      "action": "Digital footprint sanitization",
+      "timeline": "30 days"
+    }
+  ],
+  "estimatedCost": "₹25,00,000",
+  "nextSteps": ["initial_consultation", "risk_assessment"]
+}
+Webhook Integration
+1. Configure Webhook
+bash
+curl -X POST https://riskfortress.com/api/webhooks \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://yourcompany.com/webhook/riskfortress",
+    "events": ["threat_detected", "report_ready", "service_completed"],
+    "secret": "your_webhook_secret"
+  }'
+2. Webhook Events
+Threat Detected:
+
+json
+{
+  "event": "threat_detected",
+  "data": {
+    "threatId": "T-2024-001",
+    "title": "New threat detected",
+    "severity": "high",
+    "sector": "industrial",
+    "detectedAt": "2024-01-15T10:30:00Z"
+  },
+  "signature": "sha256=<signature>"
+}
+Report Ready:
+
+json
+{
+  "event": "report_ready",
+  "data": {
+    "reportId": "R-2024-001",
+    "type": "due_diligence",
+    "title": "Land Verification Report",
+    "url": "https://riskfortress.com/reports/R-2024-001",
+    "generatedAt": "2024-01-15T14:00:00Z"
+  }
+}
+3. Verify Webhook Signature
+javascript
+const crypto = require('crypto')
+
+function verifySignature(payload, signature, secret) {
+  const hmac = crypto.createHmac('sha256', secret)
+  const digest = hmac.update(JSON.stringify(payload)).digest('hex')
+  return `sha256=${digest}` === signature
+}
+Error Handling
+HTTP Status Codes
+200 - Success
+
+201 - Created
+
+400 - Bad Request
+
+401 - Unauthorized
+
+403 - Forbidden
+
+404 - Not Found
+
+429 - Too Many Requests
+
+500 - Internal Server Error
+
+Error Response Format
+json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid input data",
+    "details": {
+      "email": ["Invalid email format"]
+    },
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
+}
+SDKs & Libraries
+JavaScript/TypeScript SDK
+bash
+npm install @riskfortress/sdk
+typescript
+import { RiskFortress } from '@riskfortress/sdk'
+
+const client = new RiskFortress({
+  apiKey: 'your-api-key',
+  baseUrl: 'https://riskfortress.com/api'
+})
+
+// Submit intake
+const intake = await client.submitIntake({
+  company: 'Example Corp',
+  email: 'api@examplecorp.com',
+  // ... other fields
+})
+
+// Get threats
+const threats = await client.getThreats({
+  sector: 'industrial',
+  severity: 'high'
+})
+Python SDK
+bash
+pip install riskfortress-sdk
+python
+from riskfortress import RiskFortress
+
+client = RiskFortress(api_key='your-api-key')
+
+# Submit intake
+response = client.submit_intake({
+    'company': 'Example Corp',
+    'email': 'api@examplecorp.com'
+})
+
+# Get threats
+threats = client.get_threats(sector='industrial')
+Security Best Practices
+1. API Key Security
+javascript
+// Store API keys securely
+process.env.RISKFORTESS_API_KEY = 'your-api-key'
+
+// Rotate keys quarterly
+// Monitor key usage
+// Revoke compromised keys immediately
+2. Request Security
+javascript
+// Always use HTTPS
+const https = require('https')
+
+// Add request timeout
+const options = {
+  timeout: 10000, // 10 seconds
+  headers: {
+    'User-Agent': 'YourApp/1.0.0'
+  }
+}
+3. Data Encryption
+javascript
+// Encrypt sensitive data before sending
+const crypto = require('crypto')
+
+function encryptData(data, key) {
+  const cipher = crypto.createCipher('aes-256-gcm', key)
+  return cipher.update(JSON.stringify(data), 'utf8', 'hex')
+}
+Rate Limiting Strategy
+Implementing Backoff
+javascript
+class RiskFortressAPI {
+  async requestWithRetry(endpoint, options, retries = 3) {
+    try {
+      return await this.makeRequest(endpoint, options)
+    } catch (error) {
+      if (error.status === 429 && retries > 0) {
+        const delay = Math.pow(2, 4 - retries) * 1000
+        await new Promise(resolve => setTimeout(resolve, delay))
+        return this.requestWithRetry(endpoint, options, retries - 1)
+      }
+      throw error
+    }
+  }
+}
+Compliance & Auditing
+1. Audit Logs
+All API requests are logged with:
+
+Timestamp
+
+IP address
+
+User agent
+
+Request/response sizes
+
+Processing time
+
+2. Data Retention
+Request logs: 90 days
+
+API keys: Until revoked
+
+User data: 72 hours (for intake)
+
+Reports: 7 years
+
+3. Compliance Certifications
+ISO 27001
+
+SOC 2 Type II
+
+GDPR Compliant
+
+RBI Guidelines (for India)
+
+Support & Resources
+Getting Help
+API Documentation: https://riskfortress.com/api/docs
+
+Developer Forum: https://forum.riskfortress.com
+
+Support Email: api-support@riskfortress.com
+
+Emergency: +91-22-XXXX-XXXX
+
+Status Page
+Service Status: https://status.riskfortress.com
+
+Incident History: https://status.riskfortress.com/history
+
+Subscribe to Updates: https://status.riskfortress.com/subscribe
+
+Changelog
+Latest Version: v1.2.0
+
+Release Notes: https://riskfortress.com/api/changelog
+
+Deprecation Policy: 6 months notice for breaking changes

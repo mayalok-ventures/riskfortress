@@ -1,0 +1,10 @@
+# Cloudflare Pages redirects
+
+# Canonicalize to trailing slash (matches Next.js trailingSlash=true)
+/capabilities  /capabilities/  301
+/council  /council/  301
+/mandate  /mandate/  301
+/secure-intake  /secure-intake/  301
+/dossiers  /dossiers/  301
+/privacy  /privacy/  301
+/terms  /terms/  301

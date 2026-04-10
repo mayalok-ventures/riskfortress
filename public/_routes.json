@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "include": [
+    "/api/*",
+    "/dossiers/*"
+  ],
+  "exclude": [
+    "/dossiers/",
+    "/_next/*",
+    "/*.js",
+    "/*.css"
+  ]
+}
