@@ -25,13 +25,16 @@ export const metadata: Metadata = {
         'Hire Private Intelligence Agency India',
     ],
     openGraph: {
-        url: '/',
+        type: 'website',
+        url: 'https://riskfortress.in/',
         title: 'RiskFortress India | Private Intelligence & HNI Asset Protection',
         description: 'RiskFortress India delivers predictive risk intelligence for Ultra-HNWIs with ₹100Cr+ assets. We predict the crisis you don\'t see coming.',
         siteName: 'RiskFortress India',
+        images: [{ url: 'https://riskfortress.in/logos/og-image.png' }],
     },
     twitter: {
-        title: 'RiskFortress India | Private Intelligence Firm',
+        card: 'summary_large_image',
+        title: 'RiskFortress India | Private Intelligence & HNI Asset Protection',
         description: 'RiskFortress India delivers predictive risk intelligence for Ultra-HNWIs with ₹100Cr+ assets. We predict the crisis you don\'t see coming.',
     },
     alternates: {
