@@ -2,9 +2,9 @@ name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   deploy:
@@ -46,7 +46,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: 'riskfortress'
           directory: 'out'
-          branch: main
+          branch: master
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Purge Cloudflare Cache
