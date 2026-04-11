@@ -67,7 +67,7 @@ export default function Footer() {
                         <div className="flex items-center space-x-3 mb-6">
                             <Image
                                 src="/logos/logo.png"
-                                alt="RiskFortress India - Private Intelligence & HNI Asset Protection"
+                                alt="RiskFortress — Private Risk Intelligence"
                                 width={40}
                                 height={40}
                             />

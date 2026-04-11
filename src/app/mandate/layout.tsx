@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'The 1% Mandate | High-Stakes Advisory Model | RiskFortress India',
-    description: 'Our 1% fee model ensures aligned incentives. We engage only where risks exceed ₹1 Crore — protecting generational wealth through forensic intelligence.',
+    description: 'The 1% Mandate — RiskFortress only engages where stakes exceed ₹1 Crore. Value-based pricing aligned to protected asset value for Ultra-HNWIs across India.',
     keywords: [
         'High-Stakes Advisory Mandate',
         '1% Fee Model',
@@ -20,10 +20,10 @@ export const metadata: Metadata = {
     openGraph: {
         url: '/mandate/',
         title: 'The 1% Mandate | High-Stakes Advisory Model | RiskFortress India',
-        description: 'Our 1% fee model ensures aligned incentives. We engage only where risks exceed ₹1 Crore — protecting generational wealth through forensic intelligence.',
+        description: 'The 1% Mandate — RiskFortress only engages where stakes exceed ₹1 Crore. Value-based pricing aligned to protected asset value for Ultra-HNWIs across India.',
     },
     alternates: {
-        canonical: '/mandate/',
+        canonical: 'https://riskfortress.in/mandate/',
     },
 }
 

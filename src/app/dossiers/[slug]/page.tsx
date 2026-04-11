@@ -97,5 +97,40 @@ export function generateStaticParams() {
 
 export default async function DossierDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params
-    return <DossierDetailClient slug={slug} />
+    const content = slug !== '_placeholder' ? await getContentBySlug(slug) : null
+
+    return (
+        <>
+            <DossierDetailClient slug={slug} />
+            {content && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@type': 'Article',
+                            headline: content.title,
+                            description: content.summary,
+                            datePublished: content.publishedAt || content.createdAt,
+                            author: {
+                                '@type': 'Person',
+                                name: content.author || 'RiskFortress Intelligence Team',
+                            },
+                            publisher: {
+                                '@type': 'Organization',
+                                name: 'RiskFortress',
+                                logo: {
+                                    '@type': 'ImageObject',
+                                    url: 'https://riskfortress.in/logos/logo.png',
+                                },
+                            },
+                            mainEntityOfPage: `https://riskfortress.in/dossiers/${slug}/`,
+                            ...(content.thumbnail ? { image: content.thumbnail } : {}),
+                            keywords: content.keywords?.join(', ') || '',
+                        }),
+                    }}
+                />
+            )}
+        </>
+    )
 }

@@ -5,7 +5,7 @@ import IntakeForm from '@/components/SecureForm/IntakeForm'
 
 export const metadata: Metadata = {
     title: 'Request Discrete Consultation | RiskFortress India',
-    description: 'Request a discrete consultation with RiskFortress India. Confidential engagement for Ultra-HNWIs with assets exceeding ₹100 Crores.',
+    description: 'Request a discrete consultation with RiskFortress. Confidential intake for Ultra-HNWIs and enterprises seeking predictive risk intelligence.',
     keywords: [
         'Hire Private Intelligence Agency India',
         'Discrete Consultation',
@@ -21,10 +21,10 @@ export const metadata: Metadata = {
     openGraph: {
         url: '/secure-intake/',
         title: 'Request Discrete Consultation | RiskFortress India',
-        description: 'Request a discrete consultation with RiskFortress India. Confidential engagement for Ultra-HNWIs with assets exceeding ₹100 Crores.',
+        description: 'Request a discrete consultation with RiskFortress. Confidential intake for Ultra-HNWIs and enterprises seeking predictive risk intelligence.',
     },
     alternates: {
-        canonical: '/secure-intake/',
+        canonical: 'https://riskfortress.in/secure-intake/',
     },
 }
 
@@ -56,7 +56,7 @@ export default function SecureIntakePage() {
 
                         <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light mb-4">
                             Request Predictive Risk Intelligence, Corporate Fraud Investigation Services, 
-                            or TSCM Services Delhi from RiskFortress India—A Mayalok Ventures Division.
+                            or TSCM Services Delhi from RiskFortress India—A Mayalok Ventures Entity.
                         </p>
                         
                         <p className="text-sm text-gray-500 max-w-2xl mx-auto">
@@ -112,9 +112,9 @@ export default function SecureIntakePage() {
                     {/* Confidentiality Assurance */}
                     <div className="p-8 rounded-2xl glass-morphism border border-intelligence/20">
                         <div className="text-center">
-                            <h3 className="text-2xl font-bold text-white mb-4">
+                            <h2 className="text-2xl font-bold text-white mb-4">
                                 Confidentiality Assurance
-                            </h3>
+                            </h2>
                             <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
                                 All submissions are encrypted and reviewed only by senior intelligence personnel. 
                                 We do not retain data beyond engagement assessment.

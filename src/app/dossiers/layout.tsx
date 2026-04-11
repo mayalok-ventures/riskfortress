@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
     title: 'Case Scenarios | Intelligence Dossiers | RiskFortress India',
-    description: 'Predictive Risk Intelligence case studies. Corporate Fraud Investigation Services, Leak Investigation for Companies, and Insider Threat Detection Services. Private Intelligence Firm India preventing the next corporate collapse.',
+    description: 'Confidential risk intelligence briefs, case scenarios, forensic analyses, and investigative articles published by RiskFortress India.',
     keywords: [
         'Corporate Fraud Investigation Services',
         'Leak Investigation for Companies',
@@ -18,10 +18,10 @@ export const metadata: Metadata = {
     openGraph: {
         url: '/dossiers/',
         title: 'Case Scenarios | Intelligence Dossiers | RiskFortress India',
-        description: 'Intelligence case studies from Private Intelligence Firm India. Preventing the next corporate collapse through Predictive Risk Intelligence.',
+        description: 'Confidential risk intelligence briefs, case scenarios, forensic analyses, and investigative articles published by RiskFortress India.',
     },
     alternates: {
-        canonical: '/dossiers/',
+        canonical: 'https://riskfortress.in/dossiers/',
     },
 }
 

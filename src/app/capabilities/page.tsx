@@ -12,7 +12,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
     title: 'Intelligence Verticals | Forensic Risk Services | RiskFortress India',
-    description: 'Macro-Financial Forensics, Statutory Intelligence, and Geo-Environmental Risk analysis for Indian UHNWIs, family offices, and private equity firms.',
+    description: 'Explore RiskFortress intelligence verticals: Macro-Financial Forensics, Statutory & Structural Intelligence, and Geo-Environmental Risk analysis for high-value asset protection.',
     keywords: [
         'TSCM Services Delhi',
         'TSCM Services India',
@@ -30,12 +30,12 @@ export const metadata: Metadata = {
         'High Net Worth Security Audit',
     ],
     alternates: {
-        canonical: '/capabilities/',
+        canonical: 'https://riskfortress.in/capabilities/',
     },
     openGraph: {
         url: '/capabilities/',
         title: 'Intelligence Verticals | Forensic Risk Services | RiskFortress India',
-        description: 'Macro-Financial Forensics, Statutory Intelligence, and Geo-Environmental Risk analysis for Indian UHNWIs, family offices, and private equity firms.',
+        description: 'Explore RiskFortress intelligence verticals: Macro-Financial Forensics, Statutory & Structural Intelligence, and Geo-Environmental Risk analysis for high-value asset protection.',
     },
 }
 
@@ -159,7 +159,7 @@ export default function CapabilitiesPage() {
                     
                     <p className="text-sm text-gray-500 max-w-2xl mx-auto">
                         Strategic Foresight for UHNWIs with ₹100Cr+ assets. High-Stakes Advisory Mandate 
-                        by RiskFortress India—A Mayalok Ventures Division.
+                        by RiskFortress India—A Mayalok Ventures Entity.
                     </p>
                 </div>
 

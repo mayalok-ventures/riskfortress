@@ -57,7 +57,7 @@ export const defaultMetadata: Metadata = {
         'Statutory Forensics',
         'High-Stakes Advisory Mandate',
     ],
-    authors: [{ name: 'RiskFortress India - A Mayalok Ventures Division', url: baseUrl }],
+    authors: [{ name: 'RiskFortress India - A Mayalok Ventures Entity', url: baseUrl }],
     creator: 'RiskFortress Strategic Foresight Entity',
     publisher: 'Mayalok Ventures',
     robots: {
@@ -144,7 +144,7 @@ export function generateOrganizationSchema() {
     return {
         '@context': 'https://schema.org',
         '@type': 'Organization',
-        name: 'RiskFortress India - A Mayalok Ventures Division',
+        name: 'RiskFortress India - A Mayalok Ventures Entity',
         alternateName: ['RiskFortress Security Division', 'RiskFortress Asset Protection', 'Private Intelligence Firm India'],
         url: baseUrl,
         logo: `${baseUrl}/logos/logo.png`,
@@ -200,7 +200,7 @@ export function generateServiceSchema() {
         ],
         provider: {
             '@type': 'Organization',
-            name: 'RiskFortress India - A Mayalok Ventures Division',
+            name: 'RiskFortress India - A Mayalok Ventures Entity',
         },
         areaServed: {
             '@type': 'Country',

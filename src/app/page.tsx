@@ -8,7 +8,7 @@ import HomeClient from './HomeClient'
 
 export const metadata: Metadata = {
     title: 'RiskFortress India | Private Intelligence & HNI Asset Protection',
-    description: 'RiskFortress India delivers predictive risk intelligence for Ultra-HNWIs with ₹100Cr+ assets. We predict the crisis you don\'t see coming.',
+    description: 'RiskFortress delivers predictive risk intelligence for Ultra-HNWIs and enterprises with assets worth ₹100Cr+. Forensic foresight across financial, statutory, and geo-environmental risk.',
     keywords: [
         'RiskFortress India',
         'RiskFortress Security Division',
@@ -28,17 +28,17 @@ export const metadata: Metadata = {
         type: 'website',
         url: 'https://riskfortress.in/',
         title: 'RiskFortress India | Private Intelligence & HNI Asset Protection',
-        description: 'RiskFortress India delivers predictive risk intelligence for Ultra-HNWIs with ₹100Cr+ assets. We predict the crisis you don\'t see coming.',
+        description: 'RiskFortress delivers predictive risk intelligence for Ultra-HNWIs and enterprises with assets worth ₹100Cr+. Forensic foresight across financial, statutory, and geo-environmental risk.',
         siteName: 'RiskFortress India',
         images: [{ url: 'https://riskfortress.in/logos/og-image.png' }],
     },
     twitter: {
         card: 'summary_large_image',
         title: 'RiskFortress India | Private Intelligence & HNI Asset Protection',
-        description: 'RiskFortress India delivers predictive risk intelligence for Ultra-HNWIs with ₹100Cr+ assets. We predict the crisis you don\'t see coming.',
+        description: 'RiskFortress delivers predictive risk intelligence for Ultra-HNWIs and enterprises with assets worth ₹100Cr+. Forensic foresight across financial, statutory, and geo-environmental risk.',
     },
     alternates: {
-        canonical: '/',
+        canonical: 'https://riskfortress.in/',
     },
 }
 
@@ -57,22 +57,17 @@ export default function Home() {
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
                         "@type": "ProfessionalService",
-                        "name": "RiskFortress India",
+                        "name": "RiskFortress",
+                        "description": "Private risk intelligence and predictive forensics firm for Ultra-HNWIs with assets worth ₹100Cr+.",
                         "url": "https://riskfortress.in",
                         "logo": "https://riskfortress.in/logos/logo.png",
-                        "description": "Private intelligence and predictive risk advisory for Ultra-HNWIs with assets worth ₹100 Crores and above.",
-                        "contactPoint": {
-                            "@type": "ContactPoint",
-                            "contactType": "Discrete Consultation",
-                            "availableLanguage": ["English", "Hindi"],
-                            "email": "kunal@riskfortress.in"
-                        },
-                        "serviceType": "Private Risk Intelligence",
-                        "areaServed": "IN",
                         "parentOrganization": {
                             "@type": "Organization",
                             "name": "Mayalok Ventures"
-                        }
+                        },
+                        "areaServed": "IN",
+                        "serviceType": ["Risk Intelligence", "Forensic Analysis", "Asset Protection", "Due Diligence"],
+                        "priceRange": "₹₹₹₹"
                     })
                 }}
             />

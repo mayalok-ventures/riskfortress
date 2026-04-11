@@ -46,7 +46,7 @@ export default function Header() {
                     <Link href="/" className="flex items-center space-x-3">
                         <Image
                             src="/logos/logo.png"
-                            alt="RiskFortress India - Private Intelligence & HNI Asset Protection"
+                            alt="RiskFortress — Private Risk Intelligence"
                             width={44}
                             height={44}
                             priority

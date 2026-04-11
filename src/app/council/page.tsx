@@ -22,7 +22,7 @@ export const metadata: Metadata = {
         description: 'The Mayalok Ecosystem and RiskFortress Advisory Council — the intelligence network behind India\'s most discrete wealth protection firm.',
     },
     alternates: {
-        canonical: '/council/',
+        canonical: 'https://riskfortress.in/council/',
     },
 }
 
@@ -81,7 +81,7 @@ export default function CouncilPage() {
                             <div className="p-3 bg-champagne/5 inline-block mb-6">
                                 <principle.icon className="h-8 w-8 text-champagne" />
                             </div>
-                            <h3 className="text-xl font-light text-white mb-4">{principle.title}</h3>
+                            <h2 className="text-xl font-light text-white mb-4">{principle.title}</h2>
                             <p className="text-gray-400 text-sm leading-relaxed">{principle.description}</p>
                         </div>
                     ))}
