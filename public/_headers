@@ -7,22 +7,14 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   X-XSS-Protection: 1; mode=block
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://formspree.io https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://formspree.io https://vitals.vercel-insights.com https://cloudflareinsights.com https://www.google-analytics.com; frame-ancestors 'none';
+  Cache-Control: public, max-age=0, must-revalidate
 
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable
 
-/_next/static/chunks/*
-  Cache-Control: public, max-age=31536000, immutable
-
-/_next/static/css/*
-  Cache-Control: public, max-age=31536000, immutable
-
-/_next/static/media/*
-  Cache-Control: public, max-age=31536000, immutable
-
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
-  
+
 /*.woff2
   Cache-Control: public, max-age=31536000, immutable
 
@@ -37,24 +29,3 @@
 
 /logos/*
   Cache-Control: public, max-age=604800, stale-while-revalidate=86400
-
-/*.png
-  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
-
-/*.svg
-  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
-
-/*.ico
-  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
-
-/*.webp
-  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
-
-/*.avif
-  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
-
-/*.js
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.css
-  Cache-Control: public, max-age=31536000, immutable
