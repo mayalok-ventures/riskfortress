@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
-import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, AlertTriangle, Share2 } from 'lucide-react'
+import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, Share2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
-import { getContentBySlug, type ContentItem } from '@/lib/content'
-import { trackShare } from '@/lib/analytics'
+import ExportPDFButton from '@/components/ExportPDFButton'
 import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
+import { trackShare } from '@/lib/analytics'
+import { getContentBySlug, type ContentItem } from '@/lib/content'
 
 const getIconForSector = (sector?: string) => {
     switch (sector) {
@@ -55,6 +56,7 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
         } else if (actualSlug === '_placeholder') {
             setLoading(false)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [actualSlug])
 
     const loadContent = async (slugToLoad: string, retryCount = 0) => {
@@ -67,9 +69,15 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                 if (item.type !== 'case') {
                     setEmailVerified(true)
                 } else {
-                    const verified = sessionStorage.getItem('rf-email-verified')
-                    if (verified) {
-                        setEmailVerified(true)
+                    const verifiedAt = localStorage.getItem('rf-email-verified-at')
+                    if (verifiedAt) {
+                        const age = Date.now() - parseInt(verifiedAt)
+                        const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000
+                        if (age < SEVEN_DAYS) {
+                            setEmailVerified(true)
+                        } else {
+                            localStorage.removeItem('rf-email-verified-at')
+                        }
                     }
                 }
             } else {
@@ -181,7 +189,8 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                     caseTitle={content.title}
                     caseSlug={content.slug}
                     onSuccess={() => {
-                        sessionStorage.setItem('rf-email-verified', 'true')
+                        const nowStr = String(Date.now())
+                        localStorage.setItem('rf-email-verified-at', nowStr)
                         setEmailVerified(true)
                         setShowEmailModal(false)
                     }}
@@ -267,6 +276,7 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                                     Status: {content.caseStatus}
                                 </span>
                             )}
+                            <ExportPDFButton contentId={content.id} title={content.title} />
                         </div>
                     )}
 
@@ -304,7 +314,7 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                     </div>
                 )}
 
-                <article className="prose prose-invert prose-lg max-w-none">
+                <article id={content.id} className="prose prose-invert prose-lg max-w-none">
                     <div
                         className="text-gray-300 leading-relaxed [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-white [&>h1]:mt-8 [&>h1]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h2]:mt-8 [&>h2]:mb-4 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:text-white [&>h3]:mt-6 [&>h3]:mb-3 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>li]:mb-2 [&>blockquote]:border-l-4 [&>blockquote]:border-intelligence [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-400 [&>a]:text-intelligence [&>a]:hover:underline [&>code]:bg-gray-800 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>pre]:bg-gray-900 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto"
                         dangerouslySetInnerHTML={{ __html: content.content }}

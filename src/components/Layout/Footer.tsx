@@ -168,13 +168,25 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="mt-16 pt-8 border-t border-gray-800">
-                    <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
                         <div>
                             <p className="text-xs text-gray-600">
                                 © {new Date().getFullYear()} RiskFortress. All rights reserved.
                             </p>
-                            <p className="text-xs text-gray-600 mt-1">
-                                Preserving generational wealth through absolute foresight.
+                            <p className="text-xs text-gray-700 mt-1">
+                                A Mayalok Ventures Entity · DPIIT Registered · Greater Noida, Delhi NCR
+                            </p>
+                            <p className="text-xs text-gray-700 mt-1">
+                                Research published in{' '}
+                                <a
+                                    href="https://www.cyberdefensemagazine.com"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-champagne/50 hover:text-champagne/80 transition-colors"
+                                >
+                                    Cyber Defense Magazine
+                                </a>{' '}
+                                (March 2026)
                             </p>
                         </div>
 

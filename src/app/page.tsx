@@ -3,6 +3,8 @@ import { Metadata } from 'next'
 import Hero from '@/components/Hero/HeroContent'
 import IntelligenceMetrics from '@/components/Metrics/IntelligenceMetrics'
 import SectorFocus from '@/components/Sector/SectorFocus'
+import WhyWeExist from '@/components/WhyWeExist/WhyWeExist'
+
 import HomeClient from './HomeClient'
 
 
@@ -47,6 +49,7 @@ export default function Home() {
         <>
             <Hero />
             <IntelligenceMetrics />
+            <WhyWeExist />
             <SectorFocus />
             <HomeClient />
 

@@ -204,6 +204,82 @@ export default function RootLayout({
                         });
                     `}
                 </Script>
+
+                {/* Knowledge Panel: Organization + WebSite Schema */}
+                <Script id="organization-schema" type="application/ld+json" strategy="afterInteractive">
+                    {JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@graph': [
+                            {
+                                '@type': ['Organization', 'ProfessionalService'],
+                                '@id': 'https://riskfortress.in/#organization',
+                                name: 'RiskFortress',
+                                alternateName: 'RiskFortress India',
+                                legalName: 'RiskFortress Intelligence',
+                                url: 'https://riskfortress.in',
+                                logo: {
+                                    '@type': 'ImageObject',
+                                    url: 'https://riskfortress.in/logos/logo.png',
+                                    width: 400,
+                                    height: 400,
+                                },
+                                image: 'https://riskfortress.in/logos/logo.png',
+                                description:
+                                    'Private risk intelligence and predictive forensics for Ultra-HNWIs with ₹100Cr+ assets. A Mayalok Ventures Entity, Greater Noida, Delhi NCR.',
+                                foundingDate: '2024',
+                                address: {
+                                    '@type': 'PostalAddress',
+                                    streetAddress: 'Greater Noida',
+                                    addressLocality: 'Greater Noida',
+                                    addressRegion: 'Uttar Pradesh',
+                                    postalCode: '201310',
+                                    addressCountry: 'IN',
+                                },
+                                areaServed: {
+                                    '@type': 'Country',
+                                    name: 'India',
+                                },
+                                serviceType: [
+                                    'Risk Intelligence',
+                                    'Forensic Analysis',
+                                    'Asset Protection Due Diligence',
+                                    'Corporate Governance Forensics',
+                                    'Private Intelligence',
+                                    'HNI Asset Protection',
+                                ],
+                                email: 'contact@riskfortress.in',
+                                parentOrganization: {
+                                    '@type': 'Organization',
+                                    name: 'Mayalok Ventures',
+                                    url: 'https://mayalokventures.com',
+                                },
+                                knowsAbout: [
+                                    'Enterprise Risk Management',
+                                    'Corporate Intelligence',
+                                    'Forensic Risk Analysis',
+                                    'HNI Asset Protection',
+                                    'Geo-Political Risk',
+                                ],
+                                sameAs: [
+                                    'https://www.linkedin.com/company/riskfortress',
+                                ],
+                            },
+                            {
+                                '@type': 'WebSite',
+                                '@id': 'https://riskfortress.in/#website',
+                                url: 'https://riskfortress.in',
+                                name: 'RiskFortress',
+                                description: 'Predictive risk intelligence for Ultra-HNWIs',
+                                publisher: { '@id': 'https://riskfortress.in/#organization' },
+                                potentialAction: {
+                                    '@type': 'SearchAction',
+                                    target: { '@type': 'EntryPoint', urlTemplate: 'https://riskfortress.in/dossiers/?q={search_term_string}' },
+                                    'query-input': 'required name=search_term_string',
+                                },
+                            },
+                        ],
+                    })}
+                </Script>
             </head>
             <body className="bg-gray-950 text-gray-100 antialiased selection:bg-intelligence/30">
                 <ThemeProvider>

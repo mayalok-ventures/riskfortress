@@ -1,407 +1,244 @@
-import {
-    Shield,
-    Building,
-    Users,
-    Cpu,
-    Target,
-    BarChart3,
-    Zap
-} from 'lucide-react'
-import { Metadata } from 'next'
+'use client'
+
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
+import { ChevronDown, BarChart3, Building, Target } from 'lucide-react'
+import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-    title: 'Intelligence Verticals | Forensic Risk Services | RiskFortress India',
-    description: 'Explore RiskFortress intelligence verticals: Macro-Financial Forensics, Statutory & Structural Intelligence, and Geo-Environmental Risk analysis for high-value asset protection.',
-    keywords: [
-        'TSCM Services Delhi',
-        'TSCM Services India',
-        'Corporate Espionage Countermeasures India',
-        'Insider Threat Detection Services',
-        'HNI Asset Protection Services India',
-        'Family Office Risk Advisory',
-        'Startup Intellectual Property Protection',
-        'Due Diligence for Angel Investors',
-        'Statutory Forensics',
-        'Leak Investigation for Companies',
-        'RiskFortress Security Division',
-        'Private Intelligence Firm India',
-        'Predictive Risk Intelligence',
-        'High Net Worth Security Audit',
-    ],
-    alternates: {
-        canonical: 'https://riskfortress.in/capabilities/',
-    },
-    openGraph: {
-        url: '/capabilities/',
-        title: 'Intelligence Verticals | Forensic Risk Services | RiskFortress India',
-        description: 'Explore RiskFortress intelligence verticals: Macro-Financial Forensics, Statutory & Structural Intelligence, and Geo-Environmental Risk analysis for high-value asset protection.',
-    },
-}
+import AnimateOnScroll from '@/components/AnimateOnScroll'
+import { fadeUp, staggerContainer, scaleIn } from '@/lib/animations'
 
-const capabilities = [
+// Metadata moved to layout.tsx
+
+const verticals = [
     {
-        id: 'tscm',
-        title: 'TSCM Services India & Delhi',
-        icon: Cpu,
-        description: 'Technical Surveillance Counter-Measures preventing corporate espionage. Bug sweeping and leak investigation for companies.',
-        features: [
-            'Bug Sweeping & Detection (TSCM Services Delhi)',
-            'Corporate Espionage Countermeasures India',
-            'Leak Investigation for Companies',
-            'Secure Communication Channels',
-            'Insider Threat Detection Services',
-        ],
-        keywords: ['TSCM Services India', 'TSCM Services Delhi', 'Corporate Espionage Countermeasures India'],
-    },
-    {
-        id: 'hni',
-        title: 'HNI Asset Protection Services India',
-        icon: Shield,
-        description: 'Asset Protection Intelligence for Ultra-HNWIs with ₹100Cr+ assets. Strategic Foresight preventing the next corporate collapse.',
-        features: [
-            'High Net Worth Security Audit',
-            'Personal Threat Assessment for Executives',
-            'Kidnap and Ransom (K&R) Prevention India',
-            'Secure Transport for Valuables India',
-            'Executive Reputation Management Crisis',
-        ],
-        keywords: ['HNI Asset Protection Services India', 'High Net Worth Security Audit', 'K&R Prevention India'],
-    },
-    {
-        id: 'family',
-        title: 'Family Office Risk Advisory',
-        icon: Users,
-        description: 'Predictive Risk Intelligence for Family Offices. Preventing succession crises and protecting multi-generational wealth.',
-        features: [
-            'Family Office Risk Advisory',
-            'Legacy Succession Security',
-            'Wealth Transfer Intelligence',
-            'Digital Footprint Sanitization',
-            'Reputation Risk Management',
-        ],
-        keywords: ['Family Office Risk Advisory', 'HNI Asset Protection Services India', 'Legacy Security'],
-    },
-    {
-        id: 'corporate',
-        title: 'Corporate Fraud Investigation Services',
+        id: 'financial',
         icon: BarChart3,
-        description: 'Predictive Risk Intelligence detecting fraud and insider threats before they cause catastrophic damage.',
-        features: [
-            'Corporate Fraud Investigation Services',
-            'Insider Threat Detection Services',
-            'Due Diligence for Angel Investors',
-            'Startup Intellectual Property Protection',
+        title: 'Macro-Financial Forensics',
+        description: 'Advanced forensic intelligence for enterprise financial structures',
+        capabilities: [
+            'Business Model Collapse Prediction',
+            'Corporate Governance Forensics',
+            'Pre-Investment Risk Intelligence',
+            'Financial Fraud Early Detection',
+            'Market Shift Analysis',
+            'Exit Strategy Risk Analysis',
             'Competitor Vulnerability Assessment',
         ],
-        keywords: ['Corporate Fraud Investigation Services', 'Insider Threat Detection Services', 'Due Diligence for Angel Investors'],
+        pattern:
+            "Before the Byju's collapse, patterns existed — governance gaps, unsustainable growth metrics, regulatory blind spots. We identify these fractures 18–24 months before they surface publicly.",
+        clients: 'Private Equity Firms, Industrial Conglomerates, Ultra-HNWIs',
+        budget: '₹2–50 Crores/annum',
     },
     {
         id: 'statutory',
-        title: 'Statutory Forensics',
         icon: Building,
-        description: 'Statutory land intelligence preventing the next Noida Twin Tower scenario. Regulatory and zoning risk prediction.',
-        features: [
-            'Statutory Land Intelligence',
-            'Regulatory Change Forecasting',
-            'Zoning & Land Use Risk Prediction',
-            'Political Risk Assessment',
-            'Title & Encumbrance Forensics',
+        title: 'Statutory & Structural Intelligence',
+        description: 'Regulatory risk mapping and structural compliance forensics',
+        capabilities: [
+            'Regulatory Compliance Gap Analysis',
+            'Zoning & Land Use Risk Assessment',
+            'Corporate Structural Fraud Detection',
+            'Political & Policy Risk Mapping',
+            'Statutory Non-Compliance Early Warning',
+            'License & Permit Risk Forensics',
+            'Cross-Border Regulatory Intelligence',
         ],
-        keywords: ['Statutory Forensics', 'Statutory Land Intelligence', 'RiskFortress Asset Protection'],
+        pattern:
+            'Zoning violations, non-compliant structural approvals, and political risk in land-use decisions — visible in regulatory filings years before action is taken. The Noida Tower scenario is a pattern, not an exception.',
+        clients: 'Real Estate Developers, Industrial Conglomerates, Infrastructure Funds',
+        budget: '₹1–20 Crores/annum',
     },
     {
-        id: 'intelligence',
-        title: 'Predictive Risk Intelligence',
+        id: 'geo',
         icon: Target,
-        description: 'Strategic Foresight for UHNWIs preventing the next corporate collapse. High-Stakes Advisory Mandate.',
-        features: [
-            'Predictive Risk Intelligence',
-            'Preventing the next corporate collapse',
-            'Strategic Foresight for UHNWIs',
-            'Business Model Collapse Prediction',
-            'High-Stakes Advisory Mandate',
+        title: 'Geo-Environmental Risk',
+        description: 'Geographic and environmental exposure intelligence for high-value assets',
+        capabilities: [
+            'Climate & Environmental Risk Forecasting',
+            'Natural Disaster Exposure Mapping',
+            'Supply Chain Geographic Risk Analysis',
+            'Environmental Liability Due Diligence',
+            'Industrial Site Risk Assessment',
+            'Geo-Political Hotspot Intelligence',
         ],
-        keywords: ['Predictive Risk Intelligence', 'Strategic Foresight for UHNWIs', 'Private Intelligence Firm India'],
+        pattern:
+            'Infrastructure built in flood corridors, industrial facilities in contested environmental zones, supply chains routed through geopolitical chokepoints — each one a predictable, mappable risk that most due diligence processes ignore.',
+        clients: 'Infrastructure Funds, Family Offices, Large Industrial Manufacturers',
+        budget: '₹75L–10 Crores/annum',
     },
 ]
+
+function VerticalCard({ vertical, index }: { vertical: typeof verticals[0]; index: number }) {
+    const [open, setOpen] = useState(index === 0)
+    const Icon = vertical.icon
+
+    return (
+        <AnimateOnScroll variants={scaleIn} delay={index * 0.1}>
+            <div className="border border-gray-800 hover:border-champagne/30 transition-colors">
+                <button
+                    onClick={() => setOpen(!open)}
+                    className="w-full p-8 flex items-center justify-between text-left"
+                >
+                    <div className="flex items-center space-x-4">
+                        <div className="p-3 bg-champagne/10">
+                            <Icon className="h-7 w-7 text-champagne" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-light text-white">{vertical.title}</h2>
+                            <p className="text-sm text-gray-500 mt-1">{vertical.description}</p>
+                        </div>
+                    </div>
+                    <motion.div
+                        animate={{ rotate: open ? 180 : 0 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                        <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    </motion.div>
+                </button>
+
+                <AnimatePresence initial={false}>
+                    {open && (
+                        <motion.div
+                            key="card-content"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                            className="overflow-hidden"
+                        >
+                            <div className="px-8 pb-8 pt-0 border-t border-gray-800">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                                    {/* Capabilities */}
+                                    <div>
+                                        <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">
+                                            Key Capabilities
+                                        </h3>
+                                        <ul className="space-y-2">
+                                            {vertical.capabilities.map((cap) => (
+                                                <li key={cap} className="flex items-center space-x-3 text-gray-300 text-sm">
+                                                    <div className="w-1.5 h-1.5 bg-champagne rounded-full flex-shrink-0" />
+                                                    <span>{cap}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Pattern + details */}
+                                    <div className="space-y-4">
+                                        <div className="p-5 bg-gray-900/60 border border-gray-800">
+                                            <h4 className="text-sm font-medium text-champagne uppercase tracking-wider mb-3">
+                                                Pattern We Identify
+                                            </h4>
+                                            <p className="text-gray-300 text-sm leading-relaxed">
+                                                {vertical.pattern}
+                                            </p>
+                                            <p className="text-xs opacity-50 mt-2 italic text-gray-500">
+                                                Illustrative scenario based on publicly reported information
+                                            </p>
+                                        </div>
+                                        <div className="flex justify-between text-sm pt-2">
+                                            <div>
+                                                <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Who it&apos;s for</p>
+                                                <p className="text-gray-300 text-sm">{vertical.clients}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Budget Range</p>
+                                                <p className="text-champagne font-light">{vertical.budget}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </AnimateOnScroll>
+    )
+}
 
 export default function CapabilitiesPage() {
     return (
         <div className="min-h-screen py-32">
             {/* Background */}
-            <div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute inset-0 bg-topographic" />
-                </div>
-            </div>
+            <div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950" />
 
             <div className="container relative z-10 mx-auto px-6">
                 {/* Header */}
-                <div className="text-center mb-20">
-                    <div className="inline-flex items-center space-x-3 px-6 py-3 border border-champagne/20 rounded-none mb-8">
+                <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={staggerContainer}
+                    className="text-center mb-16"
+                >
+                    <motion.div variants={fadeUp} custom={0}
+                        className="inline-flex items-center space-x-3 px-6 py-3 border border-champagne/20 rounded-none mb-8">
                         <div className="w-2 h-2 bg-champagne rounded-full animate-pulse" />
                         <span className="text-xs tracking-[0.25em] uppercase text-champagne font-light">
-                            RISKFORTRESS SECURITY DIVISION
+                            Intelligence Verticals
                         </span>
-                    </div>
+                    </motion.div>
 
-                    <h1 className="text-4xl md:text-5xl font-light mb-6">
+                    <motion.h1 variants={fadeUp} custom={0.1} className="text-4xl md:text-5xl font-light mb-6">
                         <span className="text-white">Intelligence</span>{' '}
                         <span className="text-champagne">Verticals</span>
-                    </h1>
+                    </motion.h1>
 
-                    <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light mb-6">
-                        Predictive Risk Intelligence preventing the next corporate collapse. 
-                        Private Intelligence Firm India specializing in HNI Asset Protection Services, 
-                        Corporate Espionage Countermeasures, and Statutory Forensics.
-                    </p>
-                    
-                    <p className="text-sm text-gray-500 max-w-2xl mx-auto">
-                        Strategic Foresight for UHNWIs with ₹100Cr+ assets. High-Stakes Advisory Mandate 
-                        by RiskFortress India—A Mayalok Ventures Entity.
-                    </p>
-                </div>
+                    <motion.p variants={fadeUp} custom={0.2} className="text-xl text-gray-400 max-w-3xl mx-auto font-light">
+                        Three disciplines. Each one built for a different class of invisible risk.
+                    </motion.p>
+                </motion.div>
 
-                {/* Core Intelligence Verticals - Detailed */}
-                <div className="space-y-12 mb-24 max-w-5xl mx-auto">
-                    {/* Macro-Financial Forensics */}
-                    <div className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-950 border border-champagne/20">
-                        <div className="flex items-center space-x-4 mb-6">
-                            <div className="p-3 rounded-xl bg-champagne/10">
-                                <BarChart3 className="h-8 w-8 text-champagne" />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-white">Macro-Financial Forensics</h2>
-                                <p className="text-gray-400 text-sm">Core Intelligence Vertical</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h3 className="text-lg font-semibold text-white mb-4">Key Capabilities</h3>
-                                <ul className="space-y-2">
-                                    {['Business Model Collapse Prediction', 'Market Shift Analysis', 'Corporate Governance Forensics', 'Pre-Investment Risk Intelligence', 'Financial Fraud Early Detection'].map((item) => (
-                                        <li key={item} className="flex items-center text-gray-300 text-sm">
-                                            <div className="w-2 h-2 bg-champagne rounded-full mr-3" />
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="p-4 rounded-lg bg-gray-900/50 border border-gray-800">
-                                    <h4 className="font-semibold text-white text-sm mb-2">Real-World Impact</h4>
-                                    <p className="text-gray-400 text-sm">Identified governance gaps in a ₹3,000Cr enterprise 18 months before public collapse — The &quot;Byju&apos;s Scenario&quot;</p>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                    <div>
-                                        <p className="text-gray-500">Typical Client</p>
-                                        <p className="text-white">PE Firms, Industrial Conglomerates, Ultra-HNWIs</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-gray-500">Budget Range</p>
-                                        <p className="text-champagne font-semibold">₹2–50 Crores/annum</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                {/* Hero image */}
+                <AnimateOnScroll variants={fadeUp} className="relative w-full h-[280px] mb-20 overflow-hidden">
+                    <Image
+                        src="https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=1600&q=80"
+                        alt="Forensic financial intelligence analysis"
+                        fill
+                        className="object-cover"
+                        priority
+                        sizes="100vw"
+                    />
+                    <div className="absolute inset-0 bg-black/60" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent" />
+                </AnimateOnScroll>
 
-                    {/* Statutory & Structural Intelligence */}
-                    <div className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-950 border border-champagne/20">
-                        <div className="flex items-center space-x-4 mb-6">
-                            <div className="p-3 rounded-xl bg-champagne/10">
-                                <Building className="h-8 w-8 text-champagne" />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-white">Statutory &amp; Structural Intelligence</h2>
-                                <p className="text-gray-400 text-sm">Core Intelligence Vertical</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h3 className="text-lg font-semibold text-white mb-4">Key Capabilities</h3>
-                                <ul className="space-y-2">
-                                    {['Land title forensics and zoning risk', 'Regulatory compliance trajectory analysis', 'Political and litigation risk mapping', 'Pre-acquisition statutory due diligence', 'Cross-jurisdictional legal exposure assessment'].map((item) => (
-                                        <li key={item} className="flex items-center text-gray-300 text-sm">
-                                            <div className="w-2 h-2 bg-champagne rounded-full mr-3" />
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="p-4 rounded-lg bg-gray-900/50 border border-gray-800">
-                                    <h4 className="font-semibold text-white text-sm mb-2">Real-World Impact</h4>
-                                    <p className="text-gray-400 text-sm">Identified critical zoning violations in a major Delhi NCR development project — preventing ₹800Cr+ in stranded asset exposure.</p>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                    <div>
-                                        <p className="text-gray-500">Typical Client</p>
-                                        <p className="text-white">Real estate dynasties, large developers, infrastructure funds</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-gray-500">Budget Range</p>
-                                        <p className="text-champagne font-semibold">₹1–20 Crores/annum</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Geo-Environmental Risk */}
-                    <div className="p-8 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-950 border border-champagne/20">
-                        <div className="flex items-center space-x-4 mb-6">
-                            <div className="p-3 rounded-xl bg-champagne/10">
-                                <Target className="h-8 w-8 text-champagne" />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-white">Geo-Environmental Risk</h2>
-                                <p className="text-gray-400 text-sm">Core Intelligence Vertical</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <h3 className="text-lg font-semibold text-white mb-4">Key Capabilities</h3>
-                                <ul className="space-y-2">
-                                    {['Climate and environmental liability forecasting', 'ESG risk trajectory mapping', 'Water, land, and resource conflict prediction', 'Cross-border territorial risk analysis', 'Force majeure scenario modeling'].map((item) => (
-                                        <li key={item} className="flex items-center text-gray-300 text-sm">
-                                            <div className="w-2 h-2 bg-champagne rounded-full mr-3" />
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="p-4 rounded-lg bg-gray-900/50 border border-gray-800">
-                                    <h4 className="font-semibold text-white text-sm mb-2">Real-World Impact</h4>
-                                    <p className="text-gray-400 text-sm">Flagged critical environmental litigation risk for an industrial conglomerate 24 months before regulatory enforcement action.</p>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                    <div>
-                                        <p className="text-gray-500">Typical Client</p>
-                                        <p className="text-white">Industrial conglomerates, infrastructure developers, family offices</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-gray-500">Budget Range</p>
-                                        <p className="text-champagne font-semibold">₹50L–10 Crores/annum</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Additional Capabilities Grid */}
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl font-light text-white mb-4">
-                        Additional <span className="text-champagne">Capabilities</span>
-                    </h2>
-                    <p className="text-gray-400 font-light">Specialized services within our intelligence mandate</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-                    {capabilities.map((capability) => (
-                        <div
-                            key={capability.id}
-                            id={capability.id}
-                            className="group p-8 rounded-2xl glass-morphism border border-gray-800 hover:border-intelligence/30 transition-all hover:scale-[1.02]"
-                        >
-                            <div className="flex items-start space-x-4 mb-6">
-                                <div className="p-3 rounded-xl bg-intelligence/10 group-hover:bg-intelligence/20 transition-colors">
-                                    <capability.icon className="h-8 w-8 text-intelligence" />
-                                </div>
-                                <div>
-                                    <h3 className="text-2xl font-bold text-white mb-2">{capability.title}</h3>
-                                    <p className="text-gray-400">{capability.description}</p>
-                                </div>
-                            </div>
-
-                            <ul className="space-y-3 mb-6">
-                                {capability.features.map((feature, index) => (
-                                    <li key={index} className="flex items-center text-gray-300">
-                                        <div className="w-2 h-2 bg-intelligence rounded-full mr-3" />
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <div className="flex flex-wrap gap-2">
-                                {capability.keywords.map((keyword) => (
-                                    <span
-                                        key={keyword}
-                                        className="px-3 py-1 text-xs rounded-full bg-intelligence/5 text-intelligence border border-intelligence/10"
-                                    >
-                                        {keyword}
-                                    </span>
-                                ))}
-                            </div>
-
-                            <div className="mt-6 pt-6 border-t border-gray-800">
-                                <Link
-                                    href="/secure-intake"
-                                    className="inline-flex items-center text-intelligence hover:text-intelligence/80 transition-colors"
-                                >
-                                    <span className="font-semibold">Request Detailed Brief</span>
-                                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                    </svg>
-                                </Link>
-                            </div>
-                        </div>
+                {/* Three Verticals */}
+                <div className="max-w-4xl mx-auto space-y-4 mb-24">
+                    {verticals.map((vertical, index) => (
+                        <VerticalCard key={vertical.id} vertical={vertical} index={index} />
                     ))}
                 </div>
 
-                {/* What We Don&apos;t Do */}
-                <div className="p-8 rounded-2xl bg-gradient-to-r from-gray-900 to-gray-950 border border-gray-800 max-w-4xl mx-auto">
-                    <div className="text-center mb-8">
-                        <h2 className="text-3xl font-bold text-white mb-4">
-                            What We <span className="text-red-400">Don&apos;t</span> Do
+                {/* Bottom CTA */}
+                <AnimateOnScroll variants={fadeUp} className="max-w-3xl mx-auto">
+                    <div className="p-12 border border-champagne/20 text-center">
+                        <h2 className="text-3xl font-light text-white mb-4">
+                            Every Vertical.{' '}
+                            <span className="text-champagne">One Purpose.</span>
                         </h2>
-                        <p className="text-gray-400">
-                            To maintain our premium positioning and serve only Ultra-HNWI and enterprise clients
+                        <p className="text-gray-400 mb-10 font-light max-w-2xl mx-auto">
+                            Preventing the crises that end dynasties, drain inheritances, and collapse
+                            enterprises — before they begin.
                         </p>
+                        <motion.div
+                            whileHover={{ scale: 1.025, y: -1 }}
+                            whileTap={{ scale: 0.975 }}
+                            transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+                            className="inline-block"
+                        >
+                            <Link
+                                href="/secure-intake"
+                                className="inline-flex items-center px-10 py-5 bg-champagne text-obsidian font-medium tracking-widest uppercase text-sm transition-all hover:bg-champagne-light"
+                            >
+                                Request Discrete Consultation
+                            </Link>
+                        </motion.div>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="p-6 rounded-xl bg-red-500/5 border border-red-500/20">
-                            <h3 className="font-bold text-red-300 mb-4">❌ Services We Avoid</h3>
-                            <ul className="space-y-2">
-                                {[
-                                    'Security Guard Deployment',
-                                    'Bouncer Services',
-                                    'CCTV Installation',
-                                    'Watchman Services',
-                                    'Cash Van Security',
-                                    'Event Security Guards',
-                                ].map((service) => (
-                                    <li key={service} className="text-gray-300 flex items-center">
-                                        <div className="w-2 h-2 bg-red-500 rounded-full mr-3" />
-                                        {service}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <div className="p-6 rounded-xl bg-green-500/5 border border-green-500/20">
-                            <h3 className="font-bold text-green-300 mb-4">✅ Services We Focus On</h3>
-                            <ul className="space-y-2">
-                                {[
-                                    'Predictive Intelligence',
-                                    'Strategic Risk Management',
-                                    'Corporate Due Diligence',
-                                    'Technical Surveillance Defense',
-                                    'Family Office Security',
-                                    'Industrial Risk Assessment',
-                                ].map((service) => (
-                                    <li key={service} className="text-gray-300 flex items-center">
-                                        <div className="w-2 h-2 bg-green-500 rounded-full mr-3" />
-                                        {service}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                </AnimateOnScroll>
             </div>
         </div>
     )

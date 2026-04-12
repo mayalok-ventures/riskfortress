@@ -1,144 +1,180 @@
-import { Lock, Shield, Key, EyeOff } from 'lucide-react'
-import { Metadata } from 'next'
+// Metadata has been moved to layout.tsx
 
-import IntakeForm from '@/components/SecureForm/IntakeForm'
+'use client'
 
-export const metadata: Metadata = {
-    title: 'Request Discrete Consultation | RiskFortress India',
-    description: 'Request a discrete consultation with RiskFortress. Confidential intake for Ultra-HNWIs and enterprises seeking predictive risk intelligence.',
-    keywords: [
-        'Hire Private Intelligence Agency India',
-        'Discrete Consultation',
-        'RiskFortress India',
-        'HNI Asset Protection Services India',
-        'Corporate Fraud Investigation Services',
-        'TSCM Services Delhi',
-        'Private Intelligence Firm India',
-        'Executive Reputation Management Crisis',
-        'Kidnap and Ransom Prevention India',
-        'Leak Investigation for Companies',
-    ],
-    openGraph: {
-        url: '/secure-intake/',
-        title: 'Request Discrete Consultation | RiskFortress India',
-        description: 'Request a discrete consultation with RiskFortress. Confidential intake for Ultra-HNWIs and enterprises seeking predictive risk intelligence.',
-    },
-    alternates: {
-        canonical: 'https://riskfortress.in/secure-intake/',
-    },
-}
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 export default function SecureIntakePage() {
+    const [isSuccess, setIsSuccess] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [errorMsg, setErrorMsg] = useState('')
+
+    const { register, handleSubmit } = useForm()
+
+    const onSubmit = async (data: Record<string, string>) => {
+        setIsSubmitting(true)
+        setErrorMsg('')
+        try {
+            const res = await fetch('https://formspree.io/f/mlggebdr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify(data),
+            })
+            if (!res.ok) throw new Error('Submission failed')
+            setIsSuccess(true)
+        } catch (err: unknown) {
+            setErrorMsg('Secure transmission failed. Please contact contact@riskfortress.in directly.')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
     return (
-        <div className="min-h-screen py-32">
-            {/* Background */}
-            <div className="fixed inset-0 -z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute inset-0 bg-grid-pattern" />
-                </div>
+        <div className="min-h-screen py-32 relative overflow-hidden">
+            {/* Ambient background */}
+            <div className="fixed inset-0 -z-10 bg-[#0a0a0a]">
+                <div 
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.08]"
+                    style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80)', backgroundAttachment: 'fixed' }}
+                />
             </div>
 
-            <div className="container relative z-10 mx-auto px-6">
-                <div className="max-w-4xl mx-auto">
-                    {/* Header */}
-                    <div className="text-center mb-16">
-                        <div className="inline-flex items-center space-x-3 px-6 py-3 border border-champagne/20 rounded-none mb-8">
-                            <div className="w-2 h-2 bg-champagne rounded-full animate-pulse" />
-                            <span className="text-xs tracking-[0.25em] uppercase text-champagne font-light">
-                                SECURE INTELLIGENCE INTAKE
-                            </span>
-                        </div>
-
-                        <h1 className="text-4xl md:text-5xl font-light mb-6">
-                            <span className="text-white">Discrete</span>{' '}
-                            <span className="text-champagne">Consultation</span>
-                        </h1>
-
-                        <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light mb-4">
-                            Request Predictive Risk Intelligence, Corporate Fraud Investigation Services, 
-                            or TSCM Services Delhi from RiskFortress India—A Mayalok Ventures Entity.
+            <div className="container relative mx-auto px-4">
+                {isSuccess ? (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-xl mx-auto text-center border border-white/10 p-12 bg-black/50">
+                        <h2 className="text-3xl font-light mb-6">Request Received.</h2>
+                        <p className="text-gray-400 font-light leading-relaxed">
+                            You will hear from us within 48 hours at the email you provided.
+                            No acknowledgement email will be sent — discretion is absolute.
                         </p>
-                        
-                        <p className="text-sm text-gray-500 max-w-2xl mx-auto">
-                            HNI Asset Protection Services India for Ultra-HNWIs with ₹100Cr+ assets. 
-                            All submissions encrypted and purged after 72 hours.
-                        </p>
-                    </div>
-
-                    {/* Security Features */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                        {[
-                            {
-                                icon: Shield,
-                                title: 'Zero Data Retention',
-                                description: 'Automated deletion after 72 hours',
-                                color: 'text-green-400',
-                            },
-                            {
-                                icon: Lock,
-                                title: 'AES-256-GCM',
-                                description: 'Military-grade encryption',
-                                color: 'text-intelligence',
-                            },
-                            {
-                                icon: Key,
-                                title: 'Corporate Email Only',
-                                description: 'No personal email domains',
-                                color: 'text-purple-400',
-                            },
-                            {
-                                icon: EyeOff,
-                                title: 'No Third-Party Access',
-                                description: 'End-to-end encrypted',
-                                color: 'text-yellow-400',
-                            },
-                        ].map((feature) => (
-                            <div
-                                key={feature.title}
-                                className="p-6 rounded-xl glass-morphism text-center"
-                            >
-                                <feature.icon className={`h-8 w-8 ${feature.color} mx-auto mb-4`} />
-                                <h3 className="font-semibold text-white mb-2">{feature.title}</h3>
-                                <p className="text-sm text-gray-400">{feature.description}</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Form Container */}
-                    <div className="mb-12">
-                        <IntakeForm />
-                    </div>
-
-                    {/* Confidentiality Assurance */}
-                    <div className="p-8 rounded-2xl glass-morphism border border-intelligence/20">
-                        <div className="text-center">
-                            <h2 className="text-2xl font-bold text-white mb-4">
-                                Confidentiality Assurance
-                            </h2>
-                            <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
-                                All submissions are encrypted and reviewed only by senior intelligence personnel. 
-                                We do not retain data beyond engagement assessment.
+                    </motion.div>
+                ) : (
+                    <div className="max-w-xl mx-auto">
+                        <div className="text-center mb-12">
+                            <h1 className="text-4xl font-light mb-6">Request a Discrete Consultation</h1>
+                            <p className="text-gray-400 font-light leading-relaxed">
+                                All submissions are reviewed within 48 hours. We engage only where asset exposure exceeds ₹1 Crore. No information is stored beyond what is operationally necessary.
                             </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="p-6 rounded-xl bg-gray-900/50">
-                                    <h4 className="font-semibold text-white mb-2">Encrypted Email</h4>
-                                    <a
-                                        href="mailto:kunal@riskfortress.in"
-                                        className="text-xl text-intelligence hover:text-intelligence/80 transition-colors"
-                                    >
-                                        kunal@riskfortress.in
-                                    </a>
-                                    <p className="text-sm text-gray-400 mt-2">PGP key available upon request</p>
+                        </div>
+
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-black/40 border border-white/10 p-8 rounded-sm">
+                            <div>
+                                <label htmlFor="fullName" className="block text-sm text-gray-400 mb-2">Full Name <span className="text-champagne">*</span></label>
+                                <input
+                                    id="fullName"
+                                    {...register('fullName', { required: true })}
+                                    className="w-full bg-gray-900 border border-gray-800 p-3 text-white focus:border-champagne focus:outline-none transition-colors"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="organisation" className="block text-sm text-gray-400 mb-2">Organisation / Family Office <span className="text-champagne">*</span></label>
+                                <input
+                                    id="organisation"
+                                    {...register('organisation', { required: true })}
+                                    className="w-full bg-gray-900 border border-gray-800 p-3 text-white focus:border-champagne focus:outline-none transition-colors"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="email" className="block text-sm text-gray-400 mb-2">Email Address <span className="text-champagne">*</span></label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    {...register('email', { required: true, pattern: /^\S+@\S+$/i })}
+                                    className="w-full bg-gray-900 border border-gray-800 p-3 text-white focus:border-champagne focus:outline-none transition-colors"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="phone" className="block text-sm text-gray-400 mb-2">Phone / WhatsApp</label>
+                                <input
+                                    id="phone"
+                                    type="tel"
+                                    {...register('phone')}
+                                    className="w-full bg-gray-900 border border-gray-800 p-3 text-white focus:border-champagne focus:outline-none transition-colors"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="riskCategory" className="block text-sm text-gray-400 mb-2">Nature of Risk <span className="text-champagne">*</span></label>
+                                <select
+                                    id="riskCategory"
+                                    {...register('riskCategory', { required: true })}
+                                    className="w-full bg-gray-900 border border-gray-800 p-3 text-white focus:border-champagne focus:outline-none transition-colors appearance-none"
+                                >
+                                    <option value="" disabled selected>Select risk category...</option>
+                                    <option value="financial">Financial / Investment Risk</option>
+                                    <option value="statutory">Statutory / Regulatory Risk</option>
+                                    <option value="geo">Geo-Environmental Risk</option>
+                                    <option value="reputational">Reputational / Governance Risk</option>
+                                    <option value="multi">Multi-domain Assessment</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label htmlFor="assetValue" className="block text-sm text-gray-400 mb-2">Approximate Asset Value at Risk <span className="text-champagne">*</span></label>
+                                <select
+                                    id="assetValue"
+                                    {...register('assetValue', { required: true })}
+                                    className="w-full bg-gray-900 border border-gray-800 p-3 text-white focus:border-champagne focus:outline-none transition-colors appearance-none"
+                                >
+                                    <option value="" disabled selected>Select approximate range...</option>
+                                    <option value="1-10">₹1Cr – ₹10Cr</option>
+                                    <option value="10-50">₹10Cr – ₹50Cr</option>
+                                    <option value="50-100">₹50Cr – ₹100Cr</option>
+                                    <option value="100+">₹100Cr and above</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label htmlFor="briefContext" className="block text-sm text-gray-400 mb-2">Brief Context</label>
+                                <textarea
+                                    id="briefContext"
+                                    {...register('briefContext', { maxLength: 500 })}
+                                    className="w-full bg-gray-900 border border-gray-800 p-3 text-white focus:border-champagne focus:outline-none transition-colors h-24 resize-none"
+                                    placeholder="2–3 sentences about the risk scenario. No sensitive or confidential details needed at this stage."
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="referralSource" className="block text-sm text-gray-400 mb-2">How did you find us?</label>
+                                <input
+                                    id="referralSource"
+                                    {...register('referralSource')}
+                                    className="w-full bg-gray-900 border border-gray-800 p-3 text-white focus:border-champagne focus:outline-none transition-colors"
+                                />
+                            </div>
+
+                            {errorMsg && <p className="text-red-400 text-sm mt-2">{errorMsg}</p>}
+
+                            <motion.button
+                                type="submit"
+                                disabled={isSubmitting}
+                                whileHover={{ scale: 1.025, y: -1 }}
+                                whileTap={{ scale: 0.975 }}
+                                transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+                                className="w-full bg-champagne text-black py-4 uppercase tracking-widest text-sm font-medium mt-6 disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Securing Transmission...' : 'Submit Consultation Request'}
+                            </motion.button>
+
+                            <div className="pt-6 mt-6 border-t border-white/5 space-y-3">
+                                <div className="flex items-center text-xs text-gray-500">
+                                    <span className="mr-3">🔒</span> All information treated with absolute confidentiality
                                 </div>
-                                <div className="p-6 rounded-xl bg-gray-900/50">
-                                    <h4 className="font-semibold text-white mb-2">Location</h4>
-                                    <p className="text-xl text-intelligence">New Delhi, India</p>
-                                    <p className="text-sm text-gray-400 mt-2">By appointment only</p>
+                                <div className="flex items-center text-xs text-gray-500">
+                                    <span className="mr-3">✉</span> We respond only within 48 business hours
+                                </div>
+                                <div className="flex items-center text-xs text-gray-500">
+                                    <span className="mr-3">⚠</span> Minimum engagement threshold: ₹1 Crore asset exposure
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     )

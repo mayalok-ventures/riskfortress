@@ -28,7 +28,9 @@ import {
     List, ListOrdered, ListChecks, Quote, Code, Code2, Minus, Link as LinkIcon, Unlink, Video,
     Image as ImageIcon, Table as TableIcon, Undo2, Redo2, RemoveFormatting,
     ChevronDown, Palette, Highlighter, Upload,
-    Trash2, Plus, ArrowRight
+    Trash2, Plus, ArrowRight, Search, Replace, Indent, Outdent,
+    CaseSensitive, Shapes, Circle, Square, Triangle, SeparatorHorizontal,
+    SlidersHorizontal, Contrast, Sun, Crop, RectangleHorizontal, Type
 } from 'lucide-react'
 
 interface RichTextEditorProps {
@@ -792,6 +794,405 @@ function VideoEmbedModal({ open, onClose, onInsert }: {
 }
 
 /* ================================================================== */
+/*  Modal: Find & Replace                                              */
+/* ================================================================== */
+
+function FindReplaceBar({ editor, open, onClose }: {
+    editor: Editor; open: boolean; onClose: () => void
+}) {
+    const [findText, setFindText] = useState('')
+    const [replaceText, setReplaceText] = useState('')
+    const [matchCount, setMatchCount] = useState(0)
+
+    const doFind = useCallback(() => {
+        if (!findText.trim()) { setMatchCount(0); return }
+        const content = editor.getText()
+        const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')
+        const matches = content.match(regex)
+        setMatchCount(matches?.length || 0)
+    }, [findText, editor])
+
+    useEffect(() => { doFind() }, [findText, doFind])
+
+    const handleReplace = () => {
+        if (!findText.trim()) return
+        const html = editor.getHTML()
+        const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+        const newHtml = html.replace(regex, replaceText)
+        editor.commands.setContent(newHtml)
+    }
+
+    const handleReplaceAll = () => {
+        if (!findText.trim()) return
+        const html = editor.getHTML()
+        const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')
+        const newHtml = html.replace(regex, replaceText)
+        editor.commands.setContent(newHtml)
+        setMatchCount(0)
+    }
+
+    if (!open) return null
+
+    return (
+        <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-gray-900/95 border-t border-yellow-500/20">
+            <Search className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+            <input type="text" value={findText} onChange={e => setFindText(e.target.value)}
+                placeholder="Find..." className="px-2.5 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs w-40 focus:border-intelligence focus:outline-none" />
+            <Replace className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <input type="text" value={replaceText} onChange={e => setReplaceText(e.target.value)}
+                placeholder="Replace..." className="px-2.5 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs w-40 focus:border-intelligence focus:outline-none" />
+            <button type="button" onClick={handleReplace} className="px-2.5 py-1.5 rounded text-xs bg-gray-700 text-gray-300 hover:text-white hover:bg-gray-600">Replace</button>
+            <button type="button" onClick={handleReplaceAll} className="px-2.5 py-1.5 rounded text-xs bg-gray-700 text-gray-300 hover:text-white hover:bg-gray-600">Replace All</button>
+            {findText && <span className="text-xs text-gray-400">{matchCount} found</span>}
+            <button type="button" onClick={onClose} className="ml-auto text-gray-500 hover:text-white text-xs">✕</button>
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Modal: Shape Insert                                                */
+/* ================================================================== */
+
+function ShapeInsertModal({ open, onClose, onInsert }: {
+    open: boolean; onClose: () => void; onInsert: (html: string) => void
+}) {
+    const [shapeType, setShapeType] = useState<'divider' | 'rectangle' | 'circle' | 'triangle' | 'rounded-box'>('divider')
+    const [fillColor, setFillColor] = useState('#D4AF37')
+    const [outlineColor, setOutlineColor] = useState('#D4AF37')
+    const [outlineWidth, setOutlineWidth] = useState('2')
+    const [outlineStyle, setOutlineStyle] = useState<'solid' | 'dashed' | 'dotted'>('solid')
+    const [shapeText, setShapeText] = useState('')
+    const [width, setWidth] = useState('100%')
+    const [height, setHeight] = useState('4px')
+
+    const shapes = [
+        { id: 'divider' as const, label: 'Divider', icon: SeparatorHorizontal },
+        { id: 'rectangle' as const, label: 'Rectangle', icon: Square },
+        { id: 'circle' as const, label: 'Circle', icon: Circle },
+        { id: 'triangle' as const, label: 'Triangle', icon: Triangle },
+        { id: 'rounded-box' as const, label: 'Rounded Box', icon: RectangleHorizontal },
+    ]
+
+    const handleInsert = () => {
+        let style = ''
+        let innerHTML = shapeText ? `<p style="margin:0;padding:12px 16px;color:inherit;text-align:center;">${shapeText}</p>` : ''
+
+        switch (shapeType) {
+            case 'divider':
+                style = `width:${width};height:2px;background:linear-gradient(to right, transparent, ${fillColor}, transparent);margin:24px auto;`
+                innerHTML = ''
+                break
+            case 'rectangle':
+                style = `width:${width};min-height:${height === '4px' ? '60px' : height};background:${fillColor}20;border:${outlineWidth}px ${outlineStyle} ${outlineColor};margin:16px auto;display:flex;align-items:center;justify-content:center;`
+                break
+            case 'circle':
+                style = `width:100px;height:100px;background:${fillColor}20;border:${outlineWidth}px ${outlineStyle} ${outlineColor};border-radius:50%;margin:16px auto;display:flex;align-items:center;justify-content:center;`
+                break
+            case 'triangle':
+                style = `width:0;height:0;border-left:50px solid transparent;border-right:50px solid transparent;border-bottom:86px solid ${fillColor};margin:16px auto;`
+                innerHTML = ''
+                break
+            case 'rounded-box':
+                style = `width:${width};min-height:${height === '4px' ? '60px' : height};background:${fillColor}15;border:${outlineWidth}px ${outlineStyle} ${outlineColor};border-radius:12px;margin:16px auto;display:flex;align-items:center;justify-content:center;padding:8px;`
+                break
+        }
+
+        const html = `<div style="${style}" data-shape="${shapeType}">${innerHTML}</div>`
+        onInsert(html)
+        onClose()
+    }
+
+    if (!open) return null
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <h3 className="text-white font-semibold text-lg mb-4">Insert Shape</h3>
+
+                {/* Shape type selection */}
+                <div className="grid grid-cols-5 gap-2 mb-5">
+                    {shapes.map(s => (
+                        <button key={s.id} type="button" onClick={() => setShapeType(s.id)}
+                            className={`flex flex-col items-center p-3 rounded-lg border text-xs transition-colors ${
+                                shapeType === s.id ? 'border-intelligence bg-intelligence/10 text-intelligence' : 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-600'
+                            }`}>
+                            <s.icon className="h-5 w-5 mb-1" />
+                            {s.label}
+                        </button>
+                    ))}
+                </div>
+
+                {shapeType !== 'divider' && shapeType !== 'triangle' && (
+                    <div className="space-y-3 mb-4">
+                        <div>
+                            <label className="block text-xs text-gray-400 mb-1">Text inside shape</label>
+                            <input type="text" value={shapeText} onChange={e => setShapeText(e.target.value)}
+                                placeholder="Optional text..." className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white text-sm focus:border-intelligence focus:outline-none" />
+                        </div>
+                    </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label className="block text-xs text-gray-400 mb-1">Fill Color</label>
+                        <div className="flex items-center gap-2">
+                            <input type="color" value={fillColor} onChange={e => setFillColor(e.target.value)}
+                                className="h-8 w-8 rounded border border-gray-700 bg-gray-800 cursor-pointer" />
+                            <input type="text" value={fillColor} onChange={e => setFillColor(e.target.value)}
+                                className="flex-1 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs font-mono focus:border-intelligence focus:outline-none" />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs text-gray-400 mb-1">Outline Color</label>
+                        <div className="flex items-center gap-2">
+                            <input type="color" value={outlineColor} onChange={e => setOutlineColor(e.target.value)}
+                                className="h-8 w-8 rounded border border-gray-700 bg-gray-800 cursor-pointer" />
+                            <input type="text" value={outlineColor} onChange={e => setOutlineColor(e.target.value)}
+                                className="flex-1 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs font-mono focus:border-intelligence focus:outline-none" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div>
+                        <label className="block text-xs text-gray-400 mb-1">Outline Width</label>
+                        <select value={outlineWidth} onChange={e => setOutlineWidth(e.target.value)}
+                            className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs focus:border-intelligence focus:outline-none">
+                            {['1','2','3','4','5'].map(w => <option key={w} value={w}>{w}px</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs text-gray-400 mb-1">Outline Style</label>
+                        <select value={outlineStyle} onChange={e => setOutlineStyle(e.target.value as 'solid' | 'dashed' | 'dotted')}
+                            className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs focus:border-intelligence focus:outline-none">
+                            <option value="solid">Solid</option>
+                            <option value="dashed">Dashed</option>
+                            <option value="dotted">Dotted</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs text-gray-400 mb-1">Width</label>
+                        <select value={width} onChange={e => setWidth(e.target.value)}
+                            className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs focus:border-intelligence focus:outline-none">
+                            <option value="50%">50%</option>
+                            <option value="75%">75%</option>
+                            <option value="100%">100%</option>
+                            <option value="200px">200px</option>
+                            <option value="300px">300px</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Preview */}
+                <div className="p-4 rounded-lg bg-white border border-gray-700 mb-4 flex items-center justify-center min-h-[80px]">
+                    {shapeType === 'divider' && (
+                        <div style={{ width: '80%', height: '2px', background: `linear-gradient(to right, transparent, ${fillColor}, transparent)` }} />
+                    )}
+                    {shapeType === 'rectangle' && (
+                        <div style={{ width: '60%', minHeight: '40px', background: `${fillColor}20`, border: `${outlineWidth}px ${outlineStyle} ${outlineColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
+                            {shapeText && <span style={{ color: '#333', fontSize: '12px' }}>{shapeText}</span>}
+                        </div>
+                    )}
+                    {shapeType === 'circle' && (
+                        <div style={{ width: '60px', height: '60px', background: `${fillColor}20`, border: `${outlineWidth}px ${outlineStyle} ${outlineColor}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {shapeText && <span style={{ color: '#333', fontSize: '10px' }}>{shapeText}</span>}
+                        </div>
+                    )}
+                    {shapeType === 'triangle' && (
+                        <div style={{ width: 0, height: 0, borderLeft: '30px solid transparent', borderRight: '30px solid transparent', borderBottom: `52px solid ${fillColor}` }} />
+                    )}
+                    {shapeType === 'rounded-box' && (
+                        <div style={{ width: '60%', minHeight: '40px', background: `${fillColor}15`, border: `${outlineWidth}px ${outlineStyle} ${outlineColor}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
+                            {shapeText && <span style={{ color: '#333', fontSize: '12px' }}>{shapeText}</span>}
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                    <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm">Cancel</button>
+                    <button type="button" onClick={handleInsert}
+                        className="px-5 py-2 bg-intelligence text-obsidian rounded-lg font-semibold text-sm hover:bg-intelligence-light transition-colors">
+                        Insert Shape
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Line Spacing Dropdown                                              */
+/* ================================================================== */
+
+function LineSpacingDropdown({ editor }: { editor: Editor }) {
+    const [open, setOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
+
+    const spacings = [
+        { label: '1.0', value: '1' },
+        { label: '1.15', value: '1.15' },
+        { label: '1.5', value: '1.5' },
+        { label: '2.0', value: '2' },
+        { label: '2.5', value: '2.5' },
+        { label: '3.0', value: '3' },
+    ]
+
+    const applySpacing = (value: string) => {
+        editor.chain().focus().updateAttributes('paragraph', {}).run()
+        // Apply via raw CSS on selection
+        const { from, to } = editor.state.selection
+        editor.view.dispatch(
+            editor.state.tr.setMeta('lineSpacing', value)
+        )
+        // Fallback: wrap content node style
+        const dom = editor.view.dom
+        const paras = dom.querySelectorAll('p, h1, h2, h3, h4, li')
+        paras.forEach(p => {
+            const el = p as HTMLElement
+            if (el.contains(window.getSelection()?.anchorNode as Node)) {
+                el.style.lineHeight = value
+            }
+        })
+        setOpen(false)
+    }
+
+    return (
+        <div className="relative" ref={ref}>
+            <button type="button" onClick={() => setOpen(!open)} title="Line Spacing"
+                className="flex items-center p-1.5 rounded text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                <SlidersHorizontal className="h-4 w-4" />
+                <ChevronDown className="h-3 w-3 ml-0.5" />
+            </button>
+            {open && (
+                <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[100px]">
+                    <div className="py-1">
+                        {spacings.map(s => (
+                            <button key={s.value} type="button" onClick={() => applySpacing(s.value)}
+                                className="block w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                                {s.label}× spacing
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Case Change Dropdown                                               */
+/* ================================================================== */
+
+function CaseChangeDropdown({ editor }: { editor: Editor }) {
+    const [open, setOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
+
+    const applyCase = (caseType: 'upper' | 'lower' | 'title' | 'sentence') => {
+        const { from, to } = editor.state.selection
+        if (from === to) { setOpen(false); return }
+
+        const selectedText = editor.state.doc.textBetween(from, to, ' ')
+        let transformed = selectedText
+
+        switch (caseType) {
+            case 'upper': transformed = selectedText.toUpperCase(); break
+            case 'lower': transformed = selectedText.toLowerCase(); break
+            case 'title': transformed = selectedText.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()); break
+            case 'sentence': transformed = selectedText.charAt(0).toUpperCase() + selectedText.slice(1).toLowerCase(); break
+        }
+
+        editor.chain().focus().insertContentAt({ from, to }, transformed).run()
+        setOpen(false)
+    }
+
+    return (
+        <div className="relative" ref={ref}>
+            <button type="button" onClick={() => setOpen(!open)} title="Change Case"
+                className="flex items-center p-1.5 rounded text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                <CaseSensitive className="h-4 w-4" />
+                <ChevronDown className="h-3 w-3 ml-0.5" />
+            </button>
+            {open && (
+                <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[140px]">
+                    <div className="py-1">
+                        <button type="button" onClick={() => applyCase('sentence')} className="block w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 hover:text-white">Sentence case</button>
+                        <button type="button" onClick={() => applyCase('upper')} className="block w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 hover:text-white">UPPERCASE</button>
+                        <button type="button" onClick={() => applyCase('lower')} className="block w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 hover:text-white">lowercase</button>
+                        <button type="button" onClick={() => applyCase('title')} className="block w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 hover:text-white">Title Case</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Styles Pane Dropdown                                               */
+/* ================================================================== */
+
+function StylesDropdown({ editor }: { editor: Editor }) {
+    const [open, setOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
+
+    const styles = [
+        { label: 'Normal Text', action: () => editor.chain().focus().setParagraph().run() },
+        { label: 'Title', action: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
+        { label: 'Heading 1', action: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
+        { label: 'Heading 2', action: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
+        { label: 'Heading 3', action: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
+        { label: 'Heading 4', action: () => editor.chain().focus().toggleHeading({ level: 4 }).run() },
+        { label: 'Quote', action: () => editor.chain().focus().toggleBlockquote().run() },
+        { label: 'Code Block', action: () => editor.chain().focus().toggleCodeBlock().run() },
+    ]
+
+    return (
+        <div className="relative" ref={ref}>
+            <button type="button" onClick={() => setOpen(!open)} title="Quick Styles"
+                className="flex items-center px-2 py-1.5 rounded text-gray-300 hover:bg-gray-700 hover:text-white transition-colors text-xs border border-gray-700 min-w-[70px] justify-between">
+                <span>Styles</span>
+                <ChevronDown className="h-3 w-3 ml-1" />
+            </button>
+            {open && (
+                <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[150px]">
+                    <div className="py-1">
+                        {styles.map(s => (
+                            <button key={s.label} type="button" onClick={() => { s.action(); setOpen(false) }}
+                                className="block w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                                {s.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+/* ================================================================== */
 /*  Main Editor Component                                              */
 /* ================================================================== */
 
@@ -800,6 +1201,8 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     const [showImageModal, setShowImageModal] = useState(false)
     const [showCTAModal, setShowCTAModal] = useState(false)
     const [showVideoModal, setShowVideoModal] = useState(false)
+    const [showShapeModal, setShowShapeModal] = useState(false)
+    const [showFindReplace, setShowFindReplace] = useState(false)
 
     const editor = useEditor({
         extensions: [
@@ -886,6 +1289,11 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     }, [editor])
 
     const insertCTA = useCallback((html: string) => {
+        if (!editor) return
+        editor.chain().focus().insertContent(html).run()
+    }, [editor])
+
+    const insertShape = useCallback((html: string) => {
         if (!editor) return
         editor.chain().focus().insertContent(html).run()
     }, [editor])
@@ -1009,6 +1417,11 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                         icon={<Highlighter className="h-4 w-4" />}
                         title="Highlight Color"
                     />
+
+                    <div className="w-px h-6 bg-gray-700 mx-1" />
+
+                    <CaseChangeDropdown editor={editor} />
+                    <StylesDropdown editor={editor} />
                 </div>
 
                 {/* Toolbar Row 2 */}
@@ -1025,6 +1438,38 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('justify').run()} active={editor.isActive({ textAlign: 'justify' })} title="Justify">
                         <AlignJustify className="h-4 w-4" />
                     </ToolbarButton>
+
+                    <div className="w-px h-6 bg-gray-700 mx-1" />
+
+                    {/* Indentation */}
+                    <ToolbarButton onClick={() => {
+                        const dom = editor.view.dom
+                        const paras = dom.querySelectorAll('p, h1, h2, h3, h4, li')
+                        paras.forEach(p => {
+                            const el = p as HTMLElement
+                            if (el.contains(window.getSelection()?.anchorNode as Node)) {
+                                const current = parseInt(el.style.paddingLeft || '0', 10)
+                                el.style.paddingLeft = `${current + 24}px`
+                            }
+                        })
+                    }} title="Increase Indent">
+                        <Indent className="h-4 w-4" />
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => {
+                        const dom = editor.view.dom
+                        const paras = dom.querySelectorAll('p, h1, h2, h3, h4, li')
+                        paras.forEach(p => {
+                            const el = p as HTMLElement
+                            if (el.contains(window.getSelection()?.anchorNode as Node)) {
+                                const current = parseInt(el.style.paddingLeft || '0', 10)
+                                el.style.paddingLeft = `${Math.max(0, current - 24)}px`
+                            }
+                        })
+                    }} title="Decrease Indent">
+                        <Outdent className="h-4 w-4" />
+                    </ToolbarButton>
+
+                    <LineSpacingDropdown editor={editor} />
 
                     <div className="w-px h-6 bg-gray-700 mx-1" />
 
@@ -1073,6 +1518,15 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     <ToolbarButton onClick={() => setShowCTAModal(true)} title="Insert CTA Button">
                         <ArrowRight className="h-4 w-4" />
                     </ToolbarButton>
+                    <ToolbarButton onClick={() => setShowShapeModal(true)} title="Insert Shape">
+                        <Shapes className="h-4 w-4" />
+                    </ToolbarButton>
+
+                    <div className="w-px h-6 bg-gray-700 mx-1" />
+
+                    <ToolbarButton onClick={() => setShowFindReplace(!showFindReplace)} active={showFindReplace} title="Find & Replace (Ctrl+H)">
+                        <Search className="h-4 w-4" />
+                    </ToolbarButton>
 
                     <div className="w-px h-6 bg-gray-700 mx-1" />
 
@@ -1095,6 +1549,9 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     <span><kbd className="px-1 py-0.5 rounded bg-gray-700 text-gray-200">Ctrl/Cmd+Z</kbd> Undo</span>
                     <span><kbd className="px-1 py-0.5 rounded bg-gray-700 text-gray-200">Ctrl/Cmd+Shift+Z</kbd> Redo</span>
                 </div>
+
+                {/* Find & Replace Bar */}
+                {showFindReplace && <FindReplaceBar editor={editor} open={showFindReplace} onClose={() => setShowFindReplace(false)} />}
 
                 {/* Table Controls Row (shown only when cursor is in a table) */}
                 {isInTable && (
@@ -1213,6 +1670,115 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                         </div>
                     </div>
                 )}
+
+                {/* Image Editing Controls Row 2 (shown when image selected) */}
+                {isImageActive && (
+                    <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-gray-900/90 border-t border-blue-500/10">
+                        <span className="text-xs text-blue-200 font-semibold mr-1">EFFECTS:</span>
+
+                        {/* Brightness */}
+                        <div className="flex items-center gap-1">
+                            <Sun className="h-3.5 w-3.5 text-gray-400" />
+                            <input type="range" min={50} max={150} defaultValue={100} step={5}
+                                onChange={(e) => {
+                                    const img = editor.view.dom.querySelector('img.ProseMirror-selectednode') as HTMLImageElement | null
+                                    if (img) img.style.filter = img.style.filter?.replace(/brightness\([^)]*\)/, '') + ` brightness(${Number(e.target.value) / 100})`
+                                }}
+                                className="w-16 accent-yellow-400" title="Brightness" />
+                        </div>
+
+                        {/* Contrast */}
+                        <div className="flex items-center gap-1">
+                            <Contrast className="h-3.5 w-3.5 text-gray-400" />
+                            <input type="range" min={50} max={200} defaultValue={100} step={5}
+                                onChange={(e) => {
+                                    const img = editor.view.dom.querySelector('img.ProseMirror-selectednode') as HTMLImageElement | null
+                                    if (img) img.style.filter = img.style.filter?.replace(/contrast\([^)]*\)/, '') + ` contrast(${Number(e.target.value) / 100})`
+                                }}
+                                className="w-16 accent-blue-400" title="Contrast" />
+                        </div>
+
+                        <div className="w-px h-5 bg-gray-700 mx-1" />
+
+                        {/* Border Radius / Crop to Shape */}
+                        <span className="text-[11px] text-gray-400">Shape:</span>
+                        {[
+                            { label: 'Square', radius: '0' },
+                            { label: 'Rounded', radius: '12px' },
+                            { label: 'Pill', radius: '999px' },
+                            { label: 'Circle', radius: '50%' },
+                        ].map(s => (
+                            <button key={s.label} type="button"
+                                onClick={() => {
+                                    const img = editor.view.dom.querySelector('img.ProseMirror-selectednode') as HTMLImageElement | null
+                                    if (img) {
+                                        img.style.borderRadius = s.radius
+                                        img.style.objectFit = s.radius === '50%' ? 'cover' : ''
+                                        if (s.radius === '50%') { img.style.aspectRatio = '1'; img.style.objectFit = 'cover' }
+                                        else { img.style.aspectRatio = ''; img.style.objectFit = '' }
+                                    }
+                                }}
+                                className="px-2 py-0.5 rounded text-[10px] border border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white transition-colors">
+                                {s.label}
+                            </button>
+                        ))}
+
+                        <div className="w-px h-5 bg-gray-700 mx-1" />
+
+                        {/* Picture Style / Effects */}
+                        <span className="text-[11px] text-gray-400">Effects:</span>
+                        {[
+                            { label: 'Shadow', css: '0 4px 24px rgba(0,0,0,0.3)' },
+                            { label: 'Glow', css: '0 0 20px rgba(212,175,55,0.4)' },
+                            { label: 'None', css: 'none' },
+                        ].map(fx => (
+                            <button key={fx.label} type="button"
+                                onClick={() => {
+                                    const img = editor.view.dom.querySelector('img.ProseMirror-selectednode') as HTMLImageElement | null
+                                    if (img) img.style.boxShadow = fx.css
+                                }}
+                                className="px-2 py-0.5 rounded text-[10px] border border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white transition-colors">
+                                {fx.label}
+                            </button>
+                        ))}
+
+                        {/* Artistic Filters */}
+                        {[
+                            { label: 'B&W', filter: 'grayscale(1)' },
+                            { label: 'Sepia', filter: 'sepia(1)' },
+                            { label: 'Blur', filter: 'blur(2px)' },
+                            { label: 'Normal', filter: 'none' },
+                        ].map(f => (
+                            <button key={f.label} type="button"
+                                onClick={() => {
+                                    const img = editor.view.dom.querySelector('img.ProseMirror-selectednode') as HTMLImageElement | null
+                                    if (img) img.style.filter = f.filter
+                                }}
+                                className="px-2 py-0.5 rounded text-[10px] border border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white transition-colors">
+                                {f.label}
+                            </button>
+                        ))}
+
+                        {/* Border */}
+                        <div className="w-px h-5 bg-gray-700 mx-1" />
+                        <span className="text-[11px] text-gray-400">Border:</span>
+                        {[
+                            { label: 'None', border: 'none' },
+                            { label: 'Thin', border: '1px solid #ccc' },
+                            { label: 'Gold', border: '2px solid #D4AF37' },
+                            { label: 'Thick', border: '3px solid #333' },
+                        ].map(b => (
+                            <button key={b.label} type="button"
+                                onClick={() => {
+                                    const img = editor.view.dom.querySelector('img.ProseMirror-selectednode') as HTMLImageElement | null
+                                    if (img) img.style.border = b.border
+                                }}
+                                className="px-2 py-0.5 rounded text-[10px] border border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white transition-colors">
+                                {b.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Editor Content */}
@@ -1293,6 +1859,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
             <ImageInsertModal open={showImageModal} onClose={() => setShowImageModal(false)} onInsert={insertImage} />
             <VideoEmbedModal open={showVideoModal} onClose={() => setShowVideoModal(false)} onInsert={insertVideo} />
             <CTAButtonModal open={showCTAModal} onClose={() => setShowCTAModal(false)} onInsert={insertCTA} />
+            <ShapeInsertModal open={showShapeModal} onClose={() => setShowShapeModal(false)} onInsert={insertShape} />
         </div>
     )
 }

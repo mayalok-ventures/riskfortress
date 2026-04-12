@@ -10,6 +10,7 @@ const sectors = [
     {
         id: 'financial',
         title: 'Macro-Financial Forensics',
+        description: 'Advanced forensic intelligence for enterprise financial structures',
         icon: Factory,
         color: 'from-champagne to-champagne-dark',
         borderColor: 'border-champagne/30',
@@ -29,6 +30,7 @@ const sectors = [
     {
         id: 'statutory',
         title: 'Statutory & Structural Intelligence',
+        description: 'Regulatory risk mapping and structural compliance forensics',
         icon: Users,
         color: 'from-champagne to-champagne-dark',
         borderColor: 'border-champagne/30',
@@ -48,6 +50,7 @@ const sectors = [
     {
         id: 'environmental',
         title: 'Geo-Environmental Risk',
+        description: 'Geographic and environmental exposure intelligence for high-value assets',
         icon: Cpu,
         color: 'from-champagne to-champagne-dark',
         borderColor: 'border-champagne/30',
@@ -73,6 +76,10 @@ export default function SectorFocus() {
         <section className="relative py-32">
             {/* Background */}
             <div className="absolute inset-0 bg-gradient-to-b from-gray-950 to-gray-900">
+                <div className="absolute inset-0 opacity-[0.04]" style={{
+                    backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)',
+                    backgroundSize: '32px 32px',
+                }} />
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-industrial/20 to-transparent" />
                     <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-legacy/20 to-transparent" />
@@ -98,7 +105,7 @@ export default function SectorFocus() {
                         <span className="text-champagne">Specializations</span>
                     </h2>
                     <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light">
-                        Three core verticals where predictive forensics prevents catastrophic wealth destruction.
+                        Three disciplines. Each one built for a different class of invisible risk.
                     </p>
                 </MotionDiv>
 
@@ -155,7 +162,7 @@ export default function SectorFocus() {
                                                 <h3 className="text-2xl font-bold text-white">{activeSector.title}</h3>
                                             </div>
                                             <p className="text-gray-400">
-                                                Premium intelligence solutions for {activeSector.id === 'industrial' ? 'industrial assets' : activeSector.id === 'hni' ? 'private legacies' : 'digital sovereignty'}
+                                                {activeSector.description || 'Advanced forensic intelligence for enterprise financial structures'}
                                             </p>
                                         </div>
                                         <div className={`px-4 py-2 rounded-full bg-gradient-to-r ${activeSector.color} bg-opacity-20 border ${activeSector.borderColor}`}>
@@ -186,9 +193,10 @@ export default function SectorFocus() {
                                     <div className="mb-8 p-6 rounded-xl bg-gray-900/30 border border-gray-800">
                                         <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
                                             <Lock className="h-5 w-5 mr-2 text-green-400" />
-                                            Real-World Impact
+                                            Pattern We Identify
                                         </h4>
                                         <p className="text-gray-300 mb-2">{activeSector.caseStudy}</p>
+                                        <p className="text-xs opacity-50 mt-1 italic text-gray-500">Illustrative scenario based on publicly reported information</p>
                                         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
                                             <div>
                                                 <p className="text-sm text-gray-400">Typical Client Budget</p>
@@ -209,7 +217,7 @@ export default function SectorFocus() {
                                             </p>
                                         </div>
                                         <button className="px-6 py-2 rounded-lg bg-gradient-to-r from-intelligence to-industrial text-white font-semibold hover:shadow-intelligence transition-all">
-                                            Request Intelligence Brief
+                                            Request a Discrete Consultation
                                         </button>
                                     </div>
                                 </div>

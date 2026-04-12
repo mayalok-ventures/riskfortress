@@ -8,17 +8,17 @@ const mandatePrinciples = [
     {
         icon: Target,
         title: 'High-Stakes Advisory Mandate',
-        description: 'We only engage with risks valued at ₹1 Crore or above. This High-Stakes Advisory Mandate ensures our Predictive Risk Intelligence focuses on scenarios where Strategic Foresight for UHNWIs justifies deep forensic investigation.',
+        description: 'We only engage with risks valued at ₹1 Crore or above. This ensures our forensic intelligence focuses on scenarios where the stakes are genuinely existential.',
     },
     {
         icon: TrendingDown,
         title: '1% Fee Model for Asset Protection',
-        description: 'Our fee is exactly 1% of the protected asset value. This value-based pricing attracts high-intent, wealthy clients who understand that Asset Protection Intelligence prevents catastrophic wealth destruction.',
+        description: 'Our fee is exactly 1% of the protected asset value. This value-based pricing aligns our incentives with your protection — not with the volume of deliverables we produce.',
     },
     {
         icon: Shield,
-        title: 'HNI Asset Protection Services India',
-        description: 'Our Private Intelligence Firm India serves Ultra-HNWIs with ₹100Cr+ assets. Large developers, industrial dynasties, and enterprise founders who need Predictive Risk Intelligence preventing the next corporate collapse.',
+        title: 'Ultra-HNWI Asset Threshold',
+        description: 'We serve Ultra-HNWIs with ₹100Cr+ assets. Industrial dynasties, family offices, and enterprise founders who understand that prevention is cheaper than catastrophe.',
     },
 ]
 
@@ -116,10 +116,10 @@ export default function MandatePage() {
                         
                         <div className="space-y-6">
                             {[
-                                'Aligned Incentives: When we charge 1% of protected value, we only succeed when you don\'t face catastrophic loss.',
-                                'Premium Focus: High thresholds ensure we dedicate our best forensic resources to each engagement.',
-                                'No Generic Consulting: We don\'t solve routine problems. We prevent the crises that end dynasties.',
-                                'Long-term Relationship: Multi-generational wealth requires multi-generational thinking.',
+                                'Skin in the game: Our fee is tied to what we protect, not what we produce. If the crisis happens, we failed — regardless of what the deliverable said.',
+                                'Deliberate scarcity: We take fewer engagements than we could. Every brief we accept gets our full attention — not a junior analyst and a template.',
+                                "We don't do retainers for optics: If you want a quarterly report to show the board, we are not the right firm. If you want to know what the board doesn't know yet — we are.",
+                                'We think in decades: Wealth built over generations is lost in months. The timelines that matter to dynasties are not quarterly earnings cycles.',
                             ].map((item, index) => (
                                 <div key={index} className="flex items-start space-x-4">
                                     <CheckCircle className="h-5 w-5 text-champagne flex-shrink-0 mt-0.5" />
@@ -165,6 +165,9 @@ export default function MandatePage() {
                                 <div className="pt-4 border-t border-gray-800">
                                     <p className="text-xs text-gray-500 uppercase tracking-wider">Potential Prevention</p>
                                     <p className="text-lg font-light text-champagne mt-1">{scenario.prevented}</p>
+                                    <span className="text-xs opacity-40 block mt-1 text-gray-500">
+                                        Estimate based on publicly reported case data
+                                    </span>
                                 </div>
                             </MotionDiv>
                         ))}

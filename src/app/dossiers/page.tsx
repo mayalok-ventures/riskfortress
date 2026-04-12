@@ -1,4 +1,21 @@
+import { Metadata } from 'next'
+
 import DossiersClient from './DossiersClient'
+
+export const metadata: Metadata = {
+    title: 'Risk Intelligence Dossiers | Case Scenarios & Articles | RiskFortress India',
+    description:
+        'Confidential risk intelligence briefs, case scenarios, forensic analyses, and investigative articles published by RiskFortress India.',
+    alternates: { canonical: 'https://riskfortress.in/dossiers/' },
+    openGraph: {
+        title: 'Risk Intelligence Dossiers | RiskFortress India',
+        description: 'Forensic case scenarios, intelligence articles, and expert analysis on India\'s highest-stakes risk domains.',
+        url: 'https://riskfortress.in/dossiers/',
+        type: 'website',
+    },
+}
+
+
 
 export default function DossiersPage() {
     return (

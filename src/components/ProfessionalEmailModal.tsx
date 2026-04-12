@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { X } from 'lucide-react'
+import { useState } from 'react'
 
 interface ProfessionalEmailModalProps {
     isOpen: boolean
@@ -73,11 +73,10 @@ export default function ProfessionalEmailModal({
             const data = await response.json().catch(() => null)
 
             if (response.ok && data?.success && data?.grantToken) {
-                sessionStorage.setItem('rf-email-verified', 'true')
-                sessionStorage.setItem('rf-case-grant', data.grantToken)
-                sessionStorage.setItem('rf-case-grant-created-at', String(Date.now()))
-                sessionStorage.setItem('rf-email-verified-at', String(Date.now()))
-                sessionStorage.setItem('rf-email-domain', email.split('@')[1]?.toLowerCase() || '')
+                const nowStr = String(Date.now())
+                localStorage.setItem('rf-email-verified-at', nowStr)
+                localStorage.setItem('rf-case-grant', data.grantToken)
+                localStorage.setItem('rf-email-domain', email.split('@')[1]?.toLowerCase() || '')
 
                 onSuccess()
                 onClose()
@@ -110,10 +109,11 @@ export default function ProfessionalEmailModal({
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-400 mb-2">
+                        <label htmlFor="emailInput" className="block text-sm font-medium text-gray-400 mb-2">
                             Professional Email
                         </label>
                         <input
+                            id="emailInput"
                             type="email"
                             required
                             value={email}

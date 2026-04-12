@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
-import { trackPageView, trackScrollDepth, trackEngagementTime, trackPageExit, sendHeartbeat } from '@/lib/analytics'
+import { useEffect, useRef } from 'react'
+
+import { trackPageView, trackScrollDepth, trackEngagementTime, sendHeartbeat } from '@/lib/analytics'
 
 interface AnalyticsTrackerProps {
     contentType?: string
@@ -16,16 +17,27 @@ export default function AnalyticsTracker({ contentType = 'page' }: AnalyticsTrac
         // Skip if same path (prevents double tracking)
         if (prevPathRef.current === pathname) return
         
-        // Track exit from previous page
-        if (prevPathRef.current) {
-            trackPageExit(prevPathRef.current, contentType)
+        // Skip tracking for admin and placeholder routes
+        if (pathname.startsWith('/rf-admin') || pathname.includes('_placeholder')) {
+            return
         }
-        
+
         prevPathRef.current = pathname
         
-        // Track page view
-        const title = document.title || pathname
-        trackPageView(pathname, title, contentType)
+        // Track page view (delayed slightly to allow document.title to update)
+        setTimeout(() => {
+            let title = document.title || pathname
+            // Clean up old default titles if any
+            title = title.replace(' | A Mayalok Division', '')
+            
+            // If it is a generic title for a dossier, try to find an h1 on the page (more accurate than generic metadata before hydration)
+            if (pathname.includes('/dossiers/') && title === 'Intelligence Dossier') {
+               const h1 = document.querySelector('h1')
+               if (h1 && h1.textContent) title = h1.textContent
+            }
+            
+            trackPageView(pathname, title, contentType)
+        }, 800)
         
         // Start scroll depth tracking
         const cleanupScroll = trackScrollDepth(pathname)

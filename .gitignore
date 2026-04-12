@@ -10,3 +10,6 @@ dist
 build
 coverage
 .nyc_output
+.wrangler
+.env.local
+.env.production
