@@ -111,6 +111,20 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         platforms[platform] = (platforms[platform] || 0) + 1
         stats.platforms = platforms
 
+        // Track device category from screenWidth
+        const screenWidth = event.screenWidth as number | undefined
+        if (screenWidth) {
+          const devices = (stats.devices || { mobile: 0, tablet: 0, desktop: 0 }) as Record<string, number>
+          if (screenWidth < 768) {
+            devices.mobile = (devices.mobile || 0) + 1
+          } else if (screenWidth <= 1024) {
+            devices.tablet = (devices.tablet || 0) + 1
+          } else {
+            devices.desktop = (devices.desktop || 0) + 1
+          }
+          stats.devices = devices
+        }
+
         const path = event.path as string
         if (!pages[path]) {
           pages[path] = {
@@ -243,6 +257,18 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       topShared: Array<{ path: string; title: string; contentType: string; shares: number; platforms: Record<string, number> }>
       platforms: Record<string, number>
       todayPageviews: number
+      avgPagesPerSession: number
+      bounceRate: number
+      avgSessionDuration: number
+      avgScrollDepth: number
+      deviceBreakdown: { mobile: number; tablet: number; desktop: number }
+      previousPeriod: {
+        totalPageviews: number
+        uniqueVisitors: number
+        uniqueSessions: number
+        todayPageviews: number
+      }
+      totalShares: number
     } = {
       dates: [],
       totalPageviews: 0,
@@ -258,6 +284,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       topShared: [],
       platforms: {},
       todayPageviews: 0,
+      avgPagesPerSession: 0,
+      bounceRate: 0,
+      avgSessionDuration: 0,
+      avgScrollDepth: 0,
+      deviceBreakdown: { mobile: 0, tablet: 0, desktop: 0 },
+      previousPeriod: { totalPageviews: 0, uniqueVisitors: 0, uniqueSessions: 0, todayPageviews: 0 },
+      totalShares: 0,
     }
 
     const allVisitors = new Set<string>()
@@ -277,6 +310,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     const shareAggregates: Record<string, { count: number; title: string; contentType: string; platforms: Record<string, number> }> = {}
     const allPlatforms: Record<string, number> = {}
+    let totalEngagementMs = 0
+    let totalEngagementCount = 0
 
     for (let i = 0; i < days; i++) {
       const date = new Date()
@@ -291,6 +326,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         stats.totalPageviews += (parsed.totalPageviews as number) || 0
         stats.newVisitors += (parsed.newVisitors as number) || 0
         stats.returningVisitors += (parsed.returningVisitors as number) || 0
+        stats.totalShares += (parsed.totalShares as number) || 0
 
         ;((parsed.uniqueVisitors as string[]) || []).forEach((v: string) => allVisitors.add(v))
         ;((parsed.uniqueSessions as string[]) || []).forEach((s: string) => allSessions.add(s))
@@ -331,6 +367,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           pageAggregates[path].totalEngagement += pageData.totalEngagement
           pageAggregates[path].engagementCount += pageData.engagementCount
           pageAggregates[path].exits += pageData.exits
+
+          totalEngagementMs += pageData.totalEngagement
+          totalEngagementCount += pageData.engagementCount
         }
 
         for (const [type, count] of Object.entries(
@@ -358,6 +397,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         )) {
           allPlatforms[platform] = (allPlatforms[platform] || 0) + (count as number)
         }
+
+        // Aggregate device breakdown
+        const dayDevices = (parsed.devices || {}) as Record<string, number>
+        stats.deviceBreakdown.mobile += dayDevices.mobile || 0
+        stats.deviceBreakdown.tablet += dayDevices.tablet || 0
+        stats.deviceBreakdown.desktop += dayDevices.desktop || 0
 
         if (i === 0) {
           const now = Date.now()
@@ -390,6 +435,31 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     stats.uniqueVisitors = allVisitors.size
     stats.uniqueSessions = allSessions.size
 
+    // Compute engagement metrics
+    if (allSessions.size > 0) {
+      stats.avgPagesPerSession = Math.round((stats.totalPageviews / allSessions.size) * 10) / 10
+    }
+
+    // Bounce rate: sessions with only 1 pageview / total sessions
+    // Approximate from daily data: sessions where visitor had only 1 page
+    const totalExits = Object.values(pageAggregates).reduce((s, p) => s + p.exits, 0)
+    if (allSessions.size > 0) {
+      stats.bounceRate = Math.round((totalExits / allSessions.size) * 100)
+      if (stats.bounceRate > 100) stats.bounceRate = 100
+    }
+
+    // Average session duration from engagement data
+    if (totalEngagementCount > 0) {
+      stats.avgSessionDuration = Math.round(totalEngagementMs / totalEngagementCount / 1000)
+    }
+
+    // Average scroll depth across all pages
+    const totalScrollDepthAll = Object.values(pageAggregates).reduce((s, p) => s + p.totalScrollDepth, 0)
+    const totalScrollCountAll = Object.values(pageAggregates).reduce((s, p) => s + p.scrollCount, 0)
+    if (totalScrollCountAll > 0) {
+      stats.avgScrollDepth = Math.round(totalScrollDepthAll / totalScrollCountAll)
+    }
+
     stats.topPages = Object.entries(pageAggregates)
       .map(([path, data]) => ({
         path,
@@ -419,12 +489,35 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     stats.platforms = allPlatforms
 
-    // Today's pageviews
+    // Today's pageviews (dailyStats[0] is today before reverse)
     if (stats.dailyStats.length > 0) {
-      stats.todayPageviews = stats.dailyStats[stats.dailyStats.length - 1]?.pageviews || 0
+      stats.todayPageviews = stats.dailyStats[0]?.pageviews || 0
     }
 
     stats.dailyStats.reverse()
+
+    // Fetch previous period for comparison
+    const prevVisitors = new Set<string>()
+    const prevSessions = new Set<string>()
+    let prevPageviews = 0
+    for (let i = days; i < days * 2; i++) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dateKey = getDateKey(date)
+      const daySnap = await getDoc('analytics_stats', dateKey)
+      if (daySnap.exists) {
+        const parsed = daySnap.data()!
+        prevPageviews += (parsed.totalPageviews as number) || 0
+        ;((parsed.uniqueVisitors as string[]) || []).forEach((v: string) => prevVisitors.add(v))
+        ;((parsed.uniqueSessions as string[]) || []).forEach((s: string) => prevSessions.add(s))
+      }
+    }
+    stats.previousPeriod = {
+      totalPageviews: prevPageviews,
+      uniqueVisitors: prevVisitors.size,
+      uniqueSessions: prevSessions.size,
+      todayPageviews: 0,
+    }
 
     return jsonResponse(stats)
   } catch (error) {

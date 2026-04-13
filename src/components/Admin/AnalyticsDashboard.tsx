@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import {
     Eye, Users, Calendar, TrendingUp, Share2, Globe,
-    Loader2, RefreshCw, ArrowUpRight, Activity, Monitor, ExternalLink
+    Loader2, RefreshCw, ArrowUpRight, ArrowDownRight, Activity, Monitor, ExternalLink,
+    Clock, MousePointer, BarChart3, Smartphone, Tablet, MonitorIcon, Timer, Target
 } from 'lucide-react'
 import {
-    AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+    AreaChart, Area, BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, Cell
 } from 'recharts'
 
@@ -34,6 +35,18 @@ interface AnalyticsData {
     activeUsers: number
     todayPageviews: number
     dailyStats: Array<{ date: string; pageviews: number; visitors: number; sessions: number }>
+    avgPagesPerSession: number
+    bounceRate: number
+    avgSessionDuration: number
+    avgScrollDepth: number
+    deviceBreakdown: { mobile: number; tablet: number; desktop: number }
+    previousPeriod: {
+        totalPageviews: number
+        uniqueVisitors: number
+        uniqueSessions: number
+        todayPageviews: number
+    }
+    totalShares: number
 }
 
 /* ------------------------------------------------------------------ */
@@ -86,6 +99,22 @@ function getContentTypeLabel(path: string): string {
     return 'Page'
 }
 
+function pctChange(current: number, previous: number): { value: number; positive: boolean } | null {
+    if (previous === 0 && current === 0) return null
+    if (previous === 0) return { value: 100, positive: true }
+    const change = Math.round(((current - previous) / previous) * 100)
+    return { value: Math.abs(change), positive: change >= 0 }
+}
+
+function fmtDuration(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return s > 0 ? `${m}m ${s}s` : `${m}m`
+}
+
+const DEVICE_COLORS = { mobile: '#3B82F6', tablet: '#8B5CF6', desktop: '#10B981' }
+
 /* ------------------------------------------------------------------ */
 /*  Custom Recharts Tooltip                                            */
 /* ------------------------------------------------------------------ */
@@ -109,8 +138,9 @@ function CustomTooltip({ active, payload, label }: any) {
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-function StatCard({ label, value, icon: Icon, accent, extra }: {
+function StatCard({ label, value, icon: Icon, accent, extra, change }: {
     label: string; value: string | number; icon: React.ElementType; accent: string; extra?: React.ReactNode
+    change?: { value: number; positive: boolean } | null
 }) {
     return (
         <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6">
@@ -122,7 +152,15 @@ function StatCard({ label, value, icon: Icon, accent, extra }: {
             </div>
             <div className="flex items-end justify-between">
                 <p className="text-3xl font-bold text-white">{typeof value === 'number' ? value.toLocaleString() : value}</p>
-                {extra}
+                <div className="flex flex-col items-end gap-1">
+                    {change && (
+                        <div className={`flex items-center space-x-1 text-xs font-semibold ${change.positive ? 'text-green-400' : 'text-red-400'}`}>
+                            {change.positive ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+                            <span>{change.value}%</span>
+                        </div>
+                    )}
+                    {extra}
+                </div>
             </div>
         </div>
     )
@@ -186,6 +224,23 @@ export default function AnalyticsDashboard({ token }: Props) {
     const contentPages = data.topPages.filter(p => p.path.startsWith('/dossiers/') && p.path !== '/dossiers/')
     const sitePages = data.topPages.filter(p => !p.path.startsWith('/dossiers/') || p.path === '/dossiers/')
 
+    const prev = data.previousPeriod || { totalPageviews: 0, uniqueVisitors: 0, uniqueSessions: 0, todayPageviews: 0 }
+    const viewsChange = pctChange(data.totalPageviews, prev.totalPageviews)
+    const visitorsChange = pctChange(data.uniqueVisitors, prev.uniqueVisitors)
+
+    const avgViewsPerDay = data.dailyStats.length > 0
+        ? Math.round(data.totalPageviews / data.dailyStats.length)
+        : 0
+
+    const topSource = platformEntries.length > 0 ? platformEntries[0][0] : '-'
+
+    const totalDevices = (data.deviceBreakdown?.mobile || 0) + (data.deviceBreakdown?.tablet || 0) + (data.deviceBreakdown?.desktop || 0)
+    const deviceData = totalDevices > 0 ? [
+        { name: 'Mobile', value: data.deviceBreakdown.mobile, color: DEVICE_COLORS.mobile },
+        { name: 'Tablet', value: data.deviceBreakdown.tablet, color: DEVICE_COLORS.tablet },
+        { name: 'Desktop', value: data.deviceBreakdown.desktop, color: DEVICE_COLORS.desktop },
+    ].filter(d => d.value > 0) : []
+
     /* ------------------------------------------------------------------ */
     /*  Render                                                             */
     /* ------------------------------------------------------------------ */
@@ -216,7 +271,9 @@ export default function AnalyticsDashboard({ token }: Props) {
             {/* ===== Stat Cards ===== */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
                 <StatCard label="Total Views" value={data.totalPageviews} icon={Eye}
-                    accent="bg-intelligence/10 text-intelligence" />
+                    accent="bg-intelligence/10 text-intelligence"
+                    change={viewsChange}
+                    extra={<span className="text-[10px] text-gray-500">vs prev period</span>} />
 
                 <StatCard label="Live Now" value={data.activeUsers} icon={Activity}
                     accent="bg-green-500/10 text-green-400"
@@ -232,13 +289,15 @@ export default function AnalyticsDashboard({ token }: Props) {
                 />
 
                 <StatCard label="Today's Views" value={data.todayPageviews} icon={Calendar}
-                    accent="bg-blue-500/10 text-blue-400" />
+                    accent="bg-blue-500/10 text-blue-400"
+                    extra={<span className="text-[10px] text-gray-500">~{avgViewsPerDay}/day avg</span>} />
 
                 <StatCard label="Returning Visitors" value={data.returningVisitors} icon={Users}
                     accent="bg-purple-500/10 text-purple-400"
+                    change={visitorsChange}
                     extra={
                         data.uniqueVisitors > 0 ? (
-                            <span className="text-xs text-gray-500">
+                            <span className="text-[10px] text-gray-500">
                                 {Math.round((data.returningVisitors / data.uniqueVisitors) * 100)}% of visitors
                             </span>
                         ) : undefined
@@ -268,12 +327,14 @@ export default function AnalyticsDashboard({ token }: Props) {
                             <Tooltip content={<CustomTooltip />} />
                             <Area type="monotone" dataKey="pageviews" name="Page Views" stroke="#22d3ee" fill="url(#gradViews)" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#22d3ee' }} />
                             <Area type="monotone" dataKey="visitors" name="Visitors" stroke="#34d399" fill="url(#gradVisitors)" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#34d399' }} />
+                            <Area type="monotone" dataKey="sessions" name="Sessions" stroke="#a78bfa" fill="none" strokeWidth={1.5} strokeDasharray="4 3" dot={false} activeDot={{ r: 3, fill: '#a78bfa' }} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
                 <div className="flex items-center justify-center space-x-6 mt-2">
                     <div className="flex items-center space-x-2"><div className="h-2.5 w-2.5 rounded-full bg-cyan-400" /><span className="text-xs text-gray-400">Page Views</span></div>
                     <div className="flex items-center space-x-2"><div className="h-2.5 w-2.5 rounded-full bg-green-400" /><span className="text-xs text-gray-400">Unique Visitors</span></div>
+                    <div className="flex items-center space-x-2"><div className="h-2.5 w-2.5 rounded-full bg-purple-400" /><span className="text-xs text-gray-400">Sessions</span></div>
                 </div>
             </div>
 
@@ -488,8 +549,90 @@ export default function AnalyticsDashboard({ token }: Props) {
                 )}
             </div>
 
+            {/* ===== Engagement Metrics + Device Breakdown ===== */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                {/* Engagement Metrics */}
+                <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6">
+                    <SectionTitle>Engagement Metrics</SectionTitle>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Timer className="h-4 w-4 text-cyan-400" />
+                                <span className="text-xs text-gray-400">Avg Session Duration</span>
+                            </div>
+                            <p className="text-2xl font-bold text-white">{fmtDuration(data.avgSessionDuration || 0)}</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                            <div className="flex items-center gap-2 mb-2">
+                                <MousePointer className="h-4 w-4 text-green-400" />
+                                <span className="text-xs text-gray-400">Pages / Session</span>
+                            </div>
+                            <p className="text-2xl font-bold text-white">{data.avgPagesPerSession || 0}</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Target className="h-4 w-4 text-red-400" />
+                                <span className="text-xs text-gray-400">Bounce Rate</span>
+                            </div>
+                            <p className="text-2xl font-bold text-white">{data.bounceRate || 0}%</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700/50">
+                            <div className="flex items-center gap-2 mb-2">
+                                <BarChart3 className="h-4 w-4 text-purple-400" />
+                                <span className="text-xs text-gray-400">Avg Scroll Depth</span>
+                            </div>
+                            <p className="text-2xl font-bold text-white">{data.avgScrollDepth || 0}%</p>
+                            <div className="mt-2 w-full h-1.5 rounded-full bg-gray-800 overflow-hidden">
+                                <div className="h-full rounded-full bg-purple-500" style={{ width: `${data.avgScrollDepth || 0}%` }} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Device Breakdown */}
+                <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6">
+                    <SectionTitle>Device Breakdown</SectionTitle>
+                    {deviceData.length === 0 ? (
+                        <p className="text-gray-500 text-sm py-10 text-center">No device data yet</p>
+                    ) : (
+                        <div className="flex items-center gap-6">
+                            <div className="w-40 h-40 flex-shrink-0">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie data={deviceData} cx="50%" cy="50%" innerRadius={38} outerRadius={65}
+                                            paddingAngle={3} dataKey="value" stroke="none">
+                                            {deviceData.map((entry, i) => (
+                                                <Cell key={i} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip content={<CustomTooltip />} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="flex-1 space-y-3">
+                                {deviceData.map(d => {
+                                    const pct = totalDevices > 0 ? Math.round((d.value / totalDevices) * 100) : 0
+                                    const IconComp = d.name === 'Mobile' ? Smartphone : d.name === 'Tablet' ? Tablet : MonitorIcon
+                                    return (
+                                        <div key={d.name} className="flex items-center gap-3">
+                                            <IconComp className="h-4 w-4 flex-shrink-0" style={{ color: d.color }} />
+                                            <span className="text-sm text-gray-300 flex-1">{d.name}</span>
+                                            <span className="text-sm font-semibold text-white">{d.value.toLocaleString()}</span>
+                                            <span className="text-xs text-gray-500 w-10 text-right">{pct}%</span>
+                                            <div className="w-20 h-1.5 rounded-full bg-gray-800 overflow-hidden">
+                                                <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: d.color }} />
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {/* ===== Summary Footer ===== */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
                 <div className="rounded-xl bg-gray-900/50 border border-gray-800 p-4 text-center">
                     <p className="text-2xl font-bold text-white">{data.uniqueVisitors.toLocaleString()}</p>
                     <p className="text-xs text-gray-500 mt-1">Unique Visitors</p>
@@ -505,6 +648,14 @@ export default function AnalyticsDashboard({ token }: Props) {
                 <div className="rounded-xl bg-gray-900/50 border border-gray-800 p-4 text-center">
                     <p className="text-2xl font-bold text-white">{Object.keys(data.sources || {}).length}</p>
                     <p className="text-xs text-gray-500 mt-1">Traffic Sources</p>
+                </div>
+                <div className="rounded-xl bg-gray-900/50 border border-gray-800 p-4 text-center">
+                    <p className="text-2xl font-bold text-white">{(data.totalShares || 0).toLocaleString()}</p>
+                    <p className="text-xs text-gray-500 mt-1">Total Shares</p>
+                </div>
+                <div className="rounded-xl bg-gray-900/50 border border-gray-800 p-4 text-center">
+                    <p className="text-2xl font-bold text-intelligence truncate">{topSource}</p>
+                    <p className="text-xs text-gray-500 mt-1">Top Source</p>
                 </div>
             </div>
         </div>

@@ -30,7 +30,9 @@ import {
     ChevronDown, Palette, Highlighter, Upload,
     Trash2, Plus, ArrowRight, Search, Replace, Indent, Outdent,
     CaseSensitive, Shapes, Circle, Square, Triangle, SeparatorHorizontal,
-    SlidersHorizontal, Contrast, Sun, Crop, RectangleHorizontal, Type
+    SlidersHorizontal, Contrast, Sun, Crop, RectangleHorizontal, Type,
+    LayoutTemplate, Info, AlertTriangle, CheckCircle, XCircle, Tag,
+    FileText, Hash, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd
 } from 'lucide-react'
 
 interface RichTextEditorProps {
@@ -59,6 +61,14 @@ declare module '@tiptap/core' {
         fontSize: {
             setFontSize: (size: string) => ReturnType
             unsetFontSize: () => ReturnType
+        }
+        letterSpacing: {
+            setLetterSpacing: (spacing: string) => ReturnType
+            unsetLetterSpacing: () => ReturnType
+        }
+        lineHeight: {
+            setLineHeight: (height: string) => ReturnType
+            unsetLineHeight: () => ReturnType
         }
     }
 }
@@ -104,6 +114,66 @@ const FontSize = Extension.create({
                 chain().setMark('textStyle', { fontSize: size }).run(),
             unsetFontSize: () => ({ chain }) =>
                 chain().setMark('textStyle', { fontSize: null }).run(),
+        }
+    },
+})
+
+const LetterSpacing = Extension.create({
+    name: 'letterSpacing',
+    addOptions() {
+        return { types: ['textStyle'] }
+    },
+    addGlobalAttributes() {
+        return [{
+            types: this.options.types,
+            attributes: {
+                letterSpacing: {
+                    default: null,
+                    parseHTML: (element: HTMLElement) => element.style.letterSpacing || null,
+                    renderHTML: (attributes: { letterSpacing?: string | null }) => {
+                        if (!attributes.letterSpacing) return {}
+                        return { style: `letter-spacing: ${attributes.letterSpacing}` }
+                    },
+                },
+            },
+        }]
+    },
+    addCommands() {
+        return {
+            setLetterSpacing: (spacing: string) => ({ chain }) =>
+                chain().setMark('textStyle', { letterSpacing: spacing }).run(),
+            unsetLetterSpacing: () => ({ chain }) =>
+                chain().setMark('textStyle', { letterSpacing: null }).run(),
+        }
+    },
+})
+
+const LineHeight = Extension.create({
+    name: 'lineHeight',
+    addOptions() {
+        return { types: ['paragraph', 'heading'] }
+    },
+    addGlobalAttributes() {
+        return [{
+            types: this.options.types,
+            attributes: {
+                lineHeight: {
+                    default: null,
+                    parseHTML: (element: HTMLElement) => element.style.lineHeight || null,
+                    renderHTML: (attributes: { lineHeight?: string | null }) => {
+                        if (!attributes.lineHeight) return {}
+                        return { style: `line-height: ${attributes.lineHeight}` }
+                    },
+                },
+            },
+        }]
+    },
+    addCommands() {
+        return {
+            setLineHeight: (height: string) => ({ chain }) =>
+                chain().updateAttributes('paragraph', { lineHeight: height }).run(),
+            unsetLineHeight: () => ({ chain }) =>
+                chain().updateAttributes('paragraph', { lineHeight: null }).run(),
         }
     },
 })
@@ -174,6 +244,72 @@ const IMAGE_SIZES = [
     { label: '400px', value: '400px' },
     { label: '500px', value: '500px' },
     { label: '600px', value: '600px' },
+]
+
+const LETTER_SPACING_OPTIONS = [
+    { label: 'Default', value: '' },
+    { label: 'Tight (-0.5px)', value: '-0.5px' },
+    { label: 'Normal (0)', value: '0px' },
+    { label: 'Wide (1px)', value: '1px' },
+    { label: 'Wider (2px)', value: '2px' },
+    { label: 'Widest (4px)', value: '4px' },
+    { label: '6px', value: '6px' },
+    { label: '8px', value: '8px' },
+]
+
+const LINE_HEIGHT_OPTIONS = [
+    { label: 'Default', value: '' },
+    { label: '1.0', value: '1' },
+    { label: '1.15', value: '1.15' },
+    { label: '1.5', value: '1.5' },
+    { label: '1.75', value: '1.75' },
+    { label: '2.0', value: '2' },
+    { label: '2.5', value: '2.5' },
+    { label: '3.0', value: '3' },
+]
+
+const LAYOUT_BLOCKS = [
+    { id: 'info', label: 'Info Card', bg: '#EBF5FB', border: '#3498DB', icon: '💡', textColor: '#1A5276' },
+    { id: 'warning', label: 'Warning Card', bg: '#FEF9E7', border: '#F39C12', icon: '⚠️', textColor: '#7D6608' },
+    { id: 'success', label: 'Success Card', bg: '#EAFAF1', border: '#27AE60', icon: '✅', textColor: '#1E8449' },
+    { id: 'error', label: 'Error Card', bg: '#FDEDEC', border: '#E74C3C', icon: '❌', textColor: '#922B21' },
+    { id: 'neutral', label: 'Neutral Card', bg: '#F2F3F4', border: '#BDC3C7', icon: '📋', textColor: '#2C3E50' },
+    { id: 'dark', label: 'Dark Card', bg: '#1a1a2e', border: '#D4AF37', icon: '🌙', textColor: '#FFFFFF' },
+]
+
+const CALLOUT_TYPES = [
+    { id: 'info', label: 'Info', bg: '#E8F4FD', border: '#2196F3', icon: 'ℹ️', text: 'Information callout' },
+    { id: 'tip', label: 'Tip', bg: '#E8F5E9', border: '#4CAF50', icon: '💡', text: 'Helpful tip' },
+    { id: 'warning', label: 'Warning', bg: '#FFF3E0', border: '#FF9800', icon: '⚠️', text: 'Warning notice' },
+    { id: 'danger', label: 'Danger', bg: '#FFEBEE', border: '#F44336', icon: '🚫', text: 'Danger alert' },
+    { id: 'note', label: 'Note', bg: '#F3E5F5', border: '#9C27B0', icon: '📝', text: 'Take note' },
+    { id: 'quote', label: 'Quote', bg: '#ECEFF1', border: '#607D8B', icon: '💬', text: 'Notable quote' },
+]
+
+const STATUS_LABELS = [
+    { label: 'Draft', bg: '#6B7280', color: '#FFFFFF' },
+    { label: 'Published', bg: '#10B981', color: '#FFFFFF' },
+    { label: 'Pending', bg: '#F59E0B', color: '#000000' },
+    { label: 'Approved', bg: '#3B82F6', color: '#FFFFFF' },
+    { label: 'Rejected', bg: '#EF4444', color: '#FFFFFF' },
+    { label: 'In Review', bg: '#8B5CF6', color: '#FFFFFF' },
+    { label: 'Urgent', bg: '#DC2626', color: '#FFFFFF' },
+    { label: 'Completed', bg: '#059669', color: '#FFFFFF' },
+]
+
+const TABLE_STYLE_PRESETS = [
+    { id: 'minimal', label: 'Minimal' },
+    { id: 'bordered', label: 'Bordered' },
+    { id: 'striped', label: 'Striped' },
+    { id: 'compact', label: 'Compact' },
+    { id: 'spacious', label: 'Spacious' },
+]
+
+const DOCUMENT_PRESETS = [
+    { id: 'report', label: '📊 Report', desc: 'Numbered headings, formal layout' },
+    { id: 'article', label: '📰 Article', desc: 'Clean reading, sans-serif' },
+    { id: 'legal', label: '⚖️ Legal Document', desc: 'Serif font, numbered sections' },
+    { id: 'memo', label: '📋 Memo', desc: 'Brief, structured format' },
 ]
 
 /* ================================================================== */
@@ -853,8 +989,35 @@ function FindReplaceBar({ editor, open, onClose }: {
 /*  Modal: Shape Insert                                                */
 /* ================================================================== */
 
-function ShapeInsertModal({ open, onClose, onInsert }: {
-    open: boolean; onClose: () => void; onInsert: (html: string) => void
+function generateShapeSvgDataUri(
+    shapeType: string, fillColor: string, outlineColor: string, outlineWidth: string,
+    outlineStyle: string, shapeText: string
+): string {
+    const sw = parseInt(outlineWidth)
+    const dashArray = outlineStyle === 'dashed' ? 'stroke-dasharray="8,4"' : outlineStyle === 'dotted' ? 'stroke-dasharray="2,3"' : ''
+    const fillBg = fillColor + '30'
+    const textEl = shapeText ? `<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" fill="${outlineColor}" font-size="14" font-family="Arial,sans-serif">${shapeText.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</text>` : ''
+
+    let svg = ''
+    switch (shapeType) {
+        case 'rectangle':
+            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="100" viewBox="0 0 300 100"><rect x="${sw}" y="${sw}" width="${300-sw*2}" height="${100-sw*2}" fill="${fillBg}" stroke="${outlineColor}" stroke-width="${sw}" ${dashArray}/>${textEl}</svg>`
+            break
+        case 'circle':
+            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="${58-sw}" fill="${fillBg}" stroke="${outlineColor}" stroke-width="${sw}" ${dashArray}/>${textEl}</svg>`
+            break
+        case 'triangle':
+            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="104" viewBox="0 0 120 104"><polygon points="60,${sw} ${118-sw},${102-sw} ${sw+2},${102-sw}" fill="${fillBg}" stroke="${outlineColor}" stroke-width="${sw}" stroke-linejoin="round" ${dashArray}/></svg>`
+            break
+        case 'rounded-box':
+            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="100" viewBox="0 0 300 100"><rect x="${sw}" y="${sw}" width="${300-sw*2}" height="${100-sw*2}" rx="16" ry="16" fill="${fillBg}" stroke="${outlineColor}" stroke-width="${sw}" ${dashArray}/>${textEl}</svg>`
+            break
+    }
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+function ShapeInsertModal({ open, onClose, onInsert, editor }: {
+    open: boolean; onClose: () => void; onInsert: (html: string) => void; editor: Editor
 }) {
     const [shapeType, setShapeType] = useState<'divider' | 'rectangle' | 'circle' | 'triangle' | 'rounded-box'>('divider')
     const [fillColor, setFillColor] = useState('#D4AF37')
@@ -862,8 +1025,7 @@ function ShapeInsertModal({ open, onClose, onInsert }: {
     const [outlineWidth, setOutlineWidth] = useState('2')
     const [outlineStyle, setOutlineStyle] = useState<'solid' | 'dashed' | 'dotted'>('solid')
     const [shapeText, setShapeText] = useState('')
-    const [width, setWidth] = useState('100%')
-    const [height, setHeight] = useState('4px')
+    const [dividerStyle, setDividerStyle] = useState<'gradient' | 'solid' | 'dashed' | 'dotted' | 'double'>('gradient')
 
     const shapes = [
         { id: 'divider' as const, label: 'Divider', icon: SeparatorHorizontal },
@@ -874,42 +1036,51 @@ function ShapeInsertModal({ open, onClose, onInsert }: {
     ]
 
     const handleInsert = () => {
-        let style = ''
-        let innerHTML = shapeText ? `<p style="margin:0;padding:12px 16px;color:inherit;text-align:center;">${shapeText}</p>` : ''
-
-        switch (shapeType) {
-            case 'divider':
-                style = `width:${width};height:2px;background:linear-gradient(to right, transparent, ${fillColor}, transparent);margin:24px auto;`
-                innerHTML = ''
-                break
-            case 'rectangle':
-                style = `width:${width};min-height:${height === '4px' ? '60px' : height};background:${fillColor}20;border:${outlineWidth}px ${outlineStyle} ${outlineColor};margin:16px auto;display:flex;align-items:center;justify-content:center;`
-                break
-            case 'circle':
-                style = `width:100px;height:100px;background:${fillColor}20;border:${outlineWidth}px ${outlineStyle} ${outlineColor};border-radius:50%;margin:16px auto;display:flex;align-items:center;justify-content:center;`
-                break
-            case 'triangle':
-                style = `width:0;height:0;border-left:50px solid transparent;border-right:50px solid transparent;border-bottom:86px solid ${fillColor};margin:16px auto;`
-                innerHTML = ''
-                break
-            case 'rounded-box':
-                style = `width:${width};min-height:${height === '4px' ? '60px' : height};background:${fillColor}15;border:${outlineWidth}px ${outlineStyle} ${outlineColor};border-radius:12px;margin:16px auto;display:flex;align-items:center;justify-content:center;padding:8px;`
-                break
+        if (shapeType === 'divider') {
+            const borderMap: Record<string, string> = {
+                gradient: `border:none;height:3px;background:linear-gradient(to right, transparent, ${fillColor}, transparent);`,
+                solid: `border:none;border-top:3px solid ${fillColor};`,
+                dashed: `border:none;border-top:3px dashed ${fillColor};`,
+                dotted: `border:none;border-top:3px dotted ${fillColor};`,
+                double: `border:none;border-top:4px double ${fillColor};`,
+            }
+            const hrHtml = `<img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+                `<svg xmlns='http://www.w3.org/2000/svg' width='600' height='6'><rect width='600' height='6' fill='${fillColor}' opacity='0.3' rx='3'/><rect x='50' width='500' height='6' fill='${fillColor}' rx='3'/></svg>`
+            )}" alt="divider" style="width:100%;height:auto;margin:24px 0;${borderMap[dividerStyle] || ''}" />`
+            if (dividerStyle === 'gradient') {
+                const svgDivider = `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='4'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='0'><stop offset='0%' stop-color='${fillColor}' stop-opacity='0'/><stop offset='50%' stop-color='${fillColor}' stop-opacity='1'/><stop offset='100%' stop-color='${fillColor}' stop-opacity='0'/></linearGradient></defs><rect width='800' height='4' fill='url(%23g)' rx='2'/></svg>`
+                editor.chain().focus().insertContent({
+                    type: 'image',
+                    attrs: { src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgDivider)}`, width: '100%', align: 'center' },
+                }).run()
+            } else {
+                const lineH = dividerStyle === 'double' ? '6' : '3'
+                const svgLine = `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='${lineH}'><line x1='0' y1='${parseInt(lineH)/2}' x2='800' y2='${parseInt(lineH)/2}' stroke='${fillColor}' stroke-width='${lineH}' ${dividerStyle === 'dashed' ? "stroke-dasharray='12,6'" : dividerStyle === 'dotted' ? "stroke-dasharray='3,4'" : dividerStyle === 'double' ? "stroke-width='1'" : ''}/>${dividerStyle === 'double' ? `<line x1='0' y1='1' x2='800' y2='1' stroke='${fillColor}' stroke-width='1'/><line x1='0' y1='5' x2='800' y2='5' stroke='${fillColor}' stroke-width='1'/>` : ''}</svg>`
+                editor.chain().focus().insertContent({
+                    type: 'image',
+                    attrs: { src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgLine)}`, width: '100%', align: 'center' },
+                }).run()
+            }
+        } else {
+            const dataUri = generateShapeSvgDataUri(shapeType, fillColor, outlineColor, outlineWidth, outlineStyle, shapeText)
+            const w = shapeType === 'circle' || shapeType === 'triangle' ? '120px' : '50%'
+            editor.chain().focus().insertContent({
+                type: 'image',
+                attrs: { src: dataUri, width: w, align: 'center' },
+            }).run()
         }
-
-        const html = `<div style="${style}" data-shape="${shapeType}">${innerHTML}</div>`
-        onInsert(html)
         onClose()
     }
 
     if (!open) return null
 
+    const previewUri = shapeType !== 'divider' ? generateShapeSvgDataUri(shapeType, fillColor, outlineColor, outlineWidth, outlineStyle, shapeText) : ''
+
     return (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
             <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-                <h3 className="text-white font-semibold text-lg mb-4">Insert Shape</h3>
+                <h3 className="text-white font-semibold text-lg mb-4">Insert Shape / Divider</h3>
 
-                {/* Shape type selection */}
                 <div className="grid grid-cols-5 gap-2 mb-5">
                     {shapes.map(s => (
                         <button key={s.id} type="button" onClick={() => setShapeType(s.id)}
@@ -921,6 +1092,22 @@ function ShapeInsertModal({ open, onClose, onInsert }: {
                         </button>
                     ))}
                 </div>
+
+                {shapeType === 'divider' && (
+                    <div className="mb-4">
+                        <label className="block text-xs text-gray-400 mb-2">Divider Style</label>
+                        <div className="grid grid-cols-5 gap-2">
+                            {(['gradient','solid','dashed','dotted','double'] as const).map(ds => (
+                                <button key={ds} type="button" onClick={() => setDividerStyle(ds)}
+                                    className={`px-2 py-1.5 rounded text-xs border transition-colors ${
+                                        dividerStyle === ds ? 'border-intelligence bg-intelligence/10 text-intelligence' : 'border-gray-700 text-gray-400 hover:text-white'
+                                    }`}>
+                                    {ds.charAt(0).toUpperCase() + ds.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {shapeType !== 'divider' && shapeType !== 'triangle' && (
                     <div className="space-y-3 mb-4">
@@ -934,7 +1121,7 @@ function ShapeInsertModal({ open, onClose, onInsert }: {
 
                 <div className="grid grid-cols-2 gap-3 mb-4">
                     <div>
-                        <label className="block text-xs text-gray-400 mb-1">Fill Color</label>
+                        <label className="block text-xs text-gray-400 mb-1">{shapeType === 'divider' ? 'Color' : 'Fill Color'}</label>
                         <div className="flex items-center gap-2">
                             <input type="color" value={fillColor} onChange={e => setFillColor(e.target.value)}
                                 className="h-8 w-8 rounded border border-gray-700 bg-gray-800 cursor-pointer" />
@@ -942,69 +1129,53 @@ function ShapeInsertModal({ open, onClose, onInsert }: {
                                 className="flex-1 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs font-mono focus:border-intelligence focus:outline-none" />
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1">Outline Color</label>
-                        <div className="flex items-center gap-2">
-                            <input type="color" value={outlineColor} onChange={e => setOutlineColor(e.target.value)}
-                                className="h-8 w-8 rounded border border-gray-700 bg-gray-800 cursor-pointer" />
-                            <input type="text" value={outlineColor} onChange={e => setOutlineColor(e.target.value)}
-                                className="flex-1 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs font-mono focus:border-intelligence focus:outline-none" />
+                    {shapeType !== 'divider' && (
+                        <div>
+                            <label className="block text-xs text-gray-400 mb-1">Outline Color</label>
+                            <div className="flex items-center gap-2">
+                                <input type="color" value={outlineColor} onChange={e => setOutlineColor(e.target.value)}
+                                    className="h-8 w-8 rounded border border-gray-700 bg-gray-800 cursor-pointer" />
+                                <input type="text" value={outlineColor} onChange={e => setOutlineColor(e.target.value)}
+                                    className="flex-1 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs font-mono focus:border-intelligence focus:outline-none" />
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1">Outline Width</label>
-                        <select value={outlineWidth} onChange={e => setOutlineWidth(e.target.value)}
-                            className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs focus:border-intelligence focus:outline-none">
-                            {['1','2','3','4','5'].map(w => <option key={w} value={w}>{w}px</option>)}
-                        </select>
+                {shapeType !== 'divider' && (
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div>
+                            <label className="block text-xs text-gray-400 mb-1">Outline Width</label>
+                            <select value={outlineWidth} onChange={e => setOutlineWidth(e.target.value)}
+                                className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs focus:border-intelligence focus:outline-none">
+                                {['1','2','3','4','5'].map(w => <option key={w} value={w}>{w}px</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-gray-400 mb-1">Border Style</label>
+                            <select value={outlineStyle} onChange={e => setOutlineStyle(e.target.value as 'solid' | 'dashed' | 'dotted')}
+                                className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs focus:border-intelligence focus:outline-none">
+                                <option value="solid">Solid</option>
+                                <option value="dashed">Dashed</option>
+                                <option value="dotted">Dotted</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1">Outline Style</label>
-                        <select value={outlineStyle} onChange={e => setOutlineStyle(e.target.value as 'solid' | 'dashed' | 'dotted')}
-                            className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs focus:border-intelligence focus:outline-none">
-                            <option value="solid">Solid</option>
-                            <option value="dashed">Dashed</option>
-                            <option value="dotted">Dotted</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1">Width</label>
-                        <select value={width} onChange={e => setWidth(e.target.value)}
-                            className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-white text-xs focus:border-intelligence focus:outline-none">
-                            <option value="50%">50%</option>
-                            <option value="75%">75%</option>
-                            <option value="100%">100%</option>
-                            <option value="200px">200px</option>
-                            <option value="300px">300px</option>
-                        </select>
-                    </div>
-                </div>
+                )}
 
                 {/* Preview */}
                 <div className="p-4 rounded-lg bg-white border border-gray-700 mb-4 flex items-center justify-center min-h-[80px]">
                     {shapeType === 'divider' && (
-                        <div style={{ width: '80%', height: '2px', background: `linear-gradient(to right, transparent, ${fillColor}, transparent)` }} />
+                        <div style={{
+                            width: '80%',
+                            height: dividerStyle === 'double' ? '4px' : '3px',
+                            ...(dividerStyle === 'gradient' ? { background: `linear-gradient(to right, transparent, ${fillColor}, transparent)` } :
+                                dividerStyle === 'double' ? { borderTop: `4px double ${fillColor}` } :
+                                { borderTop: `3px ${dividerStyle} ${fillColor}` }),
+                        }} />
                     )}
-                    {shapeType === 'rectangle' && (
-                        <div style={{ width: '60%', minHeight: '40px', background: `${fillColor}20`, border: `${outlineWidth}px ${outlineStyle} ${outlineColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
-                            {shapeText && <span style={{ color: '#333', fontSize: '12px' }}>{shapeText}</span>}
-                        </div>
-                    )}
-                    {shapeType === 'circle' && (
-                        <div style={{ width: '60px', height: '60px', background: `${fillColor}20`, border: `${outlineWidth}px ${outlineStyle} ${outlineColor}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {shapeText && <span style={{ color: '#333', fontSize: '10px' }}>{shapeText}</span>}
-                        </div>
-                    )}
-                    {shapeType === 'triangle' && (
-                        <div style={{ width: 0, height: 0, borderLeft: '30px solid transparent', borderRight: '30px solid transparent', borderBottom: `52px solid ${fillColor}` }} />
-                    )}
-                    {shapeType === 'rounded-box' && (
-                        <div style={{ width: '60%', minHeight: '40px', background: `${fillColor}15`, border: `${outlineWidth}px ${outlineStyle} ${outlineColor}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
-                            {shapeText && <span style={{ color: '#333', fontSize: '12px' }}>{shapeText}</span>}
-                        </div>
+                    {shapeType !== 'divider' && previewUri && (
+                        <img src={previewUri} alt={shapeType} style={{ maxWidth: '60%', height: 'auto' }} />
                     )}
                 </div>
 
@@ -1036,48 +1207,30 @@ function LineSpacingDropdown({ editor }: { editor: Editor }) {
         return () => document.removeEventListener('mousedown', handler)
     }, [])
 
-    const spacings = [
-        { label: '1.0', value: '1' },
-        { label: '1.15', value: '1.15' },
-        { label: '1.5', value: '1.5' },
-        { label: '2.0', value: '2' },
-        { label: '2.5', value: '2.5' },
-        { label: '3.0', value: '3' },
-    ]
-
     const applySpacing = (value: string) => {
-        editor.chain().focus().updateAttributes('paragraph', {}).run()
-        // Apply via raw CSS on selection
-        const { from, to } = editor.state.selection
-        editor.view.dispatch(
-            editor.state.tr.setMeta('lineSpacing', value)
-        )
-        // Fallback: wrap content node style
-        const dom = editor.view.dom
-        const paras = dom.querySelectorAll('p, h1, h2, h3, h4, li')
-        paras.forEach(p => {
-            const el = p as HTMLElement
-            if (el.contains(window.getSelection()?.anchorNode as Node)) {
-                el.style.lineHeight = value
-            }
-        })
+        if (!value) {
+            editor.chain().focus().unsetLineHeight().run()
+        } else {
+            editor.chain().focus().setLineHeight(value).run()
+        }
         setOpen(false)
     }
 
     return (
         <div className="relative" ref={ref}>
-            <button type="button" onClick={() => setOpen(!open)} title="Line Spacing"
+            <button type="button" onClick={() => setOpen(!open)} title="Line Height"
                 className="flex items-center p-1.5 rounded text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
                 <SlidersHorizontal className="h-4 w-4" />
                 <ChevronDown className="h-3 w-3 ml-0.5" />
             </button>
             {open && (
-                <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[100px]">
+                <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[120px]">
+                    <p className="px-3 pt-2 pb-1 text-[10px] text-gray-500 font-semibold uppercase">Line Height</p>
                     <div className="py-1">
-                        {spacings.map(s => (
+                        {LINE_HEIGHT_OPTIONS.map(s => (
                             <button key={s.value} type="button" onClick={() => applySpacing(s.value)}
                                 className="block w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
-                                {s.label}× spacing
+                                {s.label}
                             </button>
                         ))}
                     </div>
@@ -1193,6 +1346,244 @@ function StylesDropdown({ editor }: { editor: Editor }) {
 }
 
 /* ================================================================== */
+/*  Layout Blocks Modal                                                */
+/* ================================================================== */
+
+function LayoutBlockModal({ open, onClose, editor }: {
+    open: boolean; onClose: () => void; editor: Editor
+}) {
+    if (!open) return null
+
+    const insertBlock = (block: typeof LAYOUT_BLOCKS[0]) => {
+        editor.chain().focus().insertContent(
+            `<blockquote style="border-left:4px solid ${block.border};background:${block.bg};padding:16px 20px;border-radius:0 8px 8px 0;margin:16px 0;color:${block.textColor};"><p>${block.icon} <strong>${block.label}</strong></p><p>Type your content here...</p></blockquote>`
+        ).run()
+        onClose()
+    }
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
+                <h3 className="text-white font-semibold text-lg mb-4">Insert Layout Block</h3>
+                <div className="grid grid-cols-2 gap-3">
+                    {LAYOUT_BLOCKS.map(block => (
+                        <button key={block.id} type="button" onClick={() => insertBlock(block)}
+                            className="flex items-center gap-3 p-4 rounded-xl border border-gray-700 hover:border-gray-500 transition-colors text-left">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-lg" style={{ background: block.bg, border: `2px solid ${block.border}` }}>
+                                {block.icon}
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-white">{block.label}</p>
+                                <p className="text-xs text-gray-500">Container with styled background</p>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+                <div className="flex justify-end mt-5">
+                    <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm">Cancel</button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Callout Modal                                                      */
+/* ================================================================== */
+
+function CalloutModal({ open, onClose, editor }: {
+    open: boolean; onClose: () => void; editor: Editor
+}) {
+    if (!open) return null
+
+    const insertCallout = (callout: typeof CALLOUT_TYPES[0]) => {
+        editor.chain().focus().insertContent(
+            `<blockquote style="border-left:4px solid ${callout.border};background:${callout.bg};padding:16px 20px;border-radius:0 8px 8px 0;margin:16px 0;"><p><strong>${callout.icon} ${callout.label}</strong></p><p>${callout.text}</p></blockquote>`
+        ).run()
+        onClose()
+    }
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <h3 className="text-white font-semibold text-lg mb-4">Insert Callout</h3>
+                <div className="grid grid-cols-2 gap-3">
+                    {CALLOUT_TYPES.map(c => (
+                        <button key={c.id} type="button" onClick={() => insertCallout(c)}
+                            className="flex items-center gap-3 p-3 rounded-lg border border-gray-700 hover:border-gray-500 transition-colors text-left">
+                            <span className="text-xl">{c.icon}</span>
+                            <div>
+                                <p className="text-sm font-semibold text-white">{c.label}</p>
+                                <p className="text-[10px] text-gray-500">{c.text}</p>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+                <div className="flex justify-end mt-5">
+                    <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm">Cancel</button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Status Label Modal                                                 */
+/* ================================================================== */
+
+function StatusLabelModal({ open, onClose, editor }: {
+    open: boolean; onClose: () => void; editor: Editor
+}) {
+    const [customLabel, setCustomLabel] = useState('')
+
+    if (!open) return null
+
+    const insertLabel = (label: string, bg: string, color: string) => {
+        editor.chain().focus().insertContent(
+            `<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;background:${bg};color:${color};letter-spacing:0.5px;">${label}</span>&nbsp;`
+        ).run()
+        onClose()
+    }
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+                <h3 className="text-white font-semibold text-lg mb-4">Insert Status Label</h3>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                    {STATUS_LABELS.map(s => (
+                        <button key={s.label} type="button" onClick={() => insertLabel(s.label, s.bg, s.color)}
+                            className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-700 hover:border-gray-500 transition-colors">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: s.bg, color: s.color }}>{s.label}</span>
+                        </button>
+                    ))}
+                </div>
+                <div className="flex items-center gap-2 mb-4">
+                    <input type="text" value={customLabel} onChange={e => setCustomLabel(e.target.value)}
+                        placeholder="Custom label..." className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white text-sm focus:border-intelligence focus:outline-none" />
+                    <button type="button" onClick={() => { if (customLabel.trim()) insertLabel(customLabel, '#D4AF37', '#000000') }}
+                        disabled={!customLabel.trim()}
+                        className="px-3 py-2 bg-intelligence text-obsidian rounded-lg font-semibold text-xs hover:bg-intelligence-light transition-colors disabled:opacity-50">Add</button>
+                </div>
+                <div className="flex justify-end">
+                    <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm">Cancel</button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Document Preset Modal                                              */
+/* ================================================================== */
+
+function DocumentPresetModal({ open, onClose, editor, onToggleNumbering, numberingEnabled }: {
+    open: boolean; onClose: () => void; editor: Editor; onToggleNumbering: () => void; numberingEnabled: boolean
+}) {
+    if (!open) return null
+
+    const applyPreset = (presetId: string) => {
+        switch (presetId) {
+            case 'report':
+                editor.chain().focus().setFontFamily('Arial').run()
+                break
+            case 'article':
+                editor.chain().focus().setFontFamily('Georgia').run()
+                break
+            case 'legal':
+                editor.chain().focus().setFontFamily('Times New Roman').run()
+                break
+            case 'memo':
+                editor.chain().focus().setFontFamily('Helvetica').run()
+                break
+        }
+        onClose()
+    }
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+                <h3 className="text-white font-semibold text-lg mb-4">Document Structure</h3>
+
+                <div className="mb-5">
+                    <label className="flex items-center justify-between p-3 rounded-lg border border-gray-700 cursor-pointer hover:border-gray-500 transition-colors">
+                        <div className="flex items-center gap-2">
+                            <Hash className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm text-white">Section Numbering</span>
+                        </div>
+                        <button type="button" onClick={onToggleNumbering}
+                            className={`w-10 h-5 rounded-full transition-colors relative ${numberingEnabled ? 'bg-intelligence' : 'bg-gray-700'}`}>
+                            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${numberingEnabled ? 'left-5' : 'left-0.5'}`} />
+                        </button>
+                    </label>
+                </div>
+
+                <p className="text-xs text-gray-500 mb-3">Document Presets (applies font)</p>
+                <div className="space-y-2">
+                    {DOCUMENT_PRESETS.map(p => (
+                        <button key={p.id} type="button" onClick={() => applyPreset(p.id)}
+                            className="flex items-center gap-3 w-full p-3 rounded-lg border border-gray-700 hover:border-gray-500 transition-colors text-left">
+                            <span className="text-lg">{p.label.split(' ')[0]}</span>
+                            <div>
+                                <p className="text-sm text-white">{p.label.split(' ').slice(1).join(' ')}</p>
+                                <p className="text-[10px] text-gray-500">{p.desc}</p>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+                <div className="flex justify-end mt-5">
+                    <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm">Close</button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+/* ================================================================== */
+/*  Letter Spacing Dropdown                                            */
+/* ================================================================== */
+
+function LetterSpacingDropdown({ editor }: { editor: Editor }) {
+    const [open, setOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
+
+    return (
+        <div className="relative" ref={ref}>
+            <button type="button" onClick={() => setOpen(!open)} title="Letter Spacing"
+                className="flex items-center p-1.5 rounded text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                <Type className="h-4 w-4" />
+                <ChevronDown className="h-3 w-3 ml-0.5" />
+            </button>
+            {open && (
+                <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 min-w-[140px]">
+                    <p className="px-3 pt-2 pb-1 text-[10px] text-gray-500 font-semibold uppercase">Letter Spacing</p>
+                    <div className="py-1">
+                        {LETTER_SPACING_OPTIONS.map(s => (
+                            <button key={s.value} type="button"
+                                onClick={() => {
+                                    if (!s.value) editor.chain().focus().unsetLetterSpacing().run()
+                                    else editor.chain().focus().setLetterSpacing(s.value).run()
+                                    setOpen(false)
+                                }}
+                                className="block w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                                {s.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+/* ================================================================== */
 /*  Main Editor Component                                              */
 /* ================================================================== */
 
@@ -1203,6 +1594,12 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     const [showVideoModal, setShowVideoModal] = useState(false)
     const [showShapeModal, setShowShapeModal] = useState(false)
     const [showFindReplace, setShowFindReplace] = useState(false)
+    const [showLayoutModal, setShowLayoutModal] = useState(false)
+    const [showCalloutModal, setShowCalloutModal] = useState(false)
+    const [showStatusModal, setShowStatusModal] = useState(false)
+    const [showPresetModal, setShowPresetModal] = useState(false)
+    const [tableStyle, setTableStyle] = useState('bordered')
+    const [sectionNumbering, setSectionNumbering] = useState(false)
 
     const editor = useEditor({
         extensions: [
@@ -1210,6 +1607,8 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
             Underline,
             TextStyle,
             FontSize,
+            LetterSpacing,
+            LineHeight,
             Color,
             FontFamily,
             Highlight.configure({ multicolor: true }),
@@ -1541,6 +1940,69 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     </ToolbarButton>
                 </div>
 
+                {/* Toolbar Row 3 — Advanced Features */}
+                <div className="flex flex-wrap items-center gap-1 px-3 py-2 border-t border-gray-700/50">
+                    <LetterSpacingDropdown editor={editor} />
+                    <LineSpacingDropdown editor={editor} />
+
+                    <div className="w-px h-6 bg-gray-700 mx-1" />
+
+                    <ToolbarButton onClick={() => setShowLayoutModal(true)} title="Layout Blocks">
+                        <LayoutTemplate className="h-4 w-4" />
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => setShowCalloutModal(true)} title="Callout Box">
+                        <Info className="h-4 w-4" />
+                    </ToolbarButton>
+                    <ToolbarButton onClick={() => setShowStatusModal(true)} title="Status Label">
+                        <Tag className="h-4 w-4" />
+                    </ToolbarButton>
+
+                    <div className="w-px h-6 bg-gray-700 mx-1" />
+
+                    <ToolbarButton onClick={() => setShowPresetModal(true)} title="Document Structure & Presets">
+                        <FileText className="h-4 w-4" />
+                    </ToolbarButton>
+
+                    <div className="w-px h-6 bg-gray-700 mx-1" />
+
+                    {isInTable && (
+                        <>
+                            <span className="text-[10px] text-gray-500 font-semibold">TABLE STYLE:</span>
+                            {TABLE_STYLE_PRESETS.map(ts => (
+                                <button key={ts.id} type="button"
+                                    onClick={() => setTableStyle(ts.id)}
+                                    className={`px-2 py-0.5 rounded text-[10px] border transition-colors ${
+                                        tableStyle === ts.id
+                                            ? 'border-intelligence bg-intelligence/15 text-intelligence'
+                                            : 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-600'
+                                    }`}>
+                                    {ts.label}
+                                </button>
+                            ))}
+                            <div className="w-px h-6 bg-gray-700 mx-1" />
+                            <span className="text-[10px] text-gray-500 font-semibold">VERT ALIGN:</span>
+                            <ToolbarButton onClick={() => {
+                                const cell = editor.view.dom.querySelector('.selectedCell, td:focus-within, th:focus-within') as HTMLElement | null
+                                if (cell) cell.style.verticalAlign = 'top'
+                            }} title="Align Top">
+                                <AlignVerticalJustifyStart className="h-3.5 w-3.5" />
+                            </ToolbarButton>
+                            <ToolbarButton onClick={() => {
+                                const cell = editor.view.dom.querySelector('.selectedCell, td:focus-within, th:focus-within') as HTMLElement | null
+                                if (cell) cell.style.verticalAlign = 'middle'
+                            }} title="Align Middle">
+                                <AlignVerticalJustifyCenter className="h-3.5 w-3.5" />
+                            </ToolbarButton>
+                            <ToolbarButton onClick={() => {
+                                const cell = editor.view.dom.querySelector('.selectedCell, td:focus-within, th:focus-within') as HTMLElement | null
+                                if (cell) cell.style.verticalAlign = 'bottom'
+                            }} title="Align Bottom">
+                                <AlignVerticalJustifyEnd className="h-3.5 w-3.5" />
+                            </ToolbarButton>
+                        </>
+                    )}
+                </div>
+
                 <div className="px-3 py-1.5 border-t border-gray-700 text-[11px] text-gray-400 flex flex-wrap gap-3">
                     <span><kbd className="px-1 py-0.5 rounded bg-gray-700 text-gray-200">Ctrl/Cmd+B</kbd> Bold</span>
                     <span><kbd className="px-1 py-0.5 rounded bg-gray-700 text-gray-200">Ctrl/Cmd+I</kbd> Italic</span>
@@ -1795,7 +2257,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     .ProseMirror ul { list-style: disc; padding-left: 1.5em; }
                     .ProseMirror ol { list-style: decimal; padding-left: 1.5em; }
                     .ProseMirror li { margin: 0.25em 0; }
-                    .ProseMirror blockquote { border-left: 4px solid #D4AF37; padding-left: 1em; margin: 1em 0; color: #666; font-style: italic; }
+                    .ProseMirror blockquote { border-left: 4px solid #D4AF37; padding-left: 1em; margin: 1em 0; color: #666; font-style: normal; border-radius: 0 8px 8px 0; padding: 12px 16px; }
                     .ProseMirror pre { background: #1a1a2e; color: #e0e0e0; padding: 1em; border-radius: 8px; overflow-x: auto; }
                     .ProseMirror code { background: #f0f0f0; padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.9em; }
                     .ProseMirror pre code { background: none; padding: 0; }
@@ -1804,8 +2266,10 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     .ProseMirror hr { border: none; border-top: 2px solid #e0e0e0; margin: 2em 0; }
                     .ProseMirror a { color: #1155CC; text-decoration: underline; }
                     .ProseMirror table { border-collapse: collapse; width: 100%; margin: 1em 0; table-layout: fixed; }
-                    .ProseMirror th, .ProseMirror td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; position: relative; min-width: 60px; }
+                    .ProseMirror th, .ProseMirror td { border: 1px solid #ccc; padding: ${tableStyle === 'compact' ? '4px 8px' : tableStyle === 'spacious' ? '14px 18px' : '8px 12px'}; text-align: left; position: relative; min-width: 60px; vertical-align: top; }
                     .ProseMirror th { background: #f5f5f5; font-weight: 600; }
+                    ${tableStyle === 'striped' ? '.ProseMirror tr:nth-child(even) td { background: #f8f9fa; }' : ''}
+                    ${tableStyle === 'minimal' ? '.ProseMirror th, .ProseMirror td { border: none; border-bottom: 1px solid #e0e0e0; }' : ''}
                     .ProseMirror .selectedCell { background: rgba(212,175,55,0.15); }
                     .ProseMirror .column-resize-handle { position: absolute; right: -2px; top: 0; bottom: 0; width: 4px; background: #D4AF37; cursor: col-resize; }
                     .ProseMirror ul[data-type="taskList"] { list-style: none; padding-left: 0; }
@@ -1814,6 +2278,17 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     .ProseMirror mark { padding: 0.1em 0.2em; border-radius: 2px; }
                     .tableWrapper { overflow-x: auto; margin: 1em 0; }
                     .resize-cursor { cursor: col-resize; }
+                    ${sectionNumbering ? `
+                    .ProseMirror { counter-reset: h1counter h2counter h3counter h4counter; }
+                    .ProseMirror h1 { counter-increment: h1counter; counter-reset: h2counter h3counter h4counter; }
+                    .ProseMirror h1::before { content: counter(h1counter) ". "; }
+                    .ProseMirror h2 { counter-increment: h2counter; counter-reset: h3counter h4counter; }
+                    .ProseMirror h2::before { content: counter(h1counter) "." counter(h2counter) " "; }
+                    .ProseMirror h3 { counter-increment: h3counter; counter-reset: h4counter; }
+                    .ProseMirror h3::before { content: counter(h1counter) "." counter(h2counter) "." counter(h3counter) " "; }
+                    .ProseMirror h4 { counter-increment: h4counter; }
+                    .ProseMirror h4::before { content: counter(h1counter) "." counter(h2counter) "." counter(h3counter) "." counter(h4counter) " "; }
+                    ` : ''}
                 `}</style>
                 <BubbleMenu
                     editor={editor}
@@ -1859,7 +2334,12 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
             <ImageInsertModal open={showImageModal} onClose={() => setShowImageModal(false)} onInsert={insertImage} />
             <VideoEmbedModal open={showVideoModal} onClose={() => setShowVideoModal(false)} onInsert={insertVideo} />
             <CTAButtonModal open={showCTAModal} onClose={() => setShowCTAModal(false)} onInsert={insertCTA} />
-            <ShapeInsertModal open={showShapeModal} onClose={() => setShowShapeModal(false)} onInsert={insertShape} />
+            <ShapeInsertModal open={showShapeModal} onClose={() => setShowShapeModal(false)} onInsert={insertShape} editor={editor} />
+            <LayoutBlockModal open={showLayoutModal} onClose={() => setShowLayoutModal(false)} editor={editor} />
+            <CalloutModal open={showCalloutModal} onClose={() => setShowCalloutModal(false)} editor={editor} />
+            <StatusLabelModal open={showStatusModal} onClose={() => setShowStatusModal(false)} editor={editor} />
+            <DocumentPresetModal open={showPresetModal} onClose={() => setShowPresetModal(false)} editor={editor}
+                onToggleNumbering={() => setSectionNumbering(prev => !prev)} numberingEnabled={sectionNumbering} />
         </div>
     )
 }
