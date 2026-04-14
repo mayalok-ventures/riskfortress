@@ -1,6 +1,6 @@
 'use client'
 
-import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, Share2 } from 'lucide-react'
+import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, Share2, Eye } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -46,6 +46,7 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
     const [accessDenied, setAccessDenied] = useState(false)
     const [emailVerified, setEmailVerified] = useState(false)
     const [showEmailModal, setShowEmailModal] = useState(false)
+    const [showStructuredView, setShowStructuredView] = useState(false)
 
     const cleanPath = pathname?.replace(/\/$/, '') || ''
     const actualSlug = cleanPath.split('/').filter(Boolean).pop() || initialSlug
@@ -69,15 +70,13 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                 if (item.type !== 'case') {
                     setEmailVerified(true)
                 } else {
-                    const verifiedAt = localStorage.getItem('rf-email-verified-at')
-                    if (verifiedAt) {
-                        const age = Date.now() - parseInt(verifiedAt)
-                        const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000
-                        if (age < SEVEN_DAYS) {
-                            setEmailVerified(true)
-                        } else {
-                            localStorage.removeItem('rf-email-verified-at')
-                        }
+                    const TWENTY_EIGHT_DAYS = 28 * 24 * 60 * 60 * 1000
+                    const accessedRaw = localStorage.getItem('rf-case-accessed')
+                    let accessedMap: Record<string, number> = {}
+                    try { accessedMap = accessedRaw ? JSON.parse(accessedRaw) : {} } catch { /* ignore */ }
+                    const lastAccess = accessedMap[slugToLoad]
+                    if (lastAccess && (Date.now() - lastAccess) < TWENTY_EIGHT_DAYS) {
+                        setEmailVerified(true)
                     }
                 }
             } else {
@@ -189,8 +188,11 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                     caseTitle={content.title}
                     caseSlug={content.slug}
                     onSuccess={() => {
-                        const nowStr = String(Date.now())
-                        localStorage.setItem('rf-email-verified-at', nowStr)
+                        const accessedRaw = localStorage.getItem('rf-case-accessed')
+                        let accessedMap: Record<string, number> = {}
+                        try { accessedMap = accessedRaw ? JSON.parse(accessedRaw) : {} } catch { /* ignore */ }
+                        accessedMap[actualSlug] = Date.now()
+                        localStorage.setItem('rf-case-accessed', JSON.stringify(accessedMap))
                         setEmailVerified(true)
                         setShowEmailModal(false)
                     }}
@@ -311,6 +313,35 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                     <div className="p-6 rounded-2xl glass-morphism border border-gray-800 mb-8">
                         <h2 className="text-lg font-semibold text-intelligence mb-2">Executive Summary</h2>
                         <p className="text-gray-300 leading-relaxed">{content.summary}</p>
+                    </div>
+                )}
+
+                {content.htmlContent && (
+                    <div className="mb-6">
+                        <button
+                            onClick={() => setShowStructuredView(!showStructuredView)}
+                            className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                                showStructuredView
+                                    ? 'bg-intelligence text-obsidian shadow-lg shadow-intelligence/20'
+                                    : 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white'
+                            }`}
+                        >
+                            <Eye className="h-4 w-4" />
+                            <span>Structured View</span>
+                        </button>
+
+                        {showStructuredView && (
+                            <div className="mt-4 rounded-2xl border border-intelligence/20">
+                                <div className="px-5 py-3 bg-intelligence/10 border-b border-intelligence/20">
+                                    <span className="text-sm font-semibold text-intelligence uppercase tracking-wider">Structured View</span>
+                                </div>
+                                <div
+                                    className="bg-white p-8 prose prose-lg max-w-none [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:mt-6 [&>h1]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-6 [&>h2]:mb-3 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-4 [&>h3]:mb-2 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>li]:mb-2 [&>blockquote]:border-l-4 [&>blockquote]:border-intelligence [&>blockquote]:pl-4 [&>blockquote]:italic [&>a]:text-blue-600 [&>a]:underline [&>code]:bg-gray-100 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>pre]:bg-gray-900 [&>pre]:text-gray-100 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>table]:w-full [&>table]:border-collapse [&_th]:border [&_th]:border-gray-300 [&_th]:bg-gray-100 [&_th]:p-2 [&_th]:text-left [&_td]:border [&_td]:border-gray-300 [&_td]:p-2 [&>img]:max-w-full [&>img]:h-auto [&>img]:rounded-lg"
+                                    style={{ color: '#1a1a1a' }}
+                                    dangerouslySetInnerHTML={{ __html: content.htmlContent }}
+                                />
+                            </div>
+                        )}
                     </div>
                 )}
 

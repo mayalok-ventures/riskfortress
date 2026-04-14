@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Save, Send, X, Plus, Loader2, CheckCircle2, Image as ImageIcon, Upload } from 'lucide-react'
+import { ArrowLeft, Save, Send, X, Plus, Loader2, CheckCircle2, Image as ImageIcon, Upload, Code2 } from 'lucide-react'
 import RichTextEditor from './RichTextEditor'
 
 interface ContentEditorProps {
@@ -19,6 +19,7 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
     const [title, setTitle] = useState('')
     const [summary, setSummary] = useState('')
     const [content, setContent] = useState('')
+    const [htmlContent, setHtmlContent] = useState('')
     const [thumbnail, setThumbnail] = useState('')
     const [keywords, setKeywords] = useState<string[]>([])
     const [keywordInput, setKeywordInput] = useState('')
@@ -53,6 +54,7 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
             setTitle(data.title || '')
             setSummary(data.summary || '')
             setContent(data.content || '')
+            setHtmlContent(data.htmlContent || '')
             setThumbnail(data.thumbnail || '')
             setKeywords(data.keywords || [])
             setAuthor(data.author || 'RiskFortress Intelligence Team')
@@ -104,6 +106,7 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
                 title: title.trim(),
                 summary: summary.trim(),
                 content,
+                htmlContent: htmlContent.trim() || undefined,
                 thumbnail: thumbnail.trim() || undefined,
                 keywords,
                 author: author.trim(),
@@ -146,7 +149,7 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
         } finally {
             setSaving(false)
         }
-    }, [title, summary, content, thumbnail, keywords, author, type, sector, threatLevel, confidence, caseStatus, location, editId, token, onSave])
+    }, [title, summary, content, htmlContent, thumbnail, keywords, author, type, sector, threatLevel, confidence, caseStatus, location, editId, token, onSave])
 
     if (loading) {
         return (
@@ -251,6 +254,39 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
                     <div>
                         <label className="block text-sm text-gray-400 mb-2">Detailed Content</label>
                         <RichTextEditor content={content} onChange={setContent} placeholder={`Write your ${typeLabel.toLowerCase()} content here...`} />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-2 flex items-center gap-2">
+                            <Code2 className="h-4 w-4 text-green-400" />
+                            HTML Content <span className="text-xs text-gray-600">(optional — paste custom HTML code here)</span>
+                        </label>
+                        <div className="rounded-xl border border-gray-700 overflow-hidden">
+                            <div className="px-4 py-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
+                                <span className="text-xs font-semibold text-green-400 uppercase tracking-wider">HTML Source</span>
+                                <span className="text-[10px] text-gray-500">This will appear under &quot;Structured View&quot; on the live page</span>
+                            </div>
+                            <textarea
+                                value={htmlContent}
+                                onChange={(e) => setHtmlContent(e.target.value)}
+                                spellCheck={false}
+                                rows={12}
+                                className="w-full p-4 bg-[#1a1a2e] text-green-300 font-mono text-sm leading-relaxed focus:outline-none resize-y placeholder-gray-600"
+                                placeholder={'<!-- Paste your HTML code here -->\n\n<h2>Custom Section</h2>\n<p>Your HTML content...</p>'}
+                            />
+                            {htmlContent.trim() && (
+                                <div className="border-t border-gray-700">
+                                    <div className="px-4 py-2 bg-intelligence/10 flex items-center justify-between">
+                                        <span className="text-xs font-semibold text-intelligence uppercase tracking-wider">Live Preview</span>
+                                    </div>
+                                    <div
+                                        className="bg-white p-6 prose prose-lg max-w-none"
+                                        style={{ color: '#1a1a1a' }}
+                                        dangerouslySetInnerHTML={{ __html: htmlContent }}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 

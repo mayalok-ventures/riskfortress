@@ -4,6 +4,7 @@ export interface ContentItem {
     title: string
     slug: string
     content: string
+    htmlContent?: string
     summary: string
     thumbnail?: string
     images?: string[]
@@ -35,8 +36,11 @@ export async function getContentBySlug(slug: string): Promise<ContentItem | null
     try {
         const headers: Record<string, string> = {}
         if (typeof window !== 'undefined') {
-            const grant = sessionStorage.getItem('rf-case-grant')
-            if (grant) headers['X-Case-Grant'] = grant
+            const grantsRaw = localStorage.getItem('rf-case-grants')
+            try {
+                const grantsMap = grantsRaw ? JSON.parse(grantsRaw) : {}
+                if (grantsMap[slug]) headers['X-Case-Grant'] = grantsMap[slug]
+            } catch { /* ignore */ }
         }
         const response = await fetch(`/api/content?slug=${encodeURIComponent(slug)}`, { headers })
         if (!response.ok) return null

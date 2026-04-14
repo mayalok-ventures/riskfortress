@@ -29,7 +29,7 @@ const getThreatLevelColor = (level?: string) => {
 
 export default function DossiersClient() {
     const router = useRouter()
-    const [activeTab, setActiveTab] = useState('cases')
+    const [activeTab, setActiveTab] = useState('articles')
     const [cases, setCases] = useState<ContentItem[]>([])
     const [articles, setArticles] = useState<ContentItem[]>([])
     const [blogs, setBlogs] = useState<ContentItem[]>([])
@@ -112,12 +112,6 @@ export default function DossiersClient() {
 
                 <div className="flex justify-center space-x-4 mb-12">
                     <button
-                        onClick={() => setActiveTab('cases')}
-                        className={`px-6 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'cases' ? 'bg-intelligence text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
-                    >
-                        Cases
-                    </button>
-                    <button
                         onClick={() => setActiveTab('articles')}
                         className={`px-6 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'articles' ? 'bg-intelligence text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
                     >
@@ -128,6 +122,12 @@ export default function DossiersClient() {
                         className={`px-6 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'blogs' ? 'bg-intelligence text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
                     >
                         Blogs
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('cases')}
+                        className={`px-6 py-3 rounded-lg font-semibold transition-colors ${activeTab === 'cases' ? 'bg-intelligence text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                    >
+                        Cases
                     </button>
                 </div>
 
@@ -210,18 +210,15 @@ export default function DossiersClient() {
                                                 <div
                                                     key={item.id}
                                                     onClick={() => {
-                                                        const verified = sessionStorage.getItem('rf-email-verified')
-                                                        const grantToken = sessionStorage.getItem('rf-case-grant')
-                                                        const grantCreatedAt = Number(sessionStorage.getItem('rf-case-grant-created-at') || '0')
-                                                        const grantIsFresh = grantCreatedAt > 0 && (Date.now() - grantCreatedAt) < 29 * 60 * 1000
+                                                        const TWENTY_EIGHT_DAYS = 28 * 24 * 60 * 60 * 1000
+                                                        const accessedRaw = localStorage.getItem('rf-case-accessed')
+                                                        let accessedMap: Record<string, number> = {}
+                                                        try { accessedMap = accessedRaw ? JSON.parse(accessedRaw) : {} } catch { /* ignore */ }
+                                                        const lastAccess = accessedMap[item.slug]
 
-                                                        if (verified && grantToken && grantIsFresh) {
+                                                        if (lastAccess && (Date.now() - lastAccess) < TWENTY_EIGHT_DAYS) {
                                                             router.push(`/dossiers/${item.slug}/`)
                                                         } else {
-                                                            if (grantToken && !grantIsFresh) {
-                                                                sessionStorage.removeItem('rf-case-grant')
-                                                                sessionStorage.removeItem('rf-case-grant-created-at')
-                                                            }
                                                             setSelectedCase(item)
                                                             setEmailModalOpen(true)
                                                         }
@@ -497,6 +494,11 @@ export default function DossiersClient() {
                 caseSlug={selectedCase?.slug || ''}
                 onSuccess={() => {
                     if (selectedCase) {
+                        const accessedRaw = localStorage.getItem('rf-case-accessed')
+                        let accessedMap: Record<string, number> = {}
+                        try { accessedMap = accessedRaw ? JSON.parse(accessedRaw) : {} } catch { /* ignore */ }
+                        accessedMap[selectedCase.slug] = Date.now()
+                        localStorage.setItem('rf-case-accessed', JSON.stringify(accessedMap))
                         router.push(`/dossiers/${selectedCase.slug}/`)
                     }
                 }}

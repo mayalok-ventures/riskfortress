@@ -101,7 +101,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         await setDoc('case_grants', grantToken, {
             contentId,
             slug,
-            expiresAt: Date.now() + 30 * 60 * 1000,
+            expiresAt: Date.now() + 28 * 24 * 60 * 60 * 1000,
             createdAt: Date.now(),
             email,
         })

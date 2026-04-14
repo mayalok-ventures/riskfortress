@@ -73,10 +73,12 @@ export default function ProfessionalEmailModal({
             const data = await response.json().catch(() => null)
 
             if (response.ok && data?.success && data?.grantToken) {
-                const nowStr = String(Date.now())
-                localStorage.setItem('rf-email-verified-at', nowStr)
-                localStorage.setItem('rf-case-grant', data.grantToken)
-                localStorage.setItem('rf-email-domain', email.split('@')[1]?.toLowerCase() || '')
+                // Store grant token per slug for API authorization
+                const grantsRaw = localStorage.getItem('rf-case-grants')
+                let grantsMap: Record<string, string> = {}
+                try { grantsMap = grantsRaw ? JSON.parse(grantsRaw) : {} } catch { /* ignore */ }
+                grantsMap[caseSlug] = data.grantToken
+                localStorage.setItem('rf-case-grants', JSON.stringify(grantsMap))
 
                 onSuccess()
                 onClose()

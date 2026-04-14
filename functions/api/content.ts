@@ -9,6 +9,7 @@ interface ContentItem {
     title: string
     slug: string
     content: string
+    htmlContent?: string
     summary: string
     thumbnail?: string
     images?: string[]
@@ -230,6 +231,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             title: body.title || '',
             slug,
             content: body.content || '',
+            htmlContent: body.htmlContent,
             summary: body.summary || '',
             thumbnail: body.thumbnail,
             images: body.images,
@@ -296,6 +298,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
 
         if (body.content !== undefined) {
             updates.content = body.content
+        }
+
+        if (body.htmlContent !== undefined) {
+            updates.htmlContent = body.htmlContent
         }
 
         if (!existing.accessToken) {

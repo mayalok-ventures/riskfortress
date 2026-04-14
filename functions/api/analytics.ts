@@ -293,6 +293,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       totalShares: 0,
     }
 
+    // returningVisitors aggregated separately (not using uniqueVisitors set)
+    let totalNewVisitors = 0
+    let totalReturningVisitors = 0
+
     const allVisitors = new Set<string>()
     const allSessions = new Set<string>()
     const pageAggregates: Record<
@@ -324,8 +328,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         const parsed = daySnap.data()!
 
         stats.totalPageviews += (parsed.totalPageviews as number) || 0
-        stats.newVisitors += (parsed.newVisitors as number) || 0
-        stats.returningVisitors += (parsed.returningVisitors as number) || 0
+        totalNewVisitors += (parsed.newVisitors as number) || 0
+        totalReturningVisitors += (parsed.returningVisitors as number) || 0
         stats.totalShares += (parsed.totalShares as number) || 0
 
         ;((parsed.uniqueVisitors as string[]) || []).forEach((v: string) => allVisitors.add(v))
@@ -434,6 +438,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     stats.uniqueVisitors = allVisitors.size
     stats.uniqueSessions = allSessions.size
+    stats.newVisitors = totalNewVisitors
+    stats.returningVisitors = totalReturningVisitors
 
     // Compute engagement metrics
     if (allSessions.size > 0) {

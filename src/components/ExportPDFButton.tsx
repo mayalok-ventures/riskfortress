@@ -40,13 +40,44 @@ export default function ExportPDFButton({ contentId, title }: ExportPDFButtonPro
 
             const logoBase64 = await loadLogoBase64()
 
-            // Capture content with white bg for clean PDF
+            // Temporarily override styles for PDF capture (dark text on white bg)
+            const originalColor = element.style.color
+            const originalBg = element.style.backgroundColor
+            element.style.color = '#1a1a1a'
+            element.style.backgroundColor = '#ffffff'
+
+            const children = element.querySelectorAll('*')
+            const originalStyles: { el: HTMLElement; color: string; bg: string }[] = []
+            children.forEach((child) => {
+                const el = child as HTMLElement
+                const computed = window.getComputedStyle(el)
+                const color = computed.color
+                const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+                if (match) {
+                    const r = parseInt(match[1])
+                    const g = parseInt(match[2])
+                    const b = parseInt(match[3])
+                    if (r + g + b > 400) {
+                        originalStyles.push({ el, color: el.style.color, bg: el.style.backgroundColor })
+                        el.style.color = '#1a1a1a'
+                    }
+                }
+            })
+
             const canvas = await html2canvas(element, {
                 scale: 2,
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false,
                 windowWidth: 800,
+            })
+
+            // Restore original styles
+            element.style.color = originalColor
+            element.style.backgroundColor = originalBg
+            originalStyles.forEach(({ el, color, bg }) => {
+                el.style.color = color
+                el.style.backgroundColor = bg
             })
 
             const pdf = new jsPDF({ unit: 'mm', format: 'a4', compress: true })

@@ -214,21 +214,23 @@ export default function AnalyticsDashboard({ token }: Props) {
     }
 
     /* ---------- Derived ---------- */
-    const chartData = data.dailyStats.map(d => ({ ...d, label: fmtDate(d.date) }))
+    const chartData = (data.dailyStats || []).map(d => ({ ...d, label: fmtDate(d.date) }))
+    const hasChartData = chartData.some(d => d.pageviews > 0 || d.visitors > 0)
 
     const platformEntries = Object.entries(data.platforms || data.sources || {})
+        .filter(([, v]) => v > 0)
         .sort((a, b) => b[1] - a[1])
 
     const totalPlatformVisits = platformEntries.reduce((s, [, v]) => s + v, 0)
 
-    const contentPages = data.topPages.filter(p => p.path.startsWith('/dossiers/') && p.path !== '/dossiers/')
-    const sitePages = data.topPages.filter(p => !p.path.startsWith('/dossiers/') || p.path === '/dossiers/')
+    const contentPages = (data.topPages || []).filter(p => p.path.startsWith('/dossiers/') && p.path !== '/dossiers/')
+    const sitePages = (data.topPages || []).filter(p => !p.path.startsWith('/dossiers/') || p.path === '/dossiers/')
 
     const prev = data.previousPeriod || { totalPageviews: 0, uniqueVisitors: 0, uniqueSessions: 0, todayPageviews: 0 }
     const viewsChange = pctChange(data.totalPageviews, prev.totalPageviews)
     const visitorsChange = pctChange(data.uniqueVisitors, prev.uniqueVisitors)
 
-    const avgViewsPerDay = data.dailyStats.length > 0
+    const avgViewsPerDay = (data.dailyStats || []).length > 0
         ? Math.round(data.totalPageviews / data.dailyStats.length)
         : 0
 
@@ -270,12 +272,12 @@ export default function AnalyticsDashboard({ token }: Props) {
 
             {/* ===== Stat Cards ===== */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-                <StatCard label="Total Views" value={data.totalPageviews} icon={Eye}
+                <StatCard label="Total Views" value={data.totalPageviews || 0} icon={Eye}
                     accent="bg-intelligence/10 text-intelligence"
                     change={viewsChange}
                     extra={<span className="text-[10px] text-gray-500">vs prev period</span>} />
 
-                <StatCard label="Live Now" value={data.activeUsers} icon={Activity}
+                <StatCard label="Live Now" value={data.activeUsers || 0} icon={Activity}
                     accent="bg-green-500/10 text-green-400"
                     extra={
                         <div className="flex items-center space-x-2">
@@ -288,17 +290,17 @@ export default function AnalyticsDashboard({ token }: Props) {
                     }
                 />
 
-                <StatCard label="Today's Views" value={data.todayPageviews} icon={Calendar}
+                <StatCard label="Today's Views" value={data.todayPageviews || 0} icon={Calendar}
                     accent="bg-blue-500/10 text-blue-400"
                     extra={<span className="text-[10px] text-gray-500">~{avgViewsPerDay}/day avg</span>} />
 
-                <StatCard label="Returning Visitors" value={data.returningVisitors} icon={Users}
+                <StatCard label="Returning Visitors" value={data.returningVisitors || 0} icon={Users}
                     accent="bg-purple-500/10 text-purple-400"
                     change={visitorsChange}
                     extra={
-                        data.uniqueVisitors > 0 ? (
+                        (data.uniqueVisitors || 0) > 0 ? (
                             <span className="text-[10px] text-gray-500">
-                                {Math.round((data.returningVisitors / data.uniqueVisitors) * 100)}% of visitors
+                                {Math.round(((data.returningVisitors || 0) / data.uniqueVisitors) * 100)}% of visitors
                             </span>
                         ) : undefined
                     }
@@ -308,6 +310,11 @@ export default function AnalyticsDashboard({ token }: Props) {
             {/* ===== Views Trend Chart ===== */}
             <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6 mb-8">
                 <SectionTitle>Views Trend</SectionTitle>
+                {!hasChartData ? (
+                    <div className="h-72 flex items-center justify-center">
+                        <p className="text-gray-500 text-sm">No trend data yet for this period</p>
+                    </div>
+                ) : (
                 <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -10 }}>
@@ -331,6 +338,7 @@ export default function AnalyticsDashboard({ token }: Props) {
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
+                )}
                 <div className="flex items-center justify-center space-x-6 mt-2">
                     <div className="flex items-center space-x-2"><div className="h-2.5 w-2.5 rounded-full bg-cyan-400" /><span className="text-xs text-gray-400">Page Views</span></div>
                     <div className="flex items-center space-x-2"><div className="h-2.5 w-2.5 rounded-full bg-green-400" /><span className="text-xs text-gray-400">Unique Visitors</span></div>

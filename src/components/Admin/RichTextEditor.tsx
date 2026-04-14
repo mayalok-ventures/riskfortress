@@ -32,7 +32,8 @@ import {
     CaseSensitive, Shapes, Circle, Square, Triangle, SeparatorHorizontal,
     SlidersHorizontal, Contrast, Sun, Crop, RectangleHorizontal, Type,
     LayoutTemplate, Info, AlertTriangle, CheckCircle, XCircle, Tag,
-    FileText, Hash, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd
+    FileText, Hash, AlignVerticalJustifyStart, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd,
+    Eye
 } from 'lucide-react'
 
 interface RichTextEditorProps {
@@ -1361,9 +1362,16 @@ function LayoutBlockModal({ open, onClose, editor }: {
         onClose()
     }
 
+    const insertCallout = (callout: typeof CALLOUT_TYPES[0]) => {
+        editor.chain().focus().insertContent(
+            `<blockquote style="border-left:4px solid ${callout.border};background:${callout.bg};padding:16px 20px;border-radius:0 8px 8px 0;margin:16px 0;"><p><strong>${callout.icon} ${callout.label}</strong></p><p>${callout.text}</p></blockquote>`
+        ).run()
+        onClose()
+    }
+
     return (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
+            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                 <h3 className="text-white font-semibold text-lg mb-4">Insert Layout Block</h3>
                 <div className="grid grid-cols-2 gap-3">
                     {LAYOUT_BLOCKS.map(block => (
@@ -1379,6 +1387,21 @@ function LayoutBlockModal({ open, onClose, editor }: {
                         </button>
                     ))}
                 </div>
+
+                <h3 className="text-white font-semibold text-lg mt-6 mb-4">Insert Callout</h3>
+                <div className="grid grid-cols-2 gap-3">
+                    {CALLOUT_TYPES.map(c => (
+                        <button key={c.id} type="button" onClick={() => insertCallout(c)}
+                            className="flex items-center gap-3 p-3 rounded-lg border border-gray-700 hover:border-gray-500 transition-colors text-left">
+                            <span className="text-xl">{c.icon}</span>
+                            <div>
+                                <p className="text-sm font-semibold text-white">{c.label}</p>
+                                <p className="text-[10px] text-gray-500">{c.text}</p>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+
                 <div className="flex justify-end mt-5">
                     <button type="button" onClick={onClose} className="px-4 py-2 text-gray-400 hover:text-white transition-colors text-sm">Cancel</button>
                 </div>
@@ -1595,7 +1618,6 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     const [showShapeModal, setShowShapeModal] = useState(false)
     const [showFindReplace, setShowFindReplace] = useState(false)
     const [showLayoutModal, setShowLayoutModal] = useState(false)
-    const [showCalloutModal, setShowCalloutModal] = useState(false)
     const [showStatusModal, setShowStatusModal] = useState(false)
     const [showPresetModal, setShowPresetModal] = useState(false)
     const [tableStyle, setTableStyle] = useState('bordered')
@@ -1820,7 +1842,6 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     <div className="w-px h-6 bg-gray-700 mx-1" />
 
                     <CaseChangeDropdown editor={editor} />
-                    <StylesDropdown editor={editor} />
                 </div>
 
                 {/* Toolbar Row 2 */}
@@ -1943,15 +1964,11 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                 {/* Toolbar Row 3 — Advanced Features */}
                 <div className="flex flex-wrap items-center gap-1 px-3 py-2 border-t border-gray-700/50">
                     <LetterSpacingDropdown editor={editor} />
-                    <LineSpacingDropdown editor={editor} />
 
                     <div className="w-px h-6 bg-gray-700 mx-1" />
 
-                    <ToolbarButton onClick={() => setShowLayoutModal(true)} title="Layout Blocks">
+                    <ToolbarButton onClick={() => setShowLayoutModal(true)} title="Layout & Callout Blocks">
                         <LayoutTemplate className="h-4 w-4" />
-                    </ToolbarButton>
-                    <ToolbarButton onClick={() => setShowCalloutModal(true)} title="Callout Box">
-                        <Info className="h-4 w-4" />
                     </ToolbarButton>
                     <ToolbarButton onClick={() => setShowStatusModal(true)} title="Status Label">
                         <Tag className="h-4 w-4" />
@@ -2290,6 +2307,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
                     .ProseMirror h4::before { content: counter(h1counter) "." counter(h2counter) "." counter(h3counter) "." counter(h4counter) " "; }
                     ` : ''}
                 `}</style>
+
                 <BubbleMenu
                     editor={editor}
                     updateDelay={120}
@@ -2336,7 +2354,6 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
             <CTAButtonModal open={showCTAModal} onClose={() => setShowCTAModal(false)} onInsert={insertCTA} />
             <ShapeInsertModal open={showShapeModal} onClose={() => setShowShapeModal(false)} onInsert={insertShape} editor={editor} />
             <LayoutBlockModal open={showLayoutModal} onClose={() => setShowLayoutModal(false)} editor={editor} />
-            <CalloutModal open={showCalloutModal} onClose={() => setShowCalloutModal(false)} editor={editor} />
             <StatusLabelModal open={showStatusModal} onClose={() => setShowStatusModal(false)} editor={editor} />
             <DocumentPresetModal open={showPresetModal} onClose={() => setShowPresetModal(false)} editor={editor}
                 onToggleNumbering={() => setSectionNumbering(prev => !prev)} numberingEnabled={sectionNumbering} />
