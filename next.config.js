@@ -36,7 +36,7 @@ const nextConfig = {
             'three',
             'framer-motion',
             'lucide-react',
-            'recharts',
+
             '@vercel/analytics',
             '@vercel/speed-insights',
             'sonner',

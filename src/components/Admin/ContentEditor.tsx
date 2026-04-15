@@ -280,7 +280,7 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
                                         <span className="text-xs font-semibold text-intelligence uppercase tracking-wider">Live Preview</span>
                                     </div>
                                     <div
-                                        className="bg-white p-6 prose prose-lg max-w-none"
+                                        className="bg-white p-8 prose prose-lg max-w-none [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:mt-6 [&>h1]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-6 [&>h2]:mb-3 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-4 [&>h3]:mb-2 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>li]:mb-2 [&>blockquote]:border-l-4 [&>blockquote]:border-intelligence [&>blockquote]:pl-4 [&>blockquote]:italic [&>a]:text-blue-600 [&>a]:underline [&>code]:bg-gray-100 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>pre]:bg-gray-900 [&>pre]:text-gray-100 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>table]:w-full [&>table]:border-collapse [&_th]:border [&_th]:border-gray-300 [&_th]:bg-gray-100 [&_th]:p-2 [&_th]:text-left [&_td]:border [&_td]:border-gray-300 [&_td]:p-2 [&>img]:max-w-full [&>img]:h-auto [&>img]:rounded-lg"
                                         style={{ color: '#1a1a1a' }}
                                         dangerouslySetInnerHTML={{ __html: htmlContent }}
                                     />
