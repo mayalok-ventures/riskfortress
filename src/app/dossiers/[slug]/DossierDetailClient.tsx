@@ -67,7 +67,9 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
             if (item) {
                 setContent(item)
                 setAccessDenied(false)
-                if (item.type !== 'case') {
+                if (item.accessRequired) {
+                    setEmailVerified(false)
+                } else if (item.type !== 'case') {
                     setEmailVerified(true)
                 } else {
                     const TWENTY_EIGHT_DAYS = 28 * 24 * 60 * 60 * 1000
@@ -193,8 +195,8 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                         try { accessedMap = accessedRaw ? JSON.parse(accessedRaw) : {} } catch { /* ignore */ }
                         accessedMap[actualSlug] = Date.now()
                         localStorage.setItem('rf-case-accessed', JSON.stringify(accessedMap))
-                        setEmailVerified(true)
                         setShowEmailModal(false)
+                        loadContent(actualSlug)
                     }}
                 />
             </div>
@@ -330,18 +332,42 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                             <span>Structured View</span>
                         </button>
 
-                        {showStructuredView && (
-                            <div className="mt-4 rounded-2xl border border-intelligence/20">
+                        {showStructuredView && (() => {
+                            const htmlStr = content.htmlContent || ''
+                            const isFullDoc = /^\s*<!doctype\s+html[\s>]/i.test(htmlStr) || /^\s*<html[\s>]/i.test(htmlStr)
+                            const iframeSrc = isFullDoc
+                                ? htmlStr
+                                : `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a;padding:32px;line-height:1.7;font-size:16px;}h1{font-size:2em;font-weight:700;margin:0.67em 0;}h2{font-size:1.5em;font-weight:700;margin:0.75em 0;}h3{font-size:1.25em;font-weight:600;margin:0.83em 0;}p{margin-bottom:1em;}ul{list-style:disc;padding-left:1.5em;margin-bottom:1em;}ol{list-style:decimal;padding-left:1.5em;margin-bottom:1em;}li{margin-bottom:0.5em;}blockquote{border-left:4px solid #D4AF37;padding:12px 16px;margin:1em 0;border-radius:0 8px 8px 0;background:#f9f9f9;}a{color:#1155CC;text-decoration:underline;}code{background:#f0f0f0;padding:0.2em 0.4em;border-radius:4px;font-size:0.9em;}pre{background:#1a1a2e;color:#e0e0e0;padding:1em;border-radius:8px;overflow-x:auto;margin:1em 0;}pre code{background:none;padding:0;}img{max-width:100%;height:auto;border-radius:8px;}table{width:100%;border-collapse:collapse;margin:1em 0;}th,td{border:1px solid #ccc;padding:8px 12px;text-align:left;}th{background:#f5f5f5;font-weight:600;}hr{border:none;border-top:2px solid #e0e0e0;margin:2em 0;}</style></head><body>${htmlStr}</body></html>`
+                            return (
+                            <div className="mt-4 rounded-2xl border border-intelligence/20 overflow-hidden">
                                 <div className="px-5 py-3 bg-intelligence/10 border-b border-intelligence/20">
                                     <span className="text-sm font-semibold text-intelligence uppercase tracking-wider">Structured View</span>
                                 </div>
-                                <div
-                                    className="bg-white p-8 prose prose-lg max-w-none [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:mt-6 [&>h1]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-6 [&>h2]:mb-3 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-4 [&>h3]:mb-2 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>li]:mb-2 [&>blockquote]:border-l-4 [&>blockquote]:border-intelligence [&>blockquote]:pl-4 [&>blockquote]:italic [&>a]:text-blue-600 [&>a]:underline [&>code]:bg-gray-100 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>pre]:bg-gray-900 [&>pre]:text-gray-100 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>table]:w-full [&>table]:border-collapse [&_th]:border [&_th]:border-gray-300 [&_th]:bg-gray-100 [&_th]:p-2 [&_th]:text-left [&_td]:border [&_td]:border-gray-300 [&_td]:p-2 [&>img]:max-w-full [&>img]:h-auto [&>img]:rounded-lg"
-                                    style={{ color: '#1a1a1a' }}
-                                    dangerouslySetInnerHTML={{ __html: content.htmlContent }}
+                                <iframe
+                                    srcDoc={iframeSrc}
+                                    className="w-full border-0 rounded-b-2xl"
+                                    style={{ minHeight: '600px', background: isFullDoc ? '#0a0c10' : '#fff' }}
+                                    sandbox="allow-same-origin allow-scripts allow-popups"
+                                    title="Structured View"
+                                    onLoad={(e) => {
+                                        const iframe = e.target as HTMLIFrameElement
+                                        const resize = () => {
+                                            try {
+                                                if (iframe.contentDocument?.documentElement) {
+                                                    const h = Math.max(600, iframe.contentDocument.documentElement.scrollHeight + 48)
+                                                    iframe.style.height = h + 'px'
+                                                }
+                                            } catch { /* sandbox restriction */ }
+                                        }
+                                        resize()
+                                        setTimeout(resize, 300)
+                                        setTimeout(resize, 1000)
+                                        setTimeout(resize, 3000)
+                                    }}
                                 />
                             </div>
-                        )}
+                            )
+                        })()}
                     </div>
                 )}
 

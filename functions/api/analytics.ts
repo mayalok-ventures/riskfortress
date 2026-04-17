@@ -37,6 +37,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return jsonResponse({ error: 'Invalid event' }, 400)
     }
 
+    // Exclude admin panel views from analytics
+    if (event.path && event.path.startsWith('/rf-admin')) {
+      return jsonResponse({ success: true })
+    }
+
     const dateKey = getDateKey()
 
     await addDoc('analytics_events', {

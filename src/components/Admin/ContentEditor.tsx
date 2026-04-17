@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Save, Send, X, Plus, Loader2, CheckCircle2, Image as ImageIcon, Upload, Code2 } from 'lucide-react'
+import { ArrowLeft, Save, Send, X, Plus, Loader2, CheckCircle2, Image as ImageIcon, Upload, Code2, Eye, EyeOff } from 'lucide-react'
 import RichTextEditor from './RichTextEditor'
 
 interface ContentEditorProps {
@@ -35,6 +35,7 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(!!editId)
     const [thumbnailUploading, setThumbnailUploading] = useState(false)
+    const [showPreview, setShowPreview] = useState(false)
 
     const token = typeof window !== 'undefined' ? sessionStorage.getItem('rf-admin-token') : null
 
@@ -191,8 +192,124 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
                         <Send className="h-4 w-4" />
                         <span>Publish</span>
                     </button>
+                    <button
+                        onClick={() => setShowPreview(!showPreview)}
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                            showPreview
+                                ? 'bg-green-600 text-white hover:bg-green-700'
+                                : 'bg-gray-700 text-white hover:bg-gray-600'
+                        }`}
+                    >
+                        {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span>{showPreview ? 'Hide Preview' : 'Live Preview'}</span>
+                    </button>
                 </div>
             </div>
+
+            {/* Live Preview Panel */}
+            {showPreview && (() => {
+                const isHtmlFullDoc = htmlContent.trim() && (/^\s*<!doctype\s+html[\s>]/i.test(htmlContent) || /^\s*<html[\s>]/i.test(htmlContent))
+                const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                const escAttr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+
+                const previewSrc = isHtmlFullDoc
+                    ? htmlContent
+                    : `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a1a;color:#d1d5db;padding:0;-webkit-font-smoothing:antialiased;}
+.page-header{background:linear-gradient(180deg,#0d0d20 0%,#0a0a1a 100%);border-bottom:1px solid rgba(212,175,55,0.15);padding:32px 0 24px;}
+.container{max-width:820px;margin:0 auto;padding:0 24px;}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);margin-bottom:20px;font-size:11px;font-weight:700;color:#D4AF37;text-transform:uppercase;letter-spacing:0.05em;}
+h1.title{font-size:2.25em;font-weight:800;color:#fff;margin-bottom:16px;line-height:1.2;letter-spacing:-0.02em;}
+.meta{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:#9ca3af;margin-bottom:0;}
+.meta span{display:inline-flex;align-items:center;gap:4px;}
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent);margin:0;}
+.article-body{padding:40px 0 64px;}
+.thumbnail{width:100%;border-radius:12px;margin-bottom:32px;max-height:420px;object-fit:cover;border:1px solid rgba(255,255,255,0.06);}
+.summary-box{padding:20px 24px;border-radius:12px;background:rgba(212,175,55,0.04);border:1px solid rgba(212,175,55,0.15);margin-bottom:36px;}
+.summary-box h2{font-size:0.8em;font-weight:700;color:#D4AF37;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;}
+.summary-box p{color:#d1d5db;line-height:1.7;font-size:15px;}
+.keywords{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+.keyword{display:inline-block;padding:4px 12px;font-size:11px;border-radius:999px;background:rgba(255,255,255,0.06);color:#9ca3af;border:1px solid rgba(255,255,255,0.08);font-weight:500;}
+.content{color:#d1d5db;line-height:1.8;font-size:16px;}
+.content h1{font-size:1.8em;font-weight:700;color:#fff;margin:36px 0 16px;}
+.content h2{font-size:1.5em;font-weight:700;color:#fff;margin:32px 0 14px;}
+.content h3{font-size:1.25em;font-weight:600;color:#fff;margin:24px 0 12px;}
+.content p{margin-bottom:16px;}
+.content ul{list-style:disc;padding-left:1.5em;margin-bottom:16px;}
+.content ol{list-style:decimal;padding-left:1.5em;margin-bottom:16px;}
+.content li{margin-bottom:8px;}
+.content blockquote{border-left:4px solid #D4AF37;padding:12px 20px;margin:20px 0;background:rgba(212,175,55,0.04);border-radius:0 8px 8px 0;color:#b0b0b0;font-style:italic;}
+.content a{color:#D4AF37;text-decoration:none;border-bottom:1px solid rgba(212,175,55,0.3);transition:border-color 0.2s;}
+.content a:hover{border-bottom-color:#D4AF37;}
+.content code{background:rgba(255,255,255,0.08);padding:0.15em 0.4em;border-radius:4px;font-size:0.88em;font-family:'SF Mono',Menlo,monospace;}
+.content pre{background:#111;padding:1em;border-radius:8px;overflow-x:auto;margin:1em 0;border:1px solid rgba(255,255,255,0.06);}
+.content pre code{background:none;padding:0;}
+.content img{max-width:100%;height:auto;border-radius:8px;margin:16px 0;}
+.content table{width:100%;border-collapse:collapse;margin:1em 0;}
+.content th,.content td{border:1px solid #2a2a3e;padding:10px 14px;text-align:left;}
+.content th{background:#12122a;font-weight:600;color:#fff;font-size:0.9em;text-transform:uppercase;letter-spacing:0.03em;}
+.content td{font-size:0.95em;}
+.html-section{margin-top:40px;padding-top:40px;border-top:1px solid rgba(255,255,255,0.08);}
+</style></head><body>
+<div class="page-header"><div class="container">
+<div class="badge">${type === 'case' ? '📋 Intelligence Dossier' : type === 'article' ? '📰 Intelligence Article' : '📝 Expert Insights'}</div>
+<h1 class="title">${escHtml(title || 'Untitled')}</h1>
+<div class="meta">
+${author ? '<span>👤 ' + escHtml(author) + '</span>' : ''}
+${sector ? '<span>🏢 ' + escHtml(sector) + '</span>' : ''}
+${location ? '<span>📍 ' + escHtml(location) + '</span>' : ''}
+<span>📅 ${new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+</div>
+</div></div>
+<div class="divider"></div>
+<div class="article-body"><div class="container">
+${thumbnail ? '<img class="thumbnail" src="' + escAttr(thumbnail) + '" alt="Thumbnail" />' : ''}
+${summary ? '<div class="summary-box"><h2>Executive Summary</h2><p>' + escHtml(summary) + '</p></div>' : ''}
+${keywords.length > 0 ? '<div class="keywords">' + keywords.map(k => '<span class="keyword">' + escHtml(k) + '</span>').join('') + '</div>' : ''}
+${content ? '<div class="content">' + content + '</div>' : ''}
+${htmlContent ? '<div class="content html-section">' + htmlContent + '</div>' : ''}
+</div></div>
+</body></html>`
+
+                const resizeIframe = (iframe: HTMLIFrameElement) => {
+                    try {
+                        if (iframe.contentDocument?.body) {
+                            const h = Math.max(600, iframe.contentDocument.documentElement.scrollHeight)
+                            iframe.style.height = h + 'px'
+                        }
+                    } catch { /* cross-origin sandbox restriction */ }
+                }
+
+                return (
+                <div className="rounded-xl border border-gray-700 overflow-hidden">
+                    <div className="px-5 py-3 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                            <Eye className="h-4 w-4 text-green-400" />
+                            <span className="text-sm font-semibold text-green-400 uppercase tracking-wider">
+                                {isHtmlFullDoc ? 'Full HTML Preview — rendering complete document' : 'Live Preview — How it will look when published'}
+                            </span>
+                        </div>
+                        <button onClick={() => setShowPreview(false)} className="text-gray-400 hover:text-white">
+                            <X className="h-4 w-4" />
+                        </button>
+                    </div>
+                    <iframe
+                        srcDoc={previewSrc}
+                        className="w-full border-0"
+                        style={{ minHeight: '600px', background: isHtmlFullDoc ? '#0a0c10' : '#0a0a1a' }}
+                        sandbox="allow-same-origin allow-scripts allow-popups"
+                        title="Content Preview"
+                        onLoad={(e) => {
+                            const iframe = e.target as HTMLIFrameElement
+                            resizeIframe(iframe)
+                            setTimeout(() => resizeIframe(iframe), 500)
+                            setTimeout(() => resizeIframe(iframe), 1500)
+                        }}
+                    />
+                </div>
+                )
+            })()}
 
             {/* Save Progress */}
             {(saving || saveSuccess) && (
@@ -274,18 +391,6 @@ export default function ContentEditor({ type, editId, onSave, onCancel }: Conten
                                 className="w-full p-4 bg-[#1a1a2e] text-green-300 font-mono text-sm leading-relaxed focus:outline-none resize-y placeholder-gray-600"
                                 placeholder={'<!-- Paste your HTML code here -->\n\n<h2>Custom Section</h2>\n<p>Your HTML content...</p>'}
                             />
-                            {htmlContent.trim() && (
-                                <div className="border-t border-gray-700">
-                                    <div className="px-4 py-2 bg-intelligence/10 flex items-center justify-between">
-                                        <span className="text-xs font-semibold text-intelligence uppercase tracking-wider">Live Preview</span>
-                                    </div>
-                                    <div
-                                        className="bg-white p-8 prose prose-lg max-w-none [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:mt-6 [&>h1]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-6 [&>h2]:mb-3 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-4 [&>h3]:mb-2 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>li]:mb-2 [&>blockquote]:border-l-4 [&>blockquote]:border-intelligence [&>blockquote]:pl-4 [&>blockquote]:italic [&>a]:text-blue-600 [&>a]:underline [&>code]:bg-gray-100 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>pre]:bg-gray-900 [&>pre]:text-gray-100 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>table]:w-full [&>table]:border-collapse [&_th]:border [&_th]:border-gray-300 [&_th]:bg-gray-100 [&_th]:p-2 [&_th]:text-left [&_td]:border [&_td]:border-gray-300 [&_td]:p-2 [&>img]:max-w-full [&>img]:h-auto [&>img]:rounded-lg"
-                                        style={{ color: '#1a1a1a' }}
-                                        dangerouslySetInnerHTML={{ __html: htmlContent }}
-                                    />
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
