@@ -713,7 +713,8 @@ function CTAButtonModal({ open, onClose, onInsert }: {
 
     const handleInsert = () => {
         if (!text.trim() || !href.trim()) return
-        const html = `<div style="text-align:${align};margin:24px 0;"><a href="${href}" target="_blank" rel="noopener noreferrer" style="display:inline-block;${sizeClasses[size]}background-color:${bgColor};color:${textColor};text-decoration:none;border-radius:8px;font-weight:600;letter-spacing:0.5px;">${text}</a></div>`
+        const normalizedHref = /^(https?:\/\/|mailto:|tel:)/i.test(href.trim()) ? href.trim() : `https://${href.trim()}`
+        const html = `<p style="text-align:${align};margin:24px 0;"><a href="${normalizedHref}" target="_blank" rel="noopener noreferrer" style="display:inline-block;${sizeClasses[size]}background-color:${bgColor};color:${textColor};text-decoration:none;border-radius:8px;font-weight:600;letter-spacing:0.5px;cursor:pointer;">${text}</a></p>`
         onInsert(html)
         onClose()
         setText('Learn More')

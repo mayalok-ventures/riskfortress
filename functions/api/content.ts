@@ -136,7 +136,21 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                 }
 
                 if (!authorized) {
-                    return jsonResponse({ error: 'Not found' }, 404)
+                    return jsonResponse({
+                        id: item.id,
+                        type: item.type,
+                        title: item.title,
+                        slug: item.slug,
+                        summary: item.summary || '',
+                        thumbnail: item.thumbnail,
+                        sector: item.sector,
+                        threatLevel: item.threatLevel,
+                        author: item.author,
+                        keywords: item.keywords || [],
+                        createdAt: item.createdAt,
+                        publishedAt: item.publishedAt,
+                        accessRequired: true,
+                    })
                 }
             }
 

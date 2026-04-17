@@ -228,7 +228,11 @@ export default function AnalyticsDashboard({ token }: Props) {
 
     const prev = data.previousPeriod || { totalPageviews: 0, uniqueVisitors: 0, uniqueSessions: 0, todayPageviews: 0 }
     const viewsChange = pctChange(data.totalPageviews, prev.totalPageviews)
-    const visitorsChange = pctChange(data.uniqueVisitors, prev.uniqueVisitors)
+    const returningChange = pctChange(data.returningVisitors, prev.uniqueVisitors > 0 ? Math.round(prev.uniqueVisitors * (data.returningVisitors / Math.max(data.uniqueVisitors, 1))) : 0)
+
+    const todayUniqueVisitors = (data.dailyStats || []).length > 0
+        ? data.dailyStats[data.dailyStats.length - 1].visitors
+        : 0
 
     const avgViewsPerDay = (data.dailyStats || []).length > 0
         ? Math.round(data.totalPageviews / data.dailyStats.length)
@@ -290,13 +294,13 @@ export default function AnalyticsDashboard({ token }: Props) {
                     }
                 />
 
-                <StatCard label="Today's Views" value={data.todayPageviews || 0} icon={Calendar}
+                <StatCard label="Today's Unique Visitors" value={todayUniqueVisitors} icon={Calendar}
                     accent="bg-blue-500/10 text-blue-400"
                     extra={<span className="text-[10px] text-gray-500">~{avgViewsPerDay}/day avg</span>} />
 
                 <StatCard label="Returning Visitors" value={data.returningVisitors || 0} icon={Users}
                     accent="bg-purple-500/10 text-purple-400"
-                    change={visitorsChange}
+                    change={returningChange}
                     extra={
                         (data.uniqueVisitors || 0) > 0 ? (
                             <span className="text-[10px] text-gray-500">
@@ -419,8 +423,15 @@ export default function AnalyticsDashboard({ token }: Props) {
                                 {sitePages.slice(0, 10).map((page, i) => (
                                     <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
                                         <td className="py-3 pr-4">
-                                            <p className="text-white font-medium truncate max-w-[280px]">{page.title || page.path}</p>
-                                            <p className="text-xs text-gray-500">{page.path}</p>
+                                           <div className="flex items-center space-x-2">
+                                               <div>
+                                                   <p className="text-white font-medium truncate max-w-[280px]">{page.title || page.path}</p>
+                                                   <a href={page.path} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-intelligence transition-colors truncate max-w-[280px] inline-flex items-center gap-1">
+                                                       {page.path}
+                                                       <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                                   </a>
+                                               </div>
+                                           </div>
                                         </td>
                                         <td className="text-right py-3 px-4 font-semibold text-intelligence">{page.views.toLocaleString()}</td>
                                         <td className="text-right py-3 px-4 text-gray-400 hidden md:table-cell">{fmtEngagement(page.avgEngagement)}</td>
@@ -462,10 +473,11 @@ export default function AnalyticsDashboard({ token }: Props) {
                                 {contentPages.slice(0, 10).map((page, i) => (
                                     <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
                                         <td className="py-3 pr-4">
-                                            <div className="flex items-center space-x-2">
+                                            <div>
                                                 <p className="text-white font-medium truncate max-w-[260px]">{page.title || page.path}</p>
-                                                <a href={page.path} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-intelligence flex-shrink-0">
-                                                    <ExternalLink className="h-3.5 w-3.5" />
+                                                <a href={page.path} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-intelligence transition-colors truncate max-w-[260px] inline-flex items-center gap-1">
+                                                    {page.path}
+                                                    <ExternalLink className="h-3 w-3 flex-shrink-0" />
                                                 </a>
                                             </div>
                                         </td>
@@ -519,7 +531,13 @@ export default function AnalyticsDashboard({ token }: Props) {
                                     return (
                                         <tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
                                             <td className="py-3 pr-4">
-                                                <p className="text-white font-medium truncate max-w-[240px]">{item.title}</p>
+                                                <div>
+                                                    <p className="text-white font-medium truncate max-w-[240px]">{item.title}</p>
+                                                    <a href={item.path} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-intelligence transition-colors truncate max-w-[240px] inline-flex items-center gap-1">
+                                                        {item.path}
+                                                        <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                                                    </a>
+                                                </div>
                                             </td>
                                             <td className="py-3 px-4">
                                                 <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
@@ -539,11 +557,13 @@ export default function AnalyticsDashboard({ token }: Props) {
                                                 </div>
                                             </td>
                                             <td className="py-3 pl-4 hidden md:table-cell">
-                                                <div className="flex items-center space-x-1">
-                                                    {Object.entries(item.platforms).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([p, c]) => (
-                                                        <span key={p} className="px-2 py-0.5 rounded text-xs bg-gray-800 text-gray-400" title={`${p}: ${c}`}>
-                                                            <span className="inline-block h-1.5 w-1.5 rounded-full mr-1" style={{ backgroundColor: PLATFORM_COLORS[p] || '#6B7280' }} />
-                                                            {c}
+                                                <div className="flex flex-wrap items-center gap-1.5">
+                                                    {Object.entries(item.platforms).sort((a, b) => b[1] - a[1]).map(([p, c]) => (
+                                                        <span key={p} className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-gray-800 text-gray-300" title={`${p}: ${c}`}>
+                                                            <span className="inline-block h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: PLATFORM_COLORS[p] || '#6B7280' }} />
+                                                            <span className="truncate max-w-[60px]">{p}</span>
+                                                            <span className="text-gray-500">·</span>
+                                                            <span className="font-semibold text-white">{c}</span>
                                                         </span>
                                                     ))}
                                                 </div>

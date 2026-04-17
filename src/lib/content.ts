@@ -20,6 +20,7 @@ export interface ContentItem {
     location?: string
     caseStatus?: 'Active' | 'Monitoring' | 'Neutralized' | 'Resolved' | 'Ongoing'
     accessToken?: string
+    accessRequired?: boolean
 }
 
 export async function getPublishedContent(): Promise<ContentItem[]> {
