@@ -51,7 +51,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const typeLabel = content.type === 'case' ? 'Intelligence Dossier' : 
                       content.type === 'article' ? 'Intelligence Article' : 'Expert Insights'
     
-    const ogImage = content.thumbnail || '/og-image.png'
+    const baseUrl = 'https://riskfortress.in'
+    const rawImage = content.thumbnail || '/og-image.png'
+    const ogImage = rawImage.startsWith('http') ? rawImage : `${baseUrl}${rawImage}`
     const pageUrl = `https://riskfortress.in/dossiers/${slug}/`
     
     return {

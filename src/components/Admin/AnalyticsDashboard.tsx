@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import {
-    Eye, Users, Calendar, TrendingUp, Share2, Globe,
+    Eye, Users, Calendar, TrendingUp, Share2, Globe, Download,
     Loader2, RefreshCw, ArrowUpRight, ArrowDownRight, Activity, Monitor, ExternalLink,
     Clock, MousePointer, BarChart3, Smartphone, Tablet, MonitorIcon, Timer, Target
 } from 'lucide-react'
@@ -115,6 +115,76 @@ function fmtDuration(seconds: number): string {
 
 const DEVICE_COLORS = { mobile: '#3B82F6', tablet: '#8B5CF6', desktop: '#10B981' }
 
+function exportToExcel(data: AnalyticsData, range: number) {
+    const BOM = '\uFEFF'
+    const lines: string[] = []
+
+    lines.push('Analytics Summary')
+    lines.push(`Period,Last ${range} days`)
+    lines.push(`Total Page Views,${data.totalPageviews}`)
+    lines.push(`Unique Visitors,${data.uniqueVisitors}`)
+    lines.push(`Unique Sessions,${data.uniqueSessions}`)
+    lines.push(`New Visitors,${data.newVisitors}`)
+    lines.push(`Returning Visitors,${data.returningVisitors}`)
+    lines.push(`Bounce Rate,${data.bounceRate}%`)
+    lines.push(`Avg Session Duration,${data.avgSessionDuration}s`)
+    lines.push(`Avg Scroll Depth,${data.avgScrollDepth}%`)
+    lines.push(`Avg Pages Per Session,${data.avgPagesPerSession}`)
+    lines.push(`Total Shares,${data.totalShares || 0}`)
+    lines.push('')
+
+    lines.push('Daily Stats')
+    lines.push('Date,Page Views,Visitors,Sessions')
+    for (const d of data.dailyStats || []) {
+        lines.push(`${d.date},${d.pageviews},${d.visitors},${d.sessions}`)
+    }
+    lines.push('')
+
+    lines.push('Traffic by Platform')
+    lines.push('Platform,Visits')
+    for (const [platform, count] of Object.entries(data.platforms || data.sources || {})) {
+        lines.push(`${platform},${count}`)
+    }
+    lines.push('')
+
+    lines.push('Top Pages')
+    lines.push('Page,Title,Views,Avg Engagement (s),Scroll Depth (%),Exit Rate (%)')
+    for (const p of data.topPages || []) {
+        const title = (p.title || p.path).replace(/,/g, ' ')
+        lines.push(`${p.path},"${title}",${p.views},${p.avgEngagement},${p.avgScrollDepth},${p.exitRate}`)
+    }
+    lines.push('')
+
+    lines.push('Device Breakdown')
+    lines.push('Device,Count')
+    if (data.deviceBreakdown) {
+        lines.push(`Mobile,${data.deviceBreakdown.mobile}`)
+        lines.push(`Tablet,${data.deviceBreakdown.tablet}`)
+        lines.push(`Desktop,${data.deviceBreakdown.desktop}`)
+    }
+    lines.push('')
+
+    if (data.topShared && data.topShared.length > 0) {
+        lines.push('Most Shared Content')
+        lines.push('Path,Title,Type,Total Shares')
+        for (const s of data.topShared) {
+            const title = (s.title || s.path).replace(/,/g, ' ')
+            lines.push(`${s.path},"${title}",${s.contentType},${s.shares}`)
+        }
+    }
+
+    const csv = BOM + lines.join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `riskfortress-analytics-${range}days-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+}
+
 /* ------------------------------------------------------------------ */
 /*  Custom Recharts Tooltip                                            */
 /* ------------------------------------------------------------------ */
@@ -181,6 +251,7 @@ export default function AnalyticsDashboard({ token }: Props) {
     const [loading, setLoading] = useState(true)
     const [range, setRange] = useState(7)
     const [refreshing, setRefreshing] = useState(false)
+    const [mounted, setMounted] = useState(false)
 
     const load = async (days: number) => {
         try {
@@ -189,6 +260,7 @@ export default function AnalyticsDashboard({ token }: Props) {
         } catch { /* ignore */ }
     }
 
+    useEffect(() => { setMounted(true) }, [])
     useEffect(() => { setLoading(true); load(range).finally(() => setLoading(false)) }, [range])
 
     const refresh = async () => { setRefreshing(true); await load(range); setRefreshing(false) }
@@ -215,7 +287,7 @@ export default function AnalyticsDashboard({ token }: Props) {
 
     /* ---------- Derived ---------- */
     const chartData = (data.dailyStats || []).map(d => ({ ...d, label: fmtDate(d.date) }))
-    const hasChartData = chartData.some(d => d.pageviews > 0 || d.visitors > 0)
+    const hasChartData = mounted && chartData.length > 0
 
     const platformEntries = Object.entries(data.platforms || data.sources || {})
         .filter(([, v]) => v > 0)
@@ -259,6 +331,12 @@ export default function AnalyticsDashboard({ token }: Props) {
                     <p className="text-gray-400 text-sm mt-1">Real-time website traffic &amp; engagement data</p>
                 </div>
                 <div className="flex items-center space-x-3">
+                    <button onClick={() => data && exportToExcel(data, range)}
+                        disabled={!data}
+                        className="p-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-600 transition-colors disabled:opacity-50"
+                        title="Export to Excel">
+                        <Download className="h-4 w-4" />
+                    </button>
                     <button onClick={refresh} disabled={refreshing}
                         className="p-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-600 transition-colors disabled:opacity-50">
                         <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -355,7 +433,7 @@ export default function AnalyticsDashboard({ token }: Props) {
                 {/* Platform Bar Chart */}
                 <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6">
                     <SectionTitle>Traffic by Platform</SectionTitle>
-                    {platformEntries.length === 0 ? (
+                    {!mounted || platformEntries.length === 0 ? (
                         <p className="text-gray-500 text-sm py-10 text-center">No platform data yet</p>
                     ) : (
                         <div className="h-72">

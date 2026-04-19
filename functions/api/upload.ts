@@ -76,7 +76,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
         return jsonResponse({
             success: true,
-            url: dataUrl,
+            url: `https://riskfortress.in/api/img/${key}`,
             key,
             filename: file.name,
             size: file.size,
