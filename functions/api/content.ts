@@ -1,5 +1,6 @@
 import { getDoc, setDoc, updateDoc, deleteDoc, queryDocs } from '../lib/firestore'
 import { requireAdminSession } from '../lib/admin-auth'
+import { buildCorsHeaders } from '../lib/cors'
 
 interface Env {}
 
@@ -27,16 +28,10 @@ interface ContentItem {
     accessToken?: string
 }
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://riskfortress.in',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Case-Grant',
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
+function jsonResponse(data: unknown, status = 200, corsHeaders?: Record<string, string>): Response {
     return new Response(JSON.stringify(data), {
         status,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { 'Content-Type': 'application/json', ...(corsHeaders || {}) },
     })
 }
 
@@ -98,6 +93,7 @@ async function validateCaseGrant(request: Request, contentId: string): Promise<b
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
+    const cors = buildCorsHeaders(context.request, 'GET, POST, PUT, DELETE, OPTIONS')
     try {
         const url = new URL(context.request.url)
         const publishedOnly = url.searchParams.get('published') === 'true'
@@ -107,12 +103,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         if (id) {
             const auth = await requireAdminSession(context.request)
             if (!auth.ok) {
-                return jsonResponse({ error: auth.error }, auth.status)
+                return jsonResponse({ error: auth.error }, auth.status, cors)
             }
 
             const snap = await getDoc('content', id)
-            if (!snap.exists) return jsonResponse({ error: 'Not found' }, 404)
-            return jsonResponse({ id: snap.id, ...snap.data() } as ContentItem)
+            if (!snap.exists) return jsonResponse({ error: 'Not found' }, 404, cors)
+            return jsonResponse({ id: snap.id, ...snap.data() } as ContentItem, 200, cors)
         }
 
         if (slug) {
@@ -120,7 +116,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                 { field: 'slug', op: '==', value: slug },
                 { field: 'status', op: '==', value: 'published' },
             ])
-            if (snap.empty) return jsonResponse({ error: 'Not found' }, 404)
+            if (snap.empty) return jsonResponse({ error: 'Not found' }, 404, cors)
 
             const d = snap.docs[0]
             const item = { id: d.id, ...d.data() } as ContentItem
@@ -150,11 +146,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                         createdAt: item.createdAt,
                         publishedAt: item.publishedAt,
                         accessRequired: true,
-                    })
+                    }, 200, cors)
                 }
             }
 
-            return jsonResponse(stripSensitiveFields(item as unknown as Record<string, unknown>, false))
+            return jsonResponse(stripSensitiveFields(item as unknown as Record<string, unknown>, false), 200, cors)
         }
 
         let items: ContentItem[] = []
@@ -171,7 +167,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                 )
             } else {
                 if (!isAdmin) {
-                    return jsonResponse({ error: 'Authentication required' }, 401)
+                    return jsonResponse({ error: 'Authentication required' }, 401, cors)
                 }
                 snap = await queryDocs('content', [], 'createdAt', 'desc')
             }
@@ -179,7 +175,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         } catch (queryError) {
             console.warn('Ordered query failed, falling back:', queryError)
             if (!publishedOnly && !isAdmin) {
-                return jsonResponse({ error: 'Authentication required' }, 401)
+                return jsonResponse({ error: 'Authentication required' }, 401, cors)
             }
             const snap = await queryDocs('content', [])
             items = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as ContentItem)
@@ -190,22 +186,25 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         }
 
         if (isAdmin) {
-            return jsonResponse(items)
+            return jsonResponse(items, 200, cors)
         }
 
         return jsonResponse(
-            items.map((item) => stripContentForListing(item as unknown as Record<string, unknown>))
+            items.map((item) => stripContentForListing(item as unknown as Record<string, unknown>)),
+            200,
+            cors
         )
     } catch (error) {
         console.error('GET error:', error)
-        return jsonResponse({ error: 'Failed to fetch' }, 500)
+        return jsonResponse({ error: 'Failed to fetch' }, 500, cors)
     }
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+    const cors = buildCorsHeaders(context.request, 'GET, POST, PUT, DELETE, OPTIONS')
     const auth = await requireAdminSession(context.request)
     if (!auth.ok) {
-        return jsonResponse({ error: auth.error }, auth.status)
+        return jsonResponse({ error: auth.error }, auth.status, cors)
     }
 
     try {
@@ -233,7 +232,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             accessToken = generateAccessToken()
         }
         if (!tokenUnique) {
-            return jsonResponse({ error: 'Failed to generate unique access token. Try again.' }, 500)
+            return jsonResponse({ error: 'Failed to generate unique access token. Try again.' }, 500, cors)
         }
 
         const now = new Date().toISOString()
@@ -268,24 +267,25 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         )
         await setDoc('content', id, docData)
 
-        return jsonResponse(data)
+        return jsonResponse(data, 200, cors)
     } catch (error) {
         console.error('POST error:', error)
-        return jsonResponse({ error: 'Failed to create' }, 500)
+        return jsonResponse({ error: 'Failed to create' }, 500, cors)
     }
 }
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
+    const cors = buildCorsHeaders(context.request, 'GET, POST, PUT, DELETE, OPTIONS')
     const auth = await requireAdminSession(context.request)
     if (!auth.ok) {
-        return jsonResponse({ error: auth.error }, auth.status)
+        return jsonResponse({ error: auth.error }, auth.status, cors)
     }
 
     try {
         const body = (await context.request.json()) as { id: string } & Partial<ContentItem>
 
         const snap = await getDoc('content', body.id)
-        if (!snap.exists) return jsonResponse({ error: 'Not found' }, 404)
+        if (!snap.exists) return jsonResponse({ error: 'Not found' }, 404, cors)
 
         const existing = snap.data() as unknown as ContentItem
         const now = new Date().toISOString()
@@ -325,34 +325,35 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         await updateDoc('content', body.id, updates)
 
         const updated = await getDoc('content', body.id)
-        return jsonResponse({ id: updated.id, ...updated.data() } as ContentItem)
+        return jsonResponse({ id: updated.id, ...updated.data() } as ContentItem, 200, cors)
     } catch (error) {
         console.error('PUT error:', error)
-        return jsonResponse({ error: 'Failed to update' }, 500)
+        return jsonResponse({ error: 'Failed to update' }, 500, cors)
     }
 }
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
+    const cors = buildCorsHeaders(context.request, 'GET, POST, PUT, DELETE, OPTIONS')
     const auth = await requireAdminSession(context.request)
     if (!auth.ok) {
-        return jsonResponse({ error: auth.error }, auth.status)
+        return jsonResponse({ error: auth.error }, auth.status, cors)
     }
 
     try {
         const url = new URL(context.request.url)
         const id = url.searchParams.get('id')
 
-        if (!id) return jsonResponse({ error: 'ID required' }, 400)
+        if (!id) return jsonResponse({ error: 'ID required' }, 400, cors)
 
         await deleteDoc('content', id)
 
-        return jsonResponse({ success: true })
+        return jsonResponse({ success: true }, 200, cors)
     } catch (error) {
         console.error('DELETE error:', error)
-        return jsonResponse({ error: 'Failed to delete' }, 500)
+        return jsonResponse({ error: 'Failed to delete' }, 500, cors)
     }
 }
 
-export const onRequestOptions: PagesFunction = async () => {
-    return new Response(null, { headers: corsHeaders })
+export const onRequestOptions: PagesFunction = async (context) => {
+    return new Response(null, { headers: buildCorsHeaders(context.request, 'GET, POST, PUT, DELETE, OPTIONS') })
 }

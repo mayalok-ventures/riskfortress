@@ -1,4 +1,5 @@
 import { setDoc, queryDocs } from '../lib/firestore'
+import { buildCorsHeaders } from '../lib/cors'
 
 interface Env {}
 
@@ -17,16 +18,10 @@ const BLOCKED_DOMAINS = [
     'msn.com',
 ]
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://riskfortress.in',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
+function jsonResponse(data: unknown, status = 200, corsHeaders?: Record<string, string>): Response {
     return new Response(JSON.stringify(data), {
         status,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { 'Content-Type': 'application/json', ...(corsHeaders || {}) },
     })
 }
 
@@ -43,6 +38,7 @@ function isValidEmail(email: string): boolean {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+    const cors = buildCorsHeaders(context.request, 'POST, OPTIONS')
     try {
         const body = (await context.request.json()) as {
             email: string
@@ -53,16 +49,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const { email, slug, caseTitle } = body
 
         if (!email || !slug || !caseTitle) {
-            return jsonResponse({ error: 'Missing required fields' }, 400)
+            return jsonResponse({ error: 'Missing required fields' }, 400, cors)
         }
 
         if (!isValidEmail(email)) {
-            return jsonResponse({ error: 'Invalid email format' }, 400)
+            return jsonResponse({ error: 'Invalid email format' }, 400, cors)
         }
 
         const domain = email.split('@')[1].toLowerCase()
         if (BLOCKED_DOMAINS.includes(domain)) {
-            return jsonResponse({ error: 'Please use a professional email address' }, 400)
+            return jsonResponse({ error: 'Please use a professional email address' }, 400, cors)
         }
 
         const snap = await queryDocs('content', [
@@ -72,7 +68,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         ])
 
         if (snap.empty) {
-            return jsonResponse({ error: 'Case study not found' }, 404)
+            return jsonResponse({ error: 'Case study not found' }, 404, cors)
         }
 
         const d = snap.docs[0]
@@ -90,10 +86,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             ip,
         })
 
+        // Send lead notification to Formspree with proper subject
         fetch('https://formspree.io/f/mlggebdr', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, caseTitle }),
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+                email,
+                caseTitle,
+                slug,
+                _subject: `Case Study Lead: ${caseTitle} — ${email}`,
+                _replyto: email,
+            }),
         }).catch(() => {})
 
         const grantToken = generateGrantToken()
@@ -106,13 +109,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             email,
         })
 
-        return jsonResponse({ success: true, grantToken })
+        return jsonResponse({ success: true, grantToken }, 200, cors)
     } catch (error) {
         console.error('Email gate POST error:', error)
-        return jsonResponse({ error: 'Failed to process request' }, 500)
+        return jsonResponse({ error: 'Failed to process request' }, 500, cors)
     }
 }
 
-export const onRequestOptions: PagesFunction = async () => {
-    return new Response(null, { headers: corsHeaders })
+export const onRequestOptions: PagesFunction = async (context) => {
+    return new Response(null, { headers: buildCorsHeaders(context.request, 'POST, OPTIONS') })
 }

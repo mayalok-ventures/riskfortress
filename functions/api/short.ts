@@ -1,17 +1,12 @@
 import { setDoc, queryDocs } from '../lib/firestore'
+import { buildCorsHeaders } from '../lib/cors'
 
 interface Env {}
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://riskfortress.in',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
+function jsonResponse(data: unknown, status = 200, corsHeaders?: Record<string, string>): Response {
     return new Response(JSON.stringify(data), {
         status,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { 'Content-Type': 'application/json', ...(corsHeaders || {}) },
     })
 }
 
@@ -24,12 +19,13 @@ function generateGrantToken(): string {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
+    const cors = buildCorsHeaders(context.request, 'GET, OPTIONS')
     try {
         const url = new URL(context.request.url)
         const token = url.searchParams.get('token')
 
         if (!token || token.length < 6) {
-            return jsonResponse({ error: 'Invalid token' }, 400)
+            return jsonResponse({ error: 'Invalid token' }, 400, cors)
         }
 
         const snap = await queryDocs('content', [
@@ -38,7 +34,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         ])
 
         if (snap.empty) {
-            return jsonResponse({ error: 'Not found' }, 404)
+            return jsonResponse({ error: 'Not found' }, 404, cors)
         }
 
         const d = snap.docs[0]
@@ -59,20 +55,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                 slug: data.slug,
                 title: data.title,
                 grantToken,
-            })
+            }, 200, cors)
         }
 
         return jsonResponse({
             type: data.type,
             slug: data.slug,
             title: data.title,
-        })
+        }, 200, cors)
     } catch (error) {
         console.error('Short link error:', error)
-        return jsonResponse({ error: 'Failed to resolve link' }, 500)
+        return jsonResponse({ error: 'Failed to resolve link' }, 500, cors)
     }
 }
 
-export const onRequestOptions: PagesFunction = async () => {
-    return new Response(null, { headers: corsHeaders })
+export const onRequestOptions: PagesFunction = async (context) => {
+    return new Response(null, { headers: buildCorsHeaders(context.request, 'GET, OPTIONS') })
 }

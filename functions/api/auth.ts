@@ -1,4 +1,5 @@
 import { getDoc, setDoc, deleteDoc } from '../lib/firestore'
+import { buildCorsHeaders } from '../lib/cors'
 
 interface Env {}
 
@@ -8,18 +9,10 @@ interface AuthRequest {
     token?: string
 }
 
-const ALLOWED_ORIGIN = 'https://riskfortress.in'
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
+function jsonResponse(data: unknown, status = 200, corsHeaders?: Record<string, string>): Response {
     return new Response(JSON.stringify(data), {
         status,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { 'Content-Type': 'application/json', ...(corsHeaders || {}) },
     })
 }
 
@@ -121,6 +114,8 @@ async function clearRateLimit(ip: string): Promise<void> {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+    const cors = buildCorsHeaders(context.request, 'POST, OPTIONS')
+
     try {
         const body = (await context.request.json()) as AuthRequest
         const { action = 'verify', password, token } = body
@@ -131,7 +126,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             } catch {
                 // session might already be gone
             }
-            return jsonResponse({ success: true })
+            return jsonResponse({ success: true }, 200, cors)
         }
 
         if (action === 'verify' && password) {
@@ -141,7 +136,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             if (!rateCheck.allowed) {
                 return jsonResponse(
                     { success: false, error: 'Too many failed attempts. Please try again later.' },
-                    429
+                    429,
+                    cors
                 )
             }
 
@@ -153,7 +149,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 console.error('ADMIN_PASSWORD_HASH not configured')
                 return jsonResponse(
                     { success: false, error: 'Authentication not configured.' },
-                    500
+                    500,
+                    cors
                 )
             }
 
@@ -178,21 +175,21 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                     success: true,
                     token: sessionToken,
                     expiresAt: expiry,
-                })
+                }, 200, cors)
             }
 
             await recordFailedAttempt(ip)
             await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000))
-            return jsonResponse({ success: false, error: 'Invalid credentials' }, 401)
+            return jsonResponse({ success: false, error: 'Invalid credentials' }, 401, cors)
         }
 
-        return jsonResponse({ error: 'Invalid request' }, 400)
+        return jsonResponse({ error: 'Invalid request' }, 400, cors)
     } catch (error) {
         console.error('Auth error:', error)
-        return jsonResponse({ error: 'Authentication failed' }, 500)
+        return jsonResponse({ error: 'Authentication failed' }, 500, cors)
     }
 }
 
-export const onRequestOptions: PagesFunction = async () => {
-    return new Response(null, { headers: corsHeaders })
+export const onRequestOptions: PagesFunction = async (context) => {
+    return new Response(null, { headers: buildCorsHeaders(context.request, 'POST, OPTIONS') })
 }

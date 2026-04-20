@@ -1,5 +1,6 @@
 import { getDoc, setDoc } from '../lib/firestore'
 import { requireAdminSession } from '../lib/admin-auth'
+import { buildCorsHeaders } from '../lib/cors'
 
 interface Env {}
 
@@ -37,16 +38,10 @@ interface SiteSettings {
     updatedAt: string
 }
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://riskfortress.in',
-    'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
+function jsonResponse(data: unknown, status = 200, corsHeaders?: Record<string, string>): Response {
     return new Response(JSON.stringify(data), {
         status,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { 'Content-Type': 'application/json', ...(corsHeaders || {}) },
     })
 }
 
@@ -54,6 +49,7 @@ const COLLECTION = 'site_settings'
 const DOC_ID = 'riskfortress'
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
+    const cors = buildCorsHeaders(context.request, 'GET, PUT, OPTIONS')
     try {
         const url = new URL(context.request.url)
         const publicOnly = url.searchParams.get('public') === 'true'
@@ -62,7 +58,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             // Public endpoint: no auth required, returns only public-safe fields
             const snap = await getDoc(COLLECTION, DOC_ID)
             if (!snap.exists) {
-                return jsonResponse({})
+                return jsonResponse({}, 200, cors)
             }
             const data = snap.data() as Record<string, unknown>
             // Only return public-safe fields
@@ -71,30 +67,31 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
                 social: data.social || {},
                 seo: data.seo || {},
                 general: data.general || {},
-            })
+            }, 200, cors)
         }
 
         // Admin endpoint: requires auth, returns everything
         const auth = await requireAdminSession(context.request)
         if (!auth.ok) {
-            return jsonResponse({ error: auth.error }, auth.status)
+            return jsonResponse({ error: auth.error }, auth.status, cors)
         }
 
         const snap = await getDoc(COLLECTION, DOC_ID)
         if (!snap.exists) {
-            return jsonResponse({})
+            return jsonResponse({}, 200, cors)
         }
-        return jsonResponse(snap.data())
+        return jsonResponse(snap.data(), 200, cors)
     } catch (error) {
         console.error('GET settings error:', error)
-        return jsonResponse({ error: 'Failed to fetch settings' }, 500)
+        return jsonResponse({ error: 'Failed to fetch settings' }, 500, cors)
     }
 }
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
+    const cors = buildCorsHeaders(context.request, 'GET, PUT, OPTIONS')
     const auth = await requireAdminSession(context.request)
     if (!auth.ok) {
-        return jsonResponse({ error: auth.error }, auth.status)
+        return jsonResponse({ error: auth.error }, auth.status, cors)
     }
 
     try {
@@ -129,13 +126,13 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
         // Write the fully merged document
         await setDoc(COLLECTION, DOC_ID, merged)
 
-        return jsonResponse(merged)
+        return jsonResponse(merged, 200, cors)
     } catch (error) {
         console.error('PUT settings error:', error)
-        return jsonResponse({ error: 'Failed to update settings' }, 500)
+        return jsonResponse({ error: 'Failed to update settings' }, 500, cors)
     }
 }
 
-export const onRequestOptions: PagesFunction = async () => {
-    return new Response(null, { headers: corsHeaders })
+export const onRequestOptions: PagesFunction = async (context) => {
+    return new Response(null, { headers: buildCorsHeaders(context.request, 'GET, PUT, OPTIONS') })
 }
