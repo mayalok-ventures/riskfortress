@@ -1,131 +1,217 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Privacy & Data Sovereignty Protocols | RiskFortress',
-    description: 'Privacy Policy and Data Protection protocols for RiskFortress Intelligence services.',
-    alternates: {
-        canonical: '/privacy/',
-    },
-    openGraph: {
-        url: '/privacy/',
-        title: 'Privacy & Data Sovereignty Protocols | RiskFortress',
-        description: 'Privacy Policy and Data Protection protocols for RiskFortress Intelligence services.',
-    },
+  title: 'Privacy & Data Sovereignty Protocols | RiskFortress',
+  description: 'RiskFortress Intelligence Privacy & Data Sovereignty Protocols — governing the collection, processing, and protection of confidential client data under Indian law.',
+  robots: { index: false, follow: false },
 }
 
-export default function PrivacyPolicy() {
-    const lastUpdated = new Date().toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    })
+const s = {
+  page: { backgroundColor: '#0a0a0a', color: '#e8e8e8', fontFamily: '"Georgia", "Times New Roman", serif', minHeight: '100vh', margin: 0, padding: 0 } as React.CSSProperties,
+  container: { maxWidth: '900px', margin: '0 auto', padding: '60px 32px 80px' } as React.CSSProperties,
+  badge: { display: 'inline-block', border: '1px solid #C9A84C', color: '#C9A84C', fontSize: '11px', letterSpacing: '3px', padding: '6px 16px', marginBottom: '32px', fontFamily: 'monospace', textTransform: 'uppercase' as const },
+  h1: { fontSize: '2rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2, marginBottom: '8px' } as React.CSSProperties,
+  docRef: { fontSize: '12px', color: '#666', fontFamily: 'monospace', marginBottom: '4px' } as React.CSSProperties,
+  effective: { fontSize: '13px', color: '#888', marginBottom: '40px', fontStyle: 'italic' } as React.CSSProperties,
+  preamble: { borderLeft: '3px solid #C9A84C', paddingLeft: '20px', color: '#bbb', fontSize: '15px', lineHeight: 1.8, marginBottom: '48px', fontStyle: 'italic' } as React.CSSProperties,
+  divider: { border: 'none', borderTop: '1px solid #1e1e1e', margin: '48px 0' } as React.CSSProperties,
+  h2: { fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C', letterSpacing: '2px', textTransform: 'uppercase' as const, marginBottom: '20px', fontFamily: 'monospace' } as React.CSSProperties,
+  h3: { fontSize: '15px', fontWeight: 700, color: '#ffffff', marginTop: '24px', marginBottom: '10px' } as React.CSSProperties,
+  p: { fontSize: '14.5px', lineHeight: 1.85, color: '#ccc', marginBottom: '16px' } as React.CSSProperties,
+  li: { fontSize: '14.5px', lineHeight: 1.85, color: '#ccc', marginBottom: '8px' } as React.CSSProperties,
+  ul: { paddingLeft: '24px', marginBottom: '16px' } as React.CSSProperties,
+  ol: { paddingLeft: '24px', marginBottom: '16px' } as React.CSSProperties,
+  highlight: { color: '#C9A84C', fontWeight: 600 } as React.CSSProperties,
+  infoBlock: { background: '#0f0f0f', border: '1px solid #222', borderLeft: '3px solid #C9A84C', padding: '20px 24px', marginBottom: '20px', borderRadius: '4px' } as React.CSSProperties,
+  footer: { borderTop: '1px solid #1a1a1a', marginTop: '80px', paddingTop: '40px', textAlign: 'center' as const, color: '#555', fontSize: '13px', lineHeight: 2 } as React.CSSProperties,
+  footerLink: { color: '#C9A84C', textDecoration: 'none', margin: '0 12px' } as React.CSSProperties,
+}
 
-    return (
-        <div className="min-h-screen bg-white py-32 select-none" style={{ userSelect: 'none' }}>
-            <div className="max-w-4xl mx-auto px-8">
-                <article className="legal-document font-serif text-gray-900" style={{ fontFamily: 'Times New Roman, serif', fontSize: '12px', lineHeight: '1.6', textAlign: 'justify' }}>
-                    
-                    <header className="text-center mb-12 border-b-2 border-gray-900 pb-8">
-                        <h1 className="text-xl font-bold uppercase tracking-wide mb-4">PRIVACY & DATA SOVEREIGNTY PROTOCOLS</h1>
-                        <p className="text-sm">Last Updated: {lastUpdated}</p>
-                        <p className="text-sm mt-2">Reference: Compliant with Information Technology Act, 2000 (as amended) & Digital Personal Data Protection Act (DPDP), 2023</p>
-                        <p className="text-sm mt-1">Document Reference: RF/LEGAL/PRIVACY/2024-001</p>
-                    </header>
+export default function PrivacyPage() {
+  return (
+    <div style={s.page}>
+      <div style={s.container}>
+        <div style={s.badge}>Classified Protocol Document</div>
+        <h1 style={s.h1}>Privacy &amp; Data Sovereignty Protocols</h1>
+        <p style={s.docRef}>Document Reference: RF/LEGAL/PRIVACY/2026-001</p>
+        <p style={s.effective}>Effective Date: April 20, 2026 &nbsp;|&nbsp; Jurisdiction: Greater Noida, Uttar Pradesh, India</p>
 
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE I: INTERPRETATION AND DEFINITIONS</h2>
-                        
-                        <p className="mb-4">1.1. For the purposes of this Privacy & Data Sovereignty Protocol (hereinafter referred to as the "Protocol"), the following definitions shall apply with full force and effect throughout the entirety of the Client's engagement with RiskFortress Intelligence Private Limited (hereinafter referred to as "RiskFortress," "the Company," "We," "Us," or "Our"):</p>
-                        
-                        <p className="mb-4">1.2. <strong>"Client"</strong> shall mean and include any natural person, body corporate, partnership firm, limited liability partnership, trust, Hindu Undivided Family, association of persons, or any other legal entity that has executed a Master Service Agreement with RiskFortress, or has otherwise engaged the services of RiskFortress through any electronic or physical medium, including but not limited to the submission of intake forms, execution of non-disclosure agreements, or verbal engagements subsequently confirmed in writing.</p>
-                        
-                        <p className="mb-4">1.3. <strong>"Intelligence Data"</strong> shall mean and encompass all information, data, documents, records, communications, and materials of whatsoever nature, whether in physical, electronic, digital, or any other format, that are collected, processed, analyzed, synthesized, or generated by RiskFortress in the course of providing services to the Client, including but not limited to: (a) raw data obtained from open-source intelligence (OSINT) vectors; (b) proprietary analytical outputs; (c) risk assessment matrices; (d) threat forecasting models; (e) geospatial intelligence products; (f) human intelligence reports; (g) technical surveillance countermeasures findings; (h) due diligence reports; and (i) any derivative works or analytical products created therefrom.</p>
-                        
-                        <p className="mb-4">1.4. <strong>"Forensic Artifacts"</strong> shall mean and include all digital, physical, documentary, or testimonial evidence collected, preserved, analyzed, or documented by RiskFortress in the course of conducting investigations, audits, assessments, or any other evidentiary collection activities, including but not limited to: (a) digital forensic images; (b) chain of custody documentation; (c) metadata extractions; (d) communication intercepts lawfully obtained; (e) witness statements; (f) surveillance records; (g) document authenticity assessments; and (h) expert reports prepared for potential legal proceedings.</p>
-                        
-                        <p className="mb-4">1.5. <strong>"Sovereign Data"</strong> shall mean and refer to any and all information that pertains to the Client's organizational structure, business operations, financial affairs, family matters, personal security arrangements, strategic initiatives, competitive intelligence, trade secrets, proprietary methodologies, and any other information that the Client has designated as confidential, sensitive, or requiring enhanced protection measures, regardless of whether such designation is express or implied from the nature of the information or the circumstances of its disclosure.</p>
-                        
-                        <p className="mb-4">1.6. <strong>"Sensitive Personal Data or Information"</strong> (as defined under Rule 3 of the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011) shall include: (a) passwords; (b) financial information such as bank account, credit card, debit card, or other payment instrument details; (c) physical, physiological, and mental health condition; (d) sexual orientation; (e) medical records and history; (f) biometric information; (g) any detail relating to the above clauses as provided to body corporate for providing service; and (h) any of the information received under above clauses by body corporate for processing, stored or processed under lawful contract or otherwise.</p>
-                        
-                        <p className="mb-4">1.7. <strong>"Processing"</strong> shall mean any operation or set of operations performed on personal data or sets of personal data, whether or not by automated means, such as collection, recording, organization, structuring, storage, adaptation or alteration, retrieval, consultation, use, disclosure by transmission, dissemination or otherwise making available, alignment or combination, restriction, erasure, or destruction.</p>
-                        
-                        <p className="mb-4">1.8. <strong>"Data Principal"</strong> shall mean the individual to whom the personal data relates and where such individual is: (a) a child, includes the parents or lawful guardian of such a child; (b) a person with disability, includes her lawful guardian, acting on her behalf.</p>
-                        
-                        <p className="mb-4">1.9. <strong>"Data Fiduciary"</strong> shall mean any person who alone or in conjunction with other persons determines the purpose and means of processing of personal data, and in the context of this Protocol, RiskFortress acts as a Data Fiduciary with respect to Client data processed in accordance with this Protocol and applicable law.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE II: COLLECTION OF NON-PUBLIC INFORMATION</h2>
-                        
-                        <p className="mb-4">2.1. RiskFortress, in the furtherance of its intelligence and risk advisory mandate, collects and processes Sensitive Personal Data and Information as defined under applicable Indian law, including but not limited to: (a) biometric data including fingerprints, facial recognition data, voice patterns, and gait analysis where necessary for identity verification and access control; (b) financial information including bank statements, tax records, investment portfolios, asset declarations, and transactional histories for the purpose of financial due diligence and fraud detection; (c) geo-spatial data including location histories, movement patterns, frequented locations, and travel itineraries for threat assessment and protective intelligence purposes.</p>
-                        
-                        <p className="mb-4">2.2. RiskFortress utilizes passive telemetry and open-source intelligence (OSINT) vectors for the collection of publicly available information, digital footprint analysis, and reputation assessment. Such collection methods include but are not limited to: (a) analysis of publicly accessible social media profiles and digital publications; (b) monitoring of public court records, regulatory filings, and government databases; (c) aggregation of news media references and press coverage; (d) examination of corporate registry filings and directorship records; (e) assessment of property records and encumbrance certificates; and (f) review of academic credentials and professional certifications from publicly accessible sources.</p>
-                        
-                        <p className="mb-4">2.3. The Client expressly acknowledges and consents that RiskFortress may, in the course of providing contracted services, collect information from third-party sources, commercial databases, government records, and other lawfully accessible repositories, and that such collection is integral to the provision of comprehensive intelligence and risk advisory services.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE III: PURPOSE OF PROCESSING (NEED-TO-KNOW BASIS)</h2>
-                        
-                        <p className="mb-4">3.1. RiskFortress processes Client data and Intelligence Data exclusively for the following specified, explicit, and legitimate purposes, adhering strictly to the principle of purpose limitation:</p>
-                        
-                        <p className="mb-4">3.1.1. <strong>Risk Mitigation:</strong> The identification, assessment, quantification, and mitigation of risks including but not limited to operational risks, strategic risks, reputational risks, legal risks, compliance risks, financial risks, and security risks facing the Client's organization, assets, personnel, or interests.</p>
-                        
-                        <p className="mb-4">3.1.2. <strong>Threat Forecasting:</strong> The predictive analysis and modeling of potential threats, adverse events, and risk scenarios utilizing proprietary algorithms, machine learning models, and expert human analysis to provide early warning intelligence and proactive protective recommendations.</p>
-                        
-                        <p className="mb-4">3.1.3. <strong>Legal Admissibility:</strong> The collection, preservation, and documentation of evidentiary materials in a manner that ensures chain of custody integrity, forensic soundness, and admissibility in judicial and quasi-judicial proceedings before courts, tribunals, and arbitral bodies in India and internationally recognized jurisdictions.</p>
-                        
-                        <p className="mb-4">3.2. RiskFortress does not sell, trade, rent, or otherwise commercially exploit Client data or Intelligence Data. Any disclosure of such data is strictly limited to the purposes specified herein and as required by applicable law.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE IV: DATA RETENTION & DIGITAL SHREDDING</h2>
-                        
-                        <p className="mb-4">4.1. All Client Intelligence Data is stored on secure, access-controlled infrastructure utilizing air-gapped systems for the most sensitive categories of information. Our data storage architecture employs multiple layers of physical, logical, and cryptographic security controls designed to prevent unauthorized access, modification, or exfiltration.</p>
-                        
-                        <p className="mb-4">4.2. <strong>The Kill Policy:</strong> All Client intelligence data shall be cryptographically purged utilizing AES-256 secure deletion protocols within seven (7) years from the date of final service delivery (being the maximum statutory retention period under applicable laws including the Limitation Act, 1963) or upon contract termination, whichever occurs earlier, unless: (a) a longer retention period is required by applicable law or regulatory mandate; (b) the data is required for pending or anticipated legal proceedings; (c) the Client provides written instructions for earlier deletion; or (d) the data has been anonymized such that the Client cannot be identified.</p>
-                        
-                        <p className="mb-4">4.3. Upon activation of data purging protocols, RiskFortress shall issue a Certificate of Destruction to the Client confirming the secure and irreversible destruction of all Client data in our possession, custody, or control, including backup copies maintained in disaster recovery systems.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE V: DISCLOSURE TO THIRD PARTIES AND LAW ENFORCEMENT</h2>
-                        
-                        <p className="mb-4">5.1. RiskFortress maintains an unwavering commitment to Client confidentiality and data sovereignty. Disclosure of Client data or Intelligence Data to third parties, including law enforcement agencies and government authorities, shall occur only under the following strictly limited circumstances:</p>
-                        
-                        <p className="mb-4">5.1.1. Pursuant to a valid order, warrant, or subpoena issued by a Court of competent jurisdiction, including the Supreme Court of India, High Courts, or subordinate courts exercising lawful authority, and only after exhausting all available legal remedies to challenge or narrow the scope of such order where doing so is in the Client's interest and legally permissible.</p>
-                        
-                        <p className="mb-4">5.1.2. RiskFortress shall not voluntarily disclose Client information in response to informal requests, letters of inquiry, or demands from police authorities, regulatory bodies, or government agencies that do not meet the threshold of a lawful court order. The Client shall be promptly notified of any such demands or requests unless such notification is prohibited by law.</p>
-                        
-                        <p className="mb-4">5.1.3. Where disclosure is necessary to prevent imminent threat to life, bodily harm, or national security, and such disclosure is the minimum necessary to address the immediate threat.</p>
-                        
-                        <p className="mb-4">5.2. RiskFortress shall maintain detailed logs of all disclosure requests received and actions taken in response thereto, which logs shall be made available to the Client upon reasonable request.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE VI: DATA PRINCIPAL RIGHTS</h2>
-                        
-                        <p className="mb-4">6.1. In accordance with the Digital Personal Data Protection Act, 2023, Data Principals have the right to: (a) obtain confirmation as to whether their personal data is being processed; (b) access a summary of personal data being processed and the processing activities; (c) request correction and erasure of inaccurate or incomplete data; (d) nominate another individual to exercise rights in the event of death or incapacity; and (e) obtain grievance redressal through designated channels.</p>
-                        
-                        <p className="mb-4">6.2. Requests for exercise of Data Principal rights shall be directed to our Data Protection Officer at: <strong>dpo@riskfortress.in</strong></p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE VII: AMENDMENTS AND GOVERNING LAW</h2>
-                        
-                        <p className="mb-4">7.1. RiskFortress reserves the right to amend, modify, or update this Protocol at any time. Material changes shall be communicated to active Clients through registered email or secure portal notification not less than thirty (30) days prior to the effective date of such changes.</p>
-                        
-                        <p className="mb-4">7.2. This Protocol shall be governed by and construed in accordance with the laws of the Republic of India. Any disputes arising hereunder shall be subject to the exclusive jurisdiction of the courts at Greater Noida, Uttar Pradesh.</p>
-                    </section>
-
-                    <footer className="mt-16 pt-8 border-t-2 border-gray-900 text-center text-xs">
-                        <p className="mb-2">RiskFortress Intelligence Private Limited</p>
-                        <p className="mb-2">Registered Office: Pari Chowk, Greater Noida, Uttar Pradesh 201310, India</p>
-                        <p className="mb-2">CIN: [To Be Assigned Upon Incorporation]</p>
-                        <p>© {new Date().getFullYear()} RiskFortress Intelligence Private Limited. All Rights Reserved.</p>
-                    </footer>
-                </article>
-            </div>
+        <div style={s.preamble}>
+          This document constitutes the binding Privacy &amp; Data Sovereignty Protocol of RiskFortress Intelligence, a Mayalok Ventures entity, DPIIT Registered, operating from Pari Chowk, Greater Noida, Uttar Pradesh 201310, India (hereinafter &ldquo;<strong style={s.highlight}>RiskFortress</strong>&rdquo;, &ldquo;<strong>we</strong>&rdquo;, or &ldquo;<strong>us</strong>&rdquo;). This Protocol governs the collection, processing, storage, transfer, and deletion of all non-public and confidential information entrusted to RiskFortress by its Clients. By engaging our services or accessing riskfortress.in, you acknowledge, accept, and are legally bound by the terms herein.
         </div>
-    )
+
+        {/* ARTICLE I */}
+        <h2 style={s.h2}>Article I — Interpretation &amp; Definitions</h2>
+        <p style={s.p}>For the purposes of this Protocol, the following terms shall have the meanings ascribed to them herein. All defined terms shall apply equally to their singular and plural forms.</p>
+        <ul style={s.ul}>
+          <li style={s.li}><strong style={s.highlight}>&ldquo;Client&rdquo;</strong> means any individual, corporate entity, family office, trust, or institution that has engaged RiskFortress under a signed Statement of Work, intake form submission, or written engagement mandate, possessing minimum assets of ₹100 Crore (Indian Rupees One Hundred Crore) under active management or ownership.</li>
+          <li style={s.li}><strong style={s.highlight}>&ldquo;Intelligence Data&rdquo;</strong> means all raw, processed, or derived data — including but not limited to OSINT findings, forensic artifacts, financial profiling outputs, geospatial analysis, corporate registry extracts, and threat assessments — compiled or generated by RiskFortress in the course of a Client engagement.</li>
+          <li style={s.li}><strong style={s.highlight}>&ldquo;Forensic Artifacts&rdquo;</strong> means digital or physical evidentiary materials, including document metadata, network traffic logs, registry entries, timestamps, hash values, chain-of-custody records, and any derivative analysis thereof.</li>
+          <li style={s.li}><strong style={s.highlight}>&ldquo;Sovereign Data&rdquo;</strong> means any Intelligence Data or Client-submitted information that is subject to the data sovereignty principles of the Republic of India, processed and stored within India-based infrastructure under Indian law.</li>
+          <li style={s.li}><strong style={s.highlight}>&ldquo;Sensitive Personal Data or Information (SPDI)&rdquo;</strong> has the meaning ascribed under Rule 3 of the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011, including financial information, biometric data, health data, passwords, sexual orientation, and related categories.</li>
+          <li style={s.li}><strong style={s.highlight}>&ldquo;Processing&rdquo;</strong> means any operation performed on personal data, including collection, recording, organization, structuring, storage, adaptation, retrieval, consultation, use, disclosure, dissemination, restriction, erasure, or destruction.</li>
+          <li style={s.li}><strong style={s.highlight}>&ldquo;Data Principal&rdquo;</strong> means the natural person to whom personal data relates, as defined under the Digital Personal Data Protection Act, 2023.</li>
+          <li style={s.li}><strong style={s.highlight}>&ldquo;Data Fiduciary&rdquo;</strong> means RiskFortress Intelligence (a Mayalok Ventures entity), which determines the purpose and means of Processing of personal data, as defined under the Digital Personal Data Protection Act, 2023.</li>
+        </ul>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE II */}
+        <h2 style={s.h2}>Article II — Collection of Non-Public Information</h2>
+        <p style={s.p}>RiskFortress collects, processes, and analyzes the following categories of non-public information exclusively for the performance of mandated intelligence services:</p>
+        <h3 style={s.h3}>2.1 — Categories of Data Collected</h3>
+        <ul style={s.ul}>
+          <li style={s.li}><strong>Biometric Data:</strong> Facial recognition patterns, fingerprint data, voiceprint analysis, and behavioral biometrics — only where explicitly authorized under a signed engagement protocol and applicable law.</li>
+          <li style={s.li}><strong>Financial Data:</strong> Asset valuations, banking relationships, shareholding structures, beneficial ownership chains, investment portfolios, tax filings, credit profiles, and cross-border financial flows.</li>
+          <li style={s.li}><strong>Geospatial Data:</strong> Property ownership records, travel patterns, location history derived from publicly available and lawfully obtained sources, and real-time geospatial threat mapping.</li>
+          <li style={s.li}><strong>OSINT Vectors:</strong> Publicly available social media footprints, court and litigation records, corporate registry filings (MCA, NCLT, BSE/NSE disclosures), property registration data, academic credentials, and professional association memberships — accessed through lawful open-source intelligence methods.</li>
+        </ul>
+        <h3 style={s.h3}>2.2 — Method of Collection</h3>
+        <p style={s.p}>Information is collected through: (a) Client-submitted intake forms and engagement documents; (b) Lawful OSINT methodologies; (c) Authorized third-party data providers operating under applicable Indian law; (d) Public registries, court records, and statutory filings; and (e) Technical intelligence and network analysis tools where contractually authorized.</p>
+        <h3 style={s.h3}>2.3 — Voluntarily Submitted Information</h3>
+        <p style={s.p}>Any information submitted voluntarily by the Client through our secure intake portal, encrypted communications, or direct engagement is treated as Confidential Information and processed exclusively for the stated engagement purpose.</p>
+        <h3 style={s.h3}>2.4 — Minors &amp; Children&rsquo;s Data</h3>
+        <div style={s.infoBlock}>
+          <p style={{...s.p, marginBottom: 0}}>RiskFortress does not knowingly collect, process, or retain personal data of individuals below the age of 18 years. Our services are designed exclusively for adult corporate entities, institutional mandates, and senior executives. If minor data is inadvertently collected in the course of an engagement, it will be permanently deleted without retention or further processing upon identification. Clients expressly warrant that no information submitted to RiskFortress pertains to individuals below 18 years of age, absent specific legal mandate requiring otherwise.</p>
+        </div>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE III */}
+        <h2 style={s.h2}>Article III — Website Analytics &amp; Cookie Policy</h2>
+        <p style={s.p}>riskfortress.in employs <strong>Cloudflare Web Analytics</strong> exclusively for website security, performance monitoring, and traffic analysis. The following conditions govern this usage:</p>
+        <ul style={s.ul}>
+          <li style={s.li}>No Personally Identifiable Information (PII) is collected through the website analytics layer.</li>
+          <li style={s.li}>Cloudflare Web Analytics operates on a privacy-first architecture — it does not use cookies, browser fingerprinting, or cross-site tracking mechanisms. Aggregate data only is processed.</li>
+          <li style={s.li}>Clients and visitors may disable cookies through their browser settings at any time without any loss of access to riskfortress.in or degradation of service.</li>
+          <li style={s.li}><strong>RiskFortress does not use, deploy, or permit:</strong> advertising networks, retargeting pixels, behavioral tracking scripts, third-party analytics SDKs, social media trackers, or any form of surveillance-grade web analytics.</li>
+          <li style={s.li}>Google Analytics (GA4) is used solely in aggregate, anonymized form for traffic source analysis. IP anonymization is enforced. No cross-device tracking or advertising profiles are built.</li>
+        </ul>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE IV */}
+        <h2 style={s.h2}>Article IV — Purpose of Processing (Need-to-Know Basis)</h2>
+        <p style={s.p}>All processing of Client data is governed by the principle of strict purpose limitation. Data collected for one engagement shall not be repurposed, cross-used, or amalgamated for any other engagement without express written consent. The authorized purposes of processing are:</p>
+        <ul style={s.ul}>
+          <li style={s.li}><strong>Risk Mitigation:</strong> Identification, profiling, and neutralization of threats to Client assets, reputation, operations, and personnel.</li>
+          <li style={s.li}><strong>Threat Forecasting:</strong> Predictive modeling, macro-financial forensics, geopolitical risk modeling, and scenario planning for strategic decision-making.</li>
+          <li style={s.li}><strong>Legal Admissibility:</strong> Preparation of forensic reports, chain-of-custody documentation, and evidentiary packages to the standard required for Indian court proceedings or regulatory submissions.</li>
+          <li style={s.li}><strong>Statutory &amp; Structural Intelligence:</strong> Analysis of regulatory exposure, corporate governance deficiencies, and statutory compliance risk.</li>
+        </ul>
+        <div style={s.infoBlock}>
+          <p style={{...s.p, marginBottom: 0}}><strong style={s.highlight}>Absolute Prohibition:</strong> RiskFortress does not sell, trade, barter, license, rent, commercially exploit, or otherwise transfer Client data to any third party for commercial gain under any circumstances. This prohibition is unconditional and survives termination of any engagement.</p>
+        </div>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE V */}
+        <h2 style={s.h2}>Article V — Data Processing, Localization &amp; AI Usage</h2>
+        <h3 style={s.h3}>5(a) — Compliance Standards</h3>
+        <p style={s.p}>All data processing operations comply with the Digital Personal Data Protection (DPDP) Act 2023, the Information Technology Act 2000 (as amended), IT (SPDI) Rules 2011, and maintain SOC2-grade operational expectations for data handling, access control, and audit trails.</p>
+        <h3 style={s.h3}>5(b) — Absolute AI Training Prohibition</h3>
+        <div style={s.infoBlock}>
+          <p style={{...s.p, marginBottom: 0}}><strong style={s.highlight}>UNCONDITIONAL PROHIBITION:</strong> No Client forensic data, network intelligence logs, intelligence reports, engagement communications, analytical outputs, or any confidential data of any nature whatsoever will EVER be used — directly or indirectly — to train, fine-tune, benchmark, evaluate, or otherwise improve any internal or third-party artificial intelligence, machine learning, large language model, or automated decision-making system. This prohibition is absolute, unconditional, irrevocable, and survives indefinitely beyond the termination of any engagement.</p>
+        </div>
+        <h3 style={s.h3}>5(c) — Role-Based Access Control (RBAC)</h3>
+        <p style={s.p}>Client data is accessible exclusively to personnel with a direct, documented operational need on the specific engagement for which the data was collected. RiskFortress maintains:</p>
+        <ul style={s.ul}>
+          <li style={s.li}>Granular Role-Based Access Control (RBAC) protocols enforced at system level.</li>
+          <li style={s.li}>Immutable access logs maintained for all data access events, retained for 7 years.</li>
+          <li style={s.li}>Quarterly internal access audits and mandatory access revocation upon engagement closure.</li>
+          <li style={s.li}>Zero-trust architecture applied to all internal data access pathways.</li>
+        </ul>
+        <h3 style={s.h3}>5(d) — Data Localization</h3>
+        <p style={s.p}>All Client data is processed and stored on India-based infrastructure wherever technically feasible, in compliance with DPDP Act 2023 data localization principles. Any cross-border transfer occurs only to jurisdictions notified under the DPDP Act Schedule and is governed by contractual safeguards including Standard Contractual Clauses equivalent or binding processing agreements.</p>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE VI */}
+        <h2 style={s.h2}>Article VI — Data Retention &amp; Digital Shredding</h2>
+        <h3 style={s.h3}>6.1 — Retention Period</h3>
+        <p style={s.p}>Client data is retained for the shorter of: (a) seven (7) years from the date of collection, consistent with the Limitation Act, 1963; or (b) the date of contractual termination plus thirty (30) days for orderly closure. Thereafter, data is subject to certified digital destruction.</p>
+        <h3 style={s.h3}>6.2 — Air-Gapped Storage &amp; Secure Deletion</h3>
+        <p style={s.p}>Sensitive intelligence artifacts are stored in air-gapped, encrypted repositories using AES-256 encryption at rest. Digital shredding employs DoD 5220.22-M or equivalent multi-pass overwrite standards, ensuring data is irrecoverable post-deletion.</p>
+        <h3 style={s.h3}>6.3 — Certificate of Destruction</h3>
+        <p style={s.p}>Upon completion of the retention period or Client request for erasure, RiskFortress issues a formal Certificate of Destruction confirming secure deletion of all Client data from active systems, archives, and backups within the technically feasible scope.</p>
+        <h3 style={s.h3}>6.4 — Data Breach Notification</h3>
+        <div style={s.infoBlock}>
+          <p style={{...s.p, marginBottom: 0}}>In the event of a confirmed or reasonably suspected data breach, RiskFortress will: (a) notify the <strong>Data Protection Board of India</strong> in accordance with DPDP Act 2023 mandates; and (b) notify all affected Data Principals — within <strong style={s.highlight}>72 hours</strong> of becoming aware of the breach. Notification shall include: the nature and scope of the breach, categories of data affected, likely consequences, and remedial measures taken or proposed. A formal Breach Register is maintained and available for regulatory inspection.</p>
+        </div>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE VII */}
+        <h2 style={s.h2}>Article VII — Disclosure to Third Parties &amp; Law Enforcement</h2>
+        <p style={s.p}>RiskFortress maintains an absolute policy of non-disclosure of Client information to any third party, governmental authority, law enforcement body, or regulatory agency absent a lawful mandate. Specifically:</p>
+        <ul style={s.ul}>
+          <li style={s.li}>Disclosure occurs only pursuant to a valid court order, judicial process, or statutory mandate issued by a competent authority under Indian law.</li>
+          <li style={s.li}>RiskFortress does not voluntarily disclose Client information to police, investigative agencies, or regulatory bodies without lawful compulsion.</li>
+          <li style={s.li}>Where legally permissible, the affected Client will be notified prior to any disclosure to allow exercise of legal remedies including injunctions or appeals.</li>
+          <li style={s.li}>Comprehensive logs of all disclosure demands, responses, and disclosures are maintained and available for Client review upon lawful request.</li>
+          <li style={s.li}>RiskFortress reserves the right to challenge any disclosure demand that appears overbroad, disproportionate, or lacking lawful basis before a competent court.</li>
+        </ul>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE VIII */}
+        <h2 style={s.h2}>Article VIII — Lawful Basis &amp; Consent</h2>
+        <p style={s.p}>RiskFortress processes personal data on the following lawful bases under the Digital Personal Data Protection Act, 2023:</p>
+        <ul style={s.ul}>
+          <li style={s.li}><strong>(a) Consent:</strong> Freely given, specific, informed, and unambiguous consent obtained from the Data Principal prior to engagement commencement, via our secure intake form checkbox mechanism and/or written engagement confirmation.</li>
+          <li style={s.li}><strong>(b) Legitimate Interests:</strong> Processing necessary for the legitimate interests of RiskFortress as Data Fiduciary, provided such interests do not override the fundamental rights of the Data Principal.</li>
+          <li style={s.li}><strong>(c) Legal Obligations:</strong> Processing required for compliance with applicable Indian law, court orders, or regulatory obligations.</li>
+        </ul>
+        <p style={s.p}>Consent may be withdrawn at any time by written notice to <strong style={s.highlight}>[email protected]</strong>. Withdrawal is effective from the date of receipt and does not affect the lawfulness of prior processing. Withdrawal requests are processed within <strong>30 days</strong> of receipt.</p>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE IX */}
+        <h2 style={s.h2}>Article IX — Data Principal Rights</h2>
+        <p style={s.p}>Under the Digital Personal Data Protection Act, 2023, each Data Principal possesses the following rights, exercisable by written request to our Grievance Redressal Officer:</p>
+        <ol style={s.ol}>
+          <li style={s.li}><strong>Right to Confirmation &amp; Access:</strong> Confirmation of whether personal data is being processed and access to a summary of data held and processing activities.</li>
+          <li style={s.li}><strong>Right to Correction &amp; Erasure:</strong> Correction of inaccurate or outdated personal data and erasure where retention is no longer justified by lawful purpose.</li>
+          <li style={s.li}><strong>Right to Grievance Redressal:</strong> Access to a functional grievance mechanism with defined response timelines.</li>
+          <li style={s.li}><strong>Right to Nomination:</strong> Nomination of another individual to exercise rights in the event of the Data Principal&rsquo;s death or incapacity.</li>
+          <li style={s.li}><strong>Right to Withdraw Consent:</strong> Withdrawal of consent at any time without prejudice to prior lawful processing, effective within 30 days of written request.</li>
+          <li style={s.li}><strong>Right to Approach the Board:</strong> Filing a complaint with the Data Protection Board of India where the Data Principal is dissatisfied with RiskFortress&rsquo;s response.</li>
+        </ol>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE X */}
+        <h2 style={s.h2}>Article X — Grievance Redressal Officer</h2>
+        <div style={s.infoBlock}>
+          <p style={s.p}><strong style={s.highlight}>Name:</strong> Kunal Pratap Singh</p>
+          <p style={s.p}><strong style={s.highlight}>Designation:</strong> Founder &amp; Data Protection Officer</p>
+          <p style={s.p}><strong style={s.highlight}>Organization:</strong> RiskFortress Intelligence (A Mayalok Ventures Entity)</p>
+          <p style={s.p}><strong style={s.highlight}>Email:</strong> <a href="mailto:[email protected]" style={{color:'#C9A84C'}}>[email protected]</a></p>
+          <p style={s.p}><strong style={s.highlight}>Address:</strong> Pari Chowk, Greater Noida, Uttar Pradesh 201310, India</p>
+          <p style={{...s.p, marginBottom: 0}}><strong style={s.highlight}>Response SLA:</strong> Acknowledged within 48 hours of receipt. Resolution within 30 days.</p>
+        </div>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE XI */}
+        <h2 style={s.h2}>Article XI — Amendments &amp; Governing Law</h2>
+        <p style={s.p}>RiskFortress reserves the right to amend, update, or revise this Privacy &amp; Data Sovereignty Protocol at any time. Material amendments shall be communicated to active Clients no less than <strong>30 days prior to the effective date</strong> via registered email or the secure client portal. Continued engagement following the effective date of any amendment constitutes acceptance thereof.</p>
+        <p style={s.p}>This Protocol is governed by, and construed in accordance with, the laws of the <strong>Republic of India</strong>. All disputes arising out of or in connection with this Protocol shall be subject to the exclusive jurisdiction of courts at <strong>Greater Noida, Uttar Pradesh</strong>, without prejudice to RiskFortress&rsquo;s right to seek emergency injunctive relief before any court of competent jurisdiction.</p>
+
+        <hr style={s.divider} />
+
+        <footer style={s.footer}>
+          <p><strong style={{color:'#C9A84C'}}>RiskFortress Intelligence</strong></p>
+          <p>A Mayalok Ventures Entity &nbsp;|&nbsp; DPIIT Registered</p>
+          <p>Pari Chowk, Greater Noida, Uttar Pradesh 201310, India</p>
+          <p style={{fontSize:'12px', color:'#444', marginTop:'8px'}}>Operating under Mayalok Ventures (DPIIT Registered). Corporate registration (CIN) will be updated upon Private Limited incorporation.</p>
+          <p style={{marginTop:'12px'}}>
+            <a href="/privacy" style={s.footerLink}>Privacy Protocols</a>
+            <a href="/terms" style={s.footerLink}>Master Service Agreement</a>
+          </p>
+          <p style={{marginTop:'12px', fontSize:'12px', color:'#444'}}>&copy; 2026 RiskFortress Intelligence. All Rights Reserved. &nbsp;|&nbsp; RF/LEGAL/PRIVACY/2026-001</p>
+        </footer>
+      </div>
+    </div>
+  )
 }

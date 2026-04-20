@@ -397,14 +397,27 @@ function GeographicSection({ data }: { data: AnalyticsData }) {
 export default function AnalyticsDashboard({ token }: Props) {
     const [data, setData] = useState<AnalyticsData | null>(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const [range, setRange] = useState(7)
     const [refreshing, setRefreshing] = useState(false)
 
     const load = async (days: number) => {
+        setError(null)
         try {
             const res = await fetch(`/api/analytics?days=${days}`, { headers: { Authorization: `Bearer ${token}` } })
-            if (res.ok) setData(await res.json())
-        } catch { /* ignore */ }
+            if (!res.ok) {
+                setError(`Failed to fetch analytics (HTTP ${res.status})`)
+                return
+            }
+            const json = await res.json()
+            if (json.error) {
+                setError(json.error)
+                return
+            }
+            setData(json)
+        } catch (err) {
+            setError(`Network error: ${err instanceof Error ? err.message : 'Unable to reach analytics API'}`)
+        }
     }
 
     useEffect(() => { load(range).finally(() => setLoading(false)) }, [range])
@@ -425,8 +438,14 @@ export default function AnalyticsDashboard({ token }: Props) {
         return (
             <div className="text-center py-32">
                 <Monitor className="h-16 w-16 text-gray-700 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-white mb-2">No Data Available</h3>
-                <p className="text-gray-400">Analytics data will appear as visitors browse the site.</p>
+                <h3 className="text-2xl font-bold text-white mb-2">{error ? 'Analytics Error' : 'No Data Available'}</h3>
+                <p className="text-gray-400">{error || 'Analytics data will appear as visitors browse the site.'}</p>
+                {error && (
+                    <button onClick={() => { setLoading(true); load(range).finally(() => setLoading(false)) }}
+                        className="mt-4 px-5 py-2 rounded-xl bg-intelligence text-obsidian font-semibold text-sm hover:bg-intelligence-light transition-colors">
+                        Retry
+                    </button>
+                )}
             </div>
         )
     }

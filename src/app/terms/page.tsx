@@ -1,194 +1,213 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Master Service Agreement & Terms of Use | RiskFortress',
-    description: 'Terms of Service and Master Service Agreement for RiskFortress Intelligence services.',
-    alternates: {
-        canonical: '/terms/',
-    },
-    openGraph: {
-        url: '/terms/',
-        title: 'Master Service Agreement & Terms of Use | RiskFortress',
-        description: 'Terms of Service and Master Service Agreement for RiskFortress Intelligence services.',
-    },
+  title: 'Master Service Agreement & Terms of Use | RiskFortress',
+  description: 'RiskFortress Intelligence Master Service Agreement & Terms of Use — binding terms governing all engagements under Indian law.',
+  robots: { index: false, follow: false },
 }
 
-export default function TermsOfService() {
-    const effectiveDate = new Date().toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    })
-
-    return (
-        <div className="min-h-screen bg-white py-32 select-none" style={{ userSelect: 'none' }}>
-            <div className="max-w-4xl mx-auto px-8">
-                <article className="legal-document font-serif text-gray-900" style={{ fontFamily: 'Times New Roman, serif', fontSize: '12px', lineHeight: '1.6', textAlign: 'justify' }}>
-
-                    <header className="text-center mb-12 border-b-2 border-gray-900 pb-8">
-                        <h1 className="text-xl font-bold uppercase tracking-wide mb-4">MASTER SERVICE AGREEMENT & TERMS OF USE</h1>
-                        <p className="text-sm">Effective Date: {effectiveDate}</p>
-                        <p className="text-sm mt-2">Document Reference: RF/LEGAL/MSA/2024-001</p>
-                        <p className="text-sm mt-1">This Agreement supersedes all prior agreements, understandings, and representations</p>
-                    </header>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE I: NATURE OF SERVICES (ADVISORY CAPACITY)</h2>
-
-                        <p className="mb-4">1.1. RiskFortress Intelligence Private Limited (hereinafter "RiskFortress," "the Company," "We," "Us," or "Our") provides strategic intelligence, risk advisory, and security consulting services (collectively, the "Services") to its clients (hereinafter "Client," "You," or "Your") in a strictly advisory and consultative capacity.</p>
-
-                        <p className="mb-4">1.2. <strong>The Crystal Ball Disclaimer:</strong> RiskFortress provides Predictive Intelligence based on probabilistic modeling, statistical analysis, historical pattern recognition, and expert human judgment. The Client expressly acknowledges and agrees that:</p>
-
-                        <p className="mb-4">1.2.1. All risk assessments, threat forecasts, and intelligence products are inherently probabilistic in nature and represent the Company's best professional judgment based on available information at the time of assessment;</p>
-
-                        <p className="mb-4">1.2.2. RiskFortress does not and cannot guarantee the prevention, prediction, or mitigation of all threats, losses, damages, or adverse events, whether foreseeable or unforeseeable;</p>
-
-                        <p className="mb-4">1.2.3. The occurrence or non-occurrence of predicted events, threats, or risks does not constitute a breach of this Agreement or any warranty, express or implied;</p>
-
-                        <p className="mb-4">1.2.4. Acts of God, force majeure events, novel threat vectors, and unprecedented circumstances are inherently beyond the scope of predictive intelligence;</p>
-
-                        <p className="mb-4">1.2.5. The Client retains sole and absolute responsibility for all business decisions, security measures implemented, and actions taken or not taken based upon the intelligence and recommendations provided by RiskFortress.</p>
-
-                        <p className="mb-4">1.3. RiskFortress does not provide legal advice, and nothing in our reports, assessments, or recommendations shall be construed as legal counsel. Clients are advised to seek independent legal advice for all matters requiring legal interpretation or action.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE II: INTELLECTUAL PROPERTY RIGHTS</h2>
-
-                        <p className="mb-4">2.1. All Dossiers, Risk Maps, Threat Assessments, Intelligence Reports, Analytical Frameworks, Methodologies, Algorithms, Software, Templates, and any other deliverables created or developed by RiskFortress (collectively, "Work Product") are and shall remain the exclusive intellectual property of RiskFortress Intelligence Private Limited.</p>
-
-                        <p className="mb-4">2.2. Upon full payment of all applicable fees and subject to the terms of this Agreement, the Client is granted a limited, non-exclusive, non-transferable, non-sublicensable, revocable license to use the Work Product solely for the Client's internal business purposes directly related to the engagement for which the Work Product was created.</p>
-
-                        <p className="mb-4">2.3. The Client shall not, without the prior written consent of RiskFortress: (a) reproduce, copy, modify, adapt, or create derivative works from the Work Product; (b) distribute, publish, display, or transmit the Work Product to any third party; (c) sell, license, sublicense, lease, or otherwise transfer the Work Product; (d) use the Work Product for any purpose other than that for which it was created; (e) remove, obscure, or alter any proprietary notices, watermarks, or attributions contained in the Work Product; (f) reverse engineer, decompile, or disassemble any software or algorithmic components of the Work Product.</p>
-
-                        <p className="mb-4">2.4. All proprietary methodologies, analytical frameworks, threat models, risk matrices, and intelligence collection protocols utilized by RiskFortress constitute trade secrets and confidential business information of the Company and are protected under applicable intellectual property laws including the Indian Copyright Act, 1957, the Patents Act, 1970, and common law principles of trade secret protection.</p>
-
-                        <p className="mb-4">2.5. Upon termination of this Agreement or expiration of the license period, whichever occurs first, the Client shall cease all use of the Work Product and, upon request, certify the destruction or return of all copies in the Client's possession, custody, or control.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE III: LIMITATION OF LIABILITY</h2>
-
-                        <p className="mb-4 p-4 border-2 border-gray-900 bg-gray-100 font-bold uppercase text-center" style={{ fontSize: '11px' }}>
-                            IN NO EVENT SHALL RISKFORTRESS, ITS DIRECTORS, OFFICERS, EMPLOYEES, AGENTS, CONTRACTORS, AFFILIATES, OR LICENSORS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES, INCLUDING BUT NOT LIMITED TO DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA, OR OTHER INTANGIBLE LOSSES (EVEN IF RISKFORTRESS HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES), ARISING OUT OF OR IN CONNECTION WITH: (A) THE USE OR INABILITY TO USE THE SERVICES; (B) ANY CONDUCT OR CONTENT OF ANY THIRD PARTY; (C) ANY CONTENT OBTAINED FROM OR THROUGH THE SERVICES; (D) UNAUTHORIZED ACCESS, USE, OR ALTERATION OF YOUR TRANSMISSIONS OR CONTENT; (E) THE OCCURRENCE OR NON-OCCURRENCE OF PREDICTED EVENTS; OR (F) ANY OTHER MATTER RELATING TO THE SERVICES.
-                        </p>
-
-                        <p className="mb-4 p-4 border-2 border-gray-900 bg-gray-100 font-bold uppercase text-center" style={{ fontSize: '11px' }}>
-                            THE MAXIMUM AGGREGATE LIABILITY OF RISKFORTRESS AND ITS DIRECTORS, OFFICERS, EMPLOYEES, AGENTS, AND AFFILIATES, ARISING OUT OF OR IN CONNECTION WITH THIS AGREEMENT OR THE SERVICES, WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY, OR ANY OTHER LEGAL THEORY, SHALL NOT EXCEED THE TOTAL FEES ACTUALLY PAID BY THE CLIENT TO RISKFORTRESS DURING THE SIX (6) MONTH PERIOD IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO THE CLAIM.
-                        </p>
-
-                        <p className="mb-4">3.3. The limitations of liability set forth in this Article III shall apply to the fullest extent permitted by applicable law, regardless of: (a) the failure of essential purpose of any limited remedy; (b) the negligence, gross negligence, or willful misconduct of RiskFortress; or (c) any fundamental breach of this Agreement by RiskFortress.</p>
-
-                        <p className="mb-4">3.4. The Client acknowledges that the fees charged by RiskFortress reflect the allocation of risk set forth in this Agreement and that RiskFortress would not enter into this Agreement without the limitations of liability contained herein.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE IV: INDEMNIFICATION</h2>
-
-                        <p className="mb-4">4.1. The Client agrees to defend, indemnify, and hold harmless RiskFortress, its parent companies, subsidiaries, affiliates, directors, officers, employees, agents, contractors, and licensors (collectively, "Indemnified Parties") from and against any and all claims, demands, suits, actions, proceedings, liabilities, damages, losses, costs, and expenses (including reasonable attorneys' fees and court costs) arising out of or in connection with:</p>
-
-                        <p className="mb-4">4.1.1. The Client's use or misuse of the Services or Work Product;</p>
-
-                        <p className="mb-4">4.1.2. The Client's breach of any representation, warranty, covenant, or obligation under this Agreement;</p>
-
-                        <p className="mb-4">4.1.3. The Client's violation of any applicable law, regulation, or third-party right;</p>
-
-                        <p className="mb-4">4.1.4. Any actions taken or not taken by the Client based on the intelligence, recommendations, or advice provided by RiskFortress;</p>
-
-                        <p className="mb-4">4.1.5. Any third-party claim arising from the Client's business operations, security incidents, or risk events, regardless of whether such claim relates to the Services;</p>
-
-                        <p className="mb-4">4.1.6. The Client's provision of false, misleading, or incomplete information to RiskFortress.</p>
-
-                        <p className="mb-4">4.2. RiskFortress shall have the right to participate in the defense of any claim with counsel of its choosing at the Client's expense, and the Client shall not settle any claim without the prior written consent of RiskFortress.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE V: FORCE MAJEURE (ACTS OF GOD)</h2>
-
-                        <p className="mb-4">5.1. RiskFortress shall not be liable for any failure or delay in performing its obligations under this Agreement to the extent that such failure or delay results from circumstances beyond RiskFortress's reasonable control (a "Force Majeure Event"), including but not limited to:</p>
-
-                        <p className="mb-4">5.1.1. Acts of God, natural disasters, earthquakes, floods, hurricanes, tsunamis, volcanic eruptions, or other natural catastrophes;</p>
-
-                        <p className="mb-4">5.1.2. War (whether declared or undeclared), armed conflict, acts of foreign enemies, invasion, hostilities, civil war, rebellion, revolution, insurrection, military or usurped power;</p>
-
-                        <p className="mb-4">5.1.3. Civil unrest, riots, civil commotion, strikes, lockouts, labor disputes, or industrial action;</p>
-
-                        <p className="mb-4">5.1.4. Terrorism, sabotage, or acts of malicious damage;</p>
-
-                        <p className="mb-4">5.1.5. Cyber warfare, distributed denial-of-service attacks, ransomware attacks, or other malicious cyber activities conducted by state or non-state actors;</p>
-
-                        <p className="mb-4">5.1.6. Government Internet shutdowns, telecommunications blackouts, or restrictions on electronic communications imposed by governmental authorities;</p>
-
-                        <p className="mb-4">5.1.7. Pandemic, epidemic, or public health emergencies;</p>
-
-                        <p className="mb-4">5.1.8. Changes in applicable laws, regulations, or government orders that render performance impossible or impractical;</p>
-
-                        <p className="mb-4">5.1.9. Failure of third-party utilities, telecommunications networks, or infrastructure providers;</p>
-
-                        <p className="mb-4">5.1.10. Nuclear, chemical, or biological contamination;</p>
-
-                        <p className="mb-4">5.1.11. Any other circumstance beyond the reasonable control of RiskFortress.</p>
-
-                        <p className="mb-4">5.2. In the event of a Force Majeure Event, RiskFortress shall use reasonable efforts to mitigate the impact and resume performance as soon as practicable. If the Force Majeure Event continues for more than ninety (90) days, either party may terminate this Agreement without liability.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE VI: DISPUTE RESOLUTION & JURISDICTION</h2>
-
-                        <p className="mb-4">6.1. <strong>Binding Arbitration:</strong> Any dispute, controversy, or claim arising out of or in connection with this Agreement, including any question regarding its existence, validity, interpretation, breach, or termination (a "Dispute"), shall be referred to and finally resolved by binding arbitration in accordance with the Arbitration and Conciliation Act, 1996 (as amended), which rules are deemed to be incorporated by reference into this clause.</p>
-
-                        <p className="mb-4">6.2. The arbitration shall be conducted by a sole arbitrator mutually agreed upon by the parties, or in the absence of such agreement within thirty (30) days, appointed in accordance with the Arbitration and Conciliation Act, 1996. The seat and venue of arbitration shall be Greater Noida, Uttar Pradesh, India.</p>
-
-                        <p className="mb-4">6.3. The language of the arbitration shall be English. The arbitral award shall be final and binding upon the parties and may be enforced in any court of competent jurisdiction.</p>
-
-                        <p className="mb-4">6.4. Notwithstanding the foregoing, RiskFortress shall be entitled to seek injunctive or other equitable relief from any court of competent jurisdiction to protect its intellectual property rights, confidential information, or trade secrets.</p>
-
-                        <p className="mb-4">6.5. <strong>Governing Law:</strong> This Agreement shall be governed by and construed in accordance with the laws of the Republic of India, without regard to its conflict of laws principles.</p>
-
-                        <p className="mb-4">6.6. Subject to the arbitration provisions above, the courts at Greater Noida, Uttar Pradesh shall have exclusive jurisdiction over any matters not subject to arbitration.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE VII: CONFIDENTIALITY</h2>
-
-                        <p className="mb-4">7.1. Each party agrees to hold in strict confidence all Confidential Information disclosed by the other party and to use such Confidential Information solely for the purposes of this Agreement. "Confidential Information" includes all non-public information disclosed by either party, including but not limited to business plans, technical data, trade secrets, know-how, inventions, processes, techniques, algorithms, software programs, customer lists, financial information, and any other information designated as confidential or that reasonably should be understood to be confidential.</p>
-
-                        <p className="mb-4">7.2. The obligations of confidentiality shall survive the termination of this Agreement for a period of seven (7) years, or indefinitely with respect to trade secrets.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE VIII: GENERAL PROVISIONS</h2>
-
-                        <p className="mb-4">8.1. <strong>Entire Agreement:</strong> This Agreement, together with any Statements of Work, Order Forms, or other documents incorporated herein by reference, constitutes the entire agreement between the parties with respect to the subject matter hereof and supersedes all prior and contemporaneous agreements, understandings, negotiations, and discussions, whether oral or written.</p>
-
-                        <p className="mb-4">8.2. <strong>Severability:</strong> If any provision of this Agreement is held to be invalid, illegal, or unenforceable, such provision shall be modified to the minimum extent necessary to make it valid, legal, and enforceable, and the remaining provisions shall continue in full force and effect.</p>
-
-                        <p className="mb-4">8.3. <strong>Waiver:</strong> No waiver of any provision of this Agreement shall be effective unless in writing and signed by the waiving party. No failure or delay in exercising any right shall operate as a waiver thereof.</p>
-
-                        <p className="mb-4">8.4. <strong>Assignment:</strong> The Client may not assign or transfer this Agreement or any rights or obligations hereunder without the prior written consent of RiskFortress. RiskFortress may assign this Agreement without restriction.</p>
-
-                        <p className="mb-4">8.5. <strong>Notices:</strong> All notices required or permitted under this Agreement shall be in writing and shall be delivered by hand, registered post, or email to the addresses specified in the engagement documents.</p>
-
-                        <p className="mb-4">8.6. <strong>Amendments:</strong> This Agreement may only be amended by a written instrument signed by both parties.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2 className="text-base font-bold uppercase mb-4 border-b border-gray-400 pb-2">ARTICLE IX: ACCEPTANCE</h2>
-
-                        <p className="mb-4">9.1. By engaging the Services of RiskFortress, whether by executing a Statement of Work, submitting an intake form, making payment, or otherwise indicating acceptance, the Client acknowledges that they have read, understood, and agreed to be bound by all terms and conditions of this Master Service Agreement.</p>
-
-                        <p className="mb-4">9.2. The Client represents and warrants that they have the legal authority to bind their organization to this Agreement.</p>
-                    </section>
-
-                    <footer className="mt-16 pt-8 border-t-2 border-gray-900 text-center text-xs">
-                        <p className="mb-2">RiskFortress Intelligence Private Limited</p>
-                        <p className="mb-2">Registered Office: Pari Chowk, Greater Noida, Uttar Pradesh 201310, India</p>
-                        <p className="mb-2">CIN: [To Be Assigned Upon Incorporation]</p>
-                        <p className="mb-4">Legal Inquiries: legal@riskfortress.in</p>
-                        <p>© {new Date().getFullYear()} RiskFortress Intelligence Private Limited. All Rights Reserved.</p>
-                    </footer>
-                </article>
-            </div>
+const S = {
+  page: { backgroundColor: '#0a0a0a', color: '#e8e8e8', fontFamily: '"Georgia","Times New Roman",serif', minHeight: '100vh', margin: 0, padding: 0 } as React.CSSProperties,
+  wrap: { maxWidth: '900px', margin: '0 auto', padding: '60px 32px 80px' } as React.CSSProperties,
+  badge: { display: 'inline-block', border: '1px solid #C9A84C', color: '#C9A84C', fontSize: '11px', letterSpacing: '3px', padding: '6px 16px', marginBottom: '32px', fontFamily: 'monospace', textTransform: 'uppercase' as const },
+  h1: { fontSize: '2rem', fontWeight: 700, color: '#fff', lineHeight: 1.2, marginBottom: '8px' } as React.CSSProperties,
+  ref: { fontSize: '12px', color: '#666', fontFamily: 'monospace', marginBottom: '4px' } as React.CSSProperties,
+  eff: { fontSize: '13px', color: '#888', marginBottom: '40px', fontStyle: 'italic' } as React.CSSProperties,
+  pre: { borderLeft: '3px solid #C9A84C', paddingLeft: '20px', color: '#bbb', fontSize: '15px', lineHeight: 1.8, marginBottom: '48px', fontStyle: 'italic' } as React.CSSProperties,
+  hr: { border: 'none', borderTop: '1px solid #1e1e1e', margin: '48px 0' } as React.CSSProperties,
+  h2: { fontSize: '1.05rem', fontWeight: 700, color: '#C9A84C', letterSpacing: '2px', textTransform: 'uppercase' as const, marginBottom: '20px', fontFamily: 'monospace' } as React.CSSProperties,
+  h3: { fontSize: '15px', fontWeight: 700, color: '#fff', marginTop: '24px', marginBottom: '10px' } as React.CSSProperties,
+  p: { fontSize: '14.5px', lineHeight: 1.85, color: '#ccc', marginBottom: '16px' } as React.CSSProperties,
+  li: { fontSize: '14.5px', lineHeight: 1.85, color: '#ccc', marginBottom: '8px' } as React.CSSProperties,
+  ul: { paddingLeft: '24px', marginBottom: '16px' } as React.CSSProperties,
+  ol: { paddingLeft: '24px', marginBottom: '16px' } as React.CSSProperties,
+  gold: { color: '#C9A84C', fontWeight: 600 } as React.CSSProperties,
+  box: { background: '#0f0f0f', border: '1px solid #222', borderLeft: '3px solid #C9A84C', padding: '20px 24px', marginBottom: '20px', borderRadius: '4px' } as React.CSSProperties,
+  warn: { background: '#0f0a0a', border: '1px solid #2a1a1a', borderLeft: '3px solid #8b0000', padding: '20px 24px', marginBottom: '20px', borderRadius: '4px', color: '#ccc', fontSize: '14.5px', lineHeight: 1.85 } as React.CSSProperties,
+  caps: { fontWeight: 700, color: '#fff', letterSpacing: '0.5px', fontSize: '14px' } as React.CSSProperties,
+  foot: { borderTop: '1px solid #1a1a1a', marginTop: '80px', paddingTop: '40px', textAlign: 'center' as const, color: '#555', fontSize: '13px', lineHeight: 2 } as React.CSSProperties,
+  flink: { color: '#C9A84C', textDecoration: 'none', margin: '0 12px' } as React.CSSProperties,
+}
+
+export default function TermsPage() {
+  return (
+    <div style={S.page}>
+      <div style={S.wrap}>
+
+        <div style={S.badge}>Binding Legal Instrument</div>
+        <h1 style={S.h1}>Master Service Agreement &amp; Terms of Use</h1>
+        <p style={S.ref}>Document Reference: RF/LEGAL/MSA/2026-001</p>
+        <p style={S.eff}>Effective Date: April 20, 2026 &nbsp;|&nbsp; Jurisdiction: Greater Noida, Uttar Pradesh, India</p>
+
+        <div style={S.pre}>
+          This Master Service Agreement and Terms of Use (hereinafter <strong style={S.gold}>&ldquo;Agreement&rdquo;</strong> or <strong style={S.gold}>&ldquo;MSA&rdquo;</strong>) constitutes a legally binding contract between RiskFortress Intelligence, a Mayalok Ventures entity, DPIIT Registered, Pari Chowk, Greater Noida, Uttar Pradesh 201310, India (hereinafter <strong style={S.gold}>&ldquo;RiskFortress&rdquo;</strong>) and any Client engaging its services. By executing a Statement of Work, submitting an intake form, making payment, or engaging in any written confirmation of services, the Client acknowledges full acceptance of and legal obligation under this Agreement. This Agreement supersedes all prior representations, understandings, and negotiations, whether oral or written.
         </div>
-    )
+
+        {/* I */}
+        <h2 style={S.h2}>Article I — Nature of Services (Advisory Capacity)</h2>
+        <h3 style={S.h3}>1.1 — Intelligence Advisory Services</h3>
+        <p style={S.p}>RiskFortress provides predictive forensic intelligence, macro-financial forensics, statutory and structural intelligence, OSINT analysis, threat profiling, and discrete consultation services exclusively to qualifying Ultra-High Net Worth Individuals and institutions. All deliverables constitute intelligence advisory outputs — not legal opinions, investment advice, or guarantees of any outcome.</p>
+        <h3 style={S.h3}>1.2 — Legal Advisory Exclusion</h3>
+        <p style={S.p}>Nothing in any RiskFortress intelligence product, report, dossier, risk map, or communication constitutes legal advice. Clients requiring legal counsel are expressly directed to engage qualified advocates licensed under the Advocates Act, 1961.</p>
+        <h3 style={S.h3}>1.3 — The Crystal Ball Disclaimer</h3>
+        <div style={S.box}>
+          <p style={{...S.p, marginBottom:0}}>All intelligence products, threat assessments, risk forecasts, and advisory outputs produced by RiskFortress are <strong style={S.gold}>probabilistic in nature</strong> and represent the best available analytical judgment of RiskFortress at the time of production. They do not constitute guarantees, predictions, or warranties of future events, outcomes, market movements, legal results, or risk materialisation. Intelligence is inherently incomplete. Adversaries adapt. Environments shift. RiskFortress provides the most rigorous analytical framework available — not omniscience.</p>
+        </div>
+        <h3 style={S.h3}>1.4 — Warranty Disclaimer</h3>
+        <div style={S.warn}>
+          <p style={S.caps}>TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, ALL SERVICES ARE PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo; WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. RISKFORTRESS EXPRESSLY DISCLAIMS ALL WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, TITLE, OR NON-INFRINGEMENT. RISKFORTRESS DOES NOT WARRANT THAT SERVICES WILL MEET CLIENT REQUIREMENTS, THAT INTELLIGENCE PRODUCTS WILL BE ERROR-FREE OR UNINTERRUPTED, OR THAT ANY THREAT OR RISK IDENTIFIED REPRESENTS THE TOTALITY OF EXISTING THREATS.</p>
+        </div>
+        <h3 style={S.h3}>1.5 — Prohibited Uses</h3>
+        <p style={S.p}>Client shall not, under any circumstances, use RiskFortress services or any deliverable therefrom:</p>
+        <ul style={S.ul}>
+          <li style={S.li}>(a) For any illegal, fraudulent, tortious, or harmful purpose under applicable Indian or international law;</li>
+          <li style={S.li}>(b) To surveil, track, or monitor any individual in violation of applicable privacy or data protection law;</li>
+          <li style={S.li}>(c) To facilitate, plan, execute, or conceal insider trading, market manipulation, financial fraud, money laundering, or any financial crime;</li>
+          <li style={S.li}>(d) To infringe, misappropriate, or circumvent any third-party intellectual property, privacy, or contractual rights;</li>
+          <li style={S.li}>(e) To compete with, replicate, reverse-engineer, or commercially exploit RiskFortress&rsquo;s proprietary methodologies, analytical frameworks, or intelligence infrastructure.</li>
+        </ul>
+
+        <hr style={S.hr} />
+
+        {/* II */}
+        <h2 style={S.h2}>Article II — Intellectual Property Rights</h2>
+        <p style={S.p}>All work product produced by RiskFortress — including but not limited to Intelligence Dossiers, Risk Maps, Threat Assessments, Macro-Financial Forensic Reports, Engagement Templates, Algorithmic Frameworks, Analytical Methodologies, and Software Tools — constitutes the exclusive intellectual property of RiskFortress and is protected under the Indian Copyright Act, 1957, the Patents Act, 1970, and applicable trade secret law.</p>
+        <p style={S.p}>Upon receipt of full payment per the applicable Statement of Work, Client is granted a <strong>limited, non-exclusive, non-transferable, non-sublicensable, revocable license</strong> for internal business use only. This license expressly excludes:</p>
+        <ul style={S.ul}>
+          <li style={S.li}>Reproduction, distribution, or publication of any work product in whole or in part;</li>
+          <li style={S.li}>Reverse-engineering, decompiling, or extracting any methodology or algorithm;</li>
+          <li style={S.li}>Sublicensing, reselling, or transferring work product to any third party;</li>
+          <li style={S.li}>Use in any legal proceeding without prior written authorization from RiskFortress;</li>
+          <li style={S.li}>Use beyond the scope of the engagement for which the work product was produced.</li>
+        </ul>
+        <p style={S.p}>RiskFortress retains all moral rights over its work product. Client&rsquo;s failure to fully pay engagement fees immediately voids the license granted herein, and all work product must be returned or destroyed within 5 business days.</p>
+
+        <hr style={S.hr} />
+
+        {/* III */}
+        <h2 style={S.h2}>Article III — Limitation of Liability</h2>
+        <div style={S.warn}>
+          <p style={S.caps}>ARTICLE III CONTAINS CRITICAL LIMITATIONS ON RISKFORTRESS&rsquo;S LIABILITY. READ CAREFULLY.</p>
+        </div>
+        <h3 style={S.h3}>3(a) — Exclusion of Consequential &amp; Indirect Damages</h3>
+        <div style={S.warn}>
+          <p style={S.caps}>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, RISKFORTRESS SHALL NOT BE LIABLE — UNDER ANY THEORY OF LIABILITY, INCLUDING CONTRACT, TORT, NEGLIGENCE, STRICT LIABILITY, OR OTHERWISE — FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES WHATSOEVER, INCLUDING BUT NOT LIMITED TO: LOSS OF PROFITS, LOSS OF REVENUE, LOSS OF BUSINESS OPPORTUNITY, LOSS OF GOODWILL, LOSS OF DATA, REPUTATIONAL HARM, BUSINESS INTERRUPTION, OR COST OF SUBSTITUTE SERVICES — EVEN IF RISKFORTRESS HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+        </div>
+        <h3 style={S.h3}>3(b) — Maximum Aggregate Liability Cap</h3>
+        <div style={S.box}>
+          <p style={{...S.p, marginBottom:0}}>The maximum aggregate liability of RiskFortress to the Client — for all claims arising under or in connection with this Agreement, whether in contract, tort, or otherwise — shall not exceed the <strong style={S.gold}>total fees actually paid by the Client to RiskFortress in the twelve (12) month period immediately preceding the event giving rise to the claim</strong>. This cap applies in aggregate across all claims and is not per-incident.</p>
+        </div>
+        <h3 style={S.h3}>3(c) — Nature of Services Acknowledgement</h3>
+        <p style={S.p}>The Client expressly acknowledges that RiskFortress&rsquo;s services constitute intelligence and risk advisory — not guarantees, insurance, or absolute protection against threats, losses, or adverse outcomes. The Client assumes full responsibility for all decisions made, actions taken, or actions not taken based on any RiskFortress deliverable.</p>
+        <h3 style={S.h3}>3(d) — Client Infrastructure Responsibility</h3>
+        <p style={S.p}>The Client is solely and exclusively responsible for their own cybersecurity posture, IT infrastructure security, access controls, employee security hygiene, and operational security protocols. RiskFortress&rsquo;s liability does not extend — under any circumstances — to losses, damages, or adverse outcomes arising from the Client&rsquo;s own infrastructure failures, negligence, failure to implement RiskFortress&rsquo;s recommended security measures, insider threats, or third-party breaches of Client systems.</p>
+        <h3 style={S.h3}>3(e) — Scope of Limitation</h3>
+        <p style={S.p}>The limitations and exclusions set forth in this Article III apply to the fullest extent permitted by applicable Indian law and survive termination of this Agreement.</p>
+
+        <hr style={S.hr} />
+
+        {/* IV */}
+        <h2 style={S.h2}>Article IV — Indemnification</h2>
+        <p style={S.p}>Client shall defend, indemnify, and hold harmless RiskFortress Intelligence and all of its affiliates, directors, officers, employees, contractors, agents, and successors (collectively, <strong style={S.gold}>&ldquo;Indemnified Parties&rdquo;</strong>) from and against any and all claims, demands, actions, proceedings, liabilities, losses, damages, penalties, fines, costs, and expenses (including reasonable legal fees) arising out of or related to:</p>
+        <ul style={S.ul}>
+          <li style={S.li}>(a) Client&rsquo;s misuse, modification, or unauthorized distribution of services or any work product;</li>
+          <li style={S.li}>(b) Client&rsquo;s breach of any term, representation, or warranty under this Agreement;</li>
+          <li style={S.li}>(c) Client&rsquo;s violation of any applicable law, regulation, or third-party right;</li>
+          <li style={S.li}>(d) Actions taken or not taken by Client based on intelligence, reports, or recommendations delivered by RiskFortress;</li>
+          <li style={S.li}>(e) Third-party claims arising from Client&rsquo;s business operations, decisions, or conduct;</li>
+          <li style={S.li}>(f) Submission of false, incomplete, misleading, or unauthorized information to RiskFortress in the course of any engagement.</li>
+        </ul>
+        <p style={S.p}>RiskFortress reserves the right to participate in the defense of any indemnified claim at Client&rsquo;s sole expense with counsel of RiskFortress&rsquo;s choosing. No settlement of any indemnified claim may be entered into by Client without the prior written consent of RiskFortress.</p>
+
+        <hr style={S.hr} />
+
+        {/* V */}
+        <h2 style={S.h2}>Article V — Fees, Payment Terms &amp; Refund Policy</h2>
+        <ul style={S.ul}>
+          <li style={S.li}><strong>(a) Fee Structure:</strong> All fees are specified in the applicable Statement of Work, quoted in Indian Rupees (INR) unless expressly stated otherwise in writing.</li>
+          <li style={S.li}><strong>(b) Payment Schedule:</strong> Fifty percent (50%) of the total engagement fee is payable as a non-refundable advance upon execution of the Statement of Work or written engagement confirmation. The remaining fifty percent (50%) is payable upon delivery of the final intelligence product or completion of the engagement milestone.</li>
+          <li style={S.li}><strong>(c) Late Payment:</strong> Amounts unpaid beyond fifteen (15) days of the due date shall attract interest at the rate of eighteen percent (18%) per annum, compounding monthly, from the due date to the date of actual payment.</li>
+          <li style={S.li}><strong>(d) GST &amp; Taxes:</strong> All fees quoted are exclusive of Goods and Services Tax (GST) and all applicable taxes, levies, and duties, which shall be charged at prevailing statutory rates and borne solely by the Client.</li>
+          <li style={S.li}><strong>(e) Refund Policy:</strong> The advance fee is non-refundable once intelligence collection, research, or analysis has commenced. Pre-commencement cancellations may receive a refund of the advance less administrative costs, capped at ten percent (10%) of the advance amount. No refunds are available on completed deliverables under any circumstance.</li>
+        </ul>
+
+        <hr style={S.hr} />
+
+        {/* VI */}
+        <h2 style={S.h2}>Article VI — Term and Termination</h2>
+        <ul style={S.ul}>
+          <li style={S.li}><strong>(a) Term:</strong> This Agreement commences on the Effective Date and continues until completion of all engagement obligations per the applicable Statement of Work, unless earlier terminated in accordance with this Article.</li>
+          <li style={S.li}><strong>(b) Termination for Convenience:</strong> Either party may terminate this Agreement upon thirty (30) days&rsquo; prior written notice. In the event of Client-initiated termination, Client shall pay for all services delivered and costs incurred up to the effective date of termination.</li>
+          <li style={S.li}><strong>(c) Termination for Cause:</strong> RiskFortress may terminate this Agreement immediately upon written notice in the event of: (i) Client&rsquo;s material breach uncured within fifteen (15) days of written notice; (ii) Client&rsquo;s insolvency, bankruptcy, or appointment of a liquidator; or (iii) Client&rsquo;s fraudulent or illegal conduct causing or likely to cause material harm to RiskFortress or third parties.</li>
+          <li style={S.li}><strong>(d) Effects of Termination:</strong> Upon termination, Client shall immediately cease use of all work product and pay all outstanding fees. The following provisions survive termination indefinitely: Intellectual Property Rights (Article II), Limitation of Liability (Article III), Indemnification (Article IV), Confidentiality (Article VII), and Dispute Resolution (Article IX).</li>
+        </ul>
+
+        <hr style={S.hr} />
+
+        {/* VII */}
+        <h2 style={S.h2}>Article VII — Confidentiality</h2>
+        <p style={S.p}>Both parties shall hold all Confidential Information of the other party in strict confidence, using no less than the same degree of care applied to their own most sensitive information. &ldquo;Confidential Information&rdquo; includes: business plans, strategic intelligence, technical data, proprietary methodologies, trade secrets, algorithms, client lists, financial data, engagement terms, and all intelligence products delivered hereunder.</p>
+        <p style={S.p}>Confidentiality obligations survive termination of this Agreement for a period of <strong>seven (7) years</strong> for all Confidential Information and <strong>indefinitely</strong> for trade secrets and proprietary methodologies. Neither party shall disclose Confidential Information to any third party without prior written consent of the disclosing party, except as required by law.</p>
+
+        <hr style={S.hr} />
+
+        {/* VIII */}
+        <h2 style={S.h2}>Article VIII — Force Majeure (Acts of God)</h2>
+        <p style={S.p}>Neither party shall be liable for delays or failures in performance resulting from causes beyond that party&rsquo;s reasonable control, including but not limited to: natural disasters, floods, earthquakes, fire, acts of war, civil unrest, terrorism, state-sponsored cyber warfare, distributed denial-of-service attacks, government-mandated internet shutdowns, pandemic or epidemic, changes in applicable law or government orders, or failure of critical third-party infrastructure.</p>
+        <p style={S.p}>The affected party shall notify the other in writing within five (5) business days of the onset of the force majeure event. If the force majeure event continues for a period exceeding ninety (90) days, either party may terminate this Agreement without liability upon written notice, except for payment obligations for services already rendered.</p>
+
+        <hr style={S.hr} />
+
+        {/* IX */}
+        <h2 style={S.h2}>Article IX — Dispute Resolution &amp; Jurisdiction</h2>
+        <p style={S.p}>All disputes, controversies, or claims arising out of or in connection with this Agreement — including its validity, breach, interpretation, or termination — shall be finally and exclusively resolved by binding arbitration under the Arbitration and Conciliation Act, 1996 (as amended).</p>
+        <ul style={S.ul}>
+          <li style={S.li}><strong>Arbitrator:</strong> A sole arbitrator mutually agreed by the parties, or in absence of agreement, appointed by the High Court of Allahabad upon application by either party.</li>
+          <li style={S.li}><strong>Seat &amp; Venue:</strong> Greater Noida, Uttar Pradesh, India.</li>
+          <li style={S.li}><strong>Language:</strong> English.</li>
+          <li style={S.li}><strong>Award:</strong> Final, binding, and enforceable. The arbitral award may be enforced as a decree of court.</li>
+          <li style={S.li}><strong>IP Exception:</strong> RiskFortress retains the right to seek immediate injunctive or equitable relief from a court of competent jurisdiction for any actual or threatened breach of intellectual property rights or confidentiality obligations, without prejudice to arbitration.</li>
+        </ul>
+        <p style={S.p}>This Agreement is governed by the laws of the <strong>Republic of India</strong>. For matters not subject to arbitration, the courts at Greater Noida, Uttar Pradesh shall have exclusive jurisdiction.</p>
+
+        <hr style={S.hr} />
+
+        {/* X */}
+        <h2 style={S.h2}>Article X — General Provisions</h2>
+        <ul style={S.ul}>
+          <li style={S.li}><strong>Entire Agreement:</strong> This MSA, together with the applicable Statement of Work, constitutes the entire agreement between the parties and supersedes all prior negotiations, representations, warranties, and understandings.</li>
+          <li style={S.li}><strong>Severability:</strong> If any provision of this Agreement is found to be invalid, illegal, or unenforceable by a competent court, the remaining provisions shall continue in full force and effect.</li>
+          <li style={S.li}><strong>Waiver:</strong> No failure or delay by RiskFortress in exercising any right shall constitute a waiver thereof. Any waiver must be in writing and signed by an authorized representative of RiskFortress.</li>
+          <li style={S.li}><strong>Assignment:</strong> Client may not assign, transfer, or delegate any rights or obligations under this Agreement without RiskFortress&rsquo;s prior written consent. RiskFortress may freely assign this Agreement to any affiliate, successor, or acquirer.</li>
+          <li style={S.li}><strong>Notices:</strong> All formal notices shall be delivered by hand, registered post with acknowledgement due, or encrypted email to the addresses on record. Notices are effective on receipt.</li>
+          <li style={S.li}><strong>Amendments:</strong> No amendment to this Agreement is valid unless made in writing and signed by duly authorized representatives of both parties.</li>
+        </ul>
+
+        <hr style={S.hr} />
+
+        {/* XI */}
+        <h2 style={S.h2}>Article XI — Acceptance</h2>
+        <div style={S.box}>
+          <p style={{...S.p, marginBottom:'12px'}}><strong style={S.gold}>BY ENGAGING RISKFORTRESS SERVICES</strong> — through execution of a Statement of Work, submission of a secure intake form, making any advance payment, or providing written confirmation of engagement — the Client unconditionally acknowledges that they have read, understood, and agree to be legally bound by all terms of this Master Service Agreement.</p>
+          <p style={{...S.p, marginBottom:'12px'}}>The Client further warrants that: (a) they possess full legal authority to enter into this Agreement and bind their organization; (b) no representation, promise, or warranty outside this Agreement has induced their acceptance; and (c) all information provided to RiskFortress is true, complete, and accurate to the best of their knowledge.</p>
+          <p style={{...S.p, marginBottom:0, color:'#888', fontSize:'13px'}}>For queries regarding this Agreement, contact: <a href="mailto:[email protected]" style={{color:'#C9A84C'}}>[email protected]</a></p>
+        </div>
+
+        <hr style={S.hr} />
+
+        <footer style={S.foot}>
+          <p><strong style={{color:'#C9A84C'}}>RiskFortress Intelligence</strong></p>
+          <p>A Mayalok Ventures Entity &nbsp;|&nbsp; DPIIT Registered</p>
+          <p>Pari Chowk, Greater Noida, Uttar Pradesh 201310, India</p>
+          <p style={{fontSize:'12px', color:'#444', marginTop:'8px'}}>Operating under Mayalok Ventures (DPIIT Registered). Corporate registration (CIN) will be updated upon Private Limited incorporation.</p>
+          <p style={{marginTop:'12px'}}>
+            <a href="/privacy" style={S.flink}>Privacy Protocols</a>
+            <a href="/terms" style={S.flink}>Master Service Agreement</a>
+          </p>
+          <p style={{marginTop:'12px', fontSize:'12px', color:'#444'}}>&copy; 2026 RiskFortress Intelligence. All Rights Reserved. &nbsp;|&nbsp; RF/LEGAL/MSA/2026-001</p>
+        </footer>
+
+      </div>
+    </div>
+  )
 }
