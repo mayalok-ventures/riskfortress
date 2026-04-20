@@ -12,6 +12,7 @@ import { ThemeProvider } from '@/components/Layout/ThemeProvider'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import AnalyticsTracker from '@/components/AnalyticsTracker'
+import CookieConsent from '@/components/CookieConsent'
 
 const GA_MEASUREMENT_ID = 'G-0NB75DBBJP'
 const SITE_URL = 'https://riskfortress.in'
@@ -289,6 +290,7 @@ export default function RootLayout({
                         <Footer />
                     </div>
                     <AnalyticsTracker />
+                    <CookieConsent />
                     <Analytics />
                     <SpeedInsights />
                     <Toaster

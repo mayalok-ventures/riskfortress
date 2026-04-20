@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import {
-    Eye, Users, Calendar, TrendingUp, Share2, Globe, Download,
+    Eye, Users, Calendar, Share2, Globe, Download,
     Loader2, RefreshCw, ArrowUpRight, ArrowDownRight, Activity, Monitor, ExternalLink,
-    Clock, MousePointer, BarChart3, Smartphone, Tablet, MonitorIcon, Timer, Target
+    MousePointer, BarChart3, Smartphone, Tablet, MonitorIcon, Timer, Target, MapPin
 } from 'lucide-react'
 import {
     AreaChart, Area, BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid,
@@ -47,6 +47,9 @@ interface AnalyticsData {
         todayPageviews: number
     }
     totalShares: number
+    topCountries: Array<{ country: string; views: number }>
+    topCities: Array<{ city: string; country: string; views: number }>
+    pageGeo: Record<string, Array<{ country: string; city: string; views: number }>>
 }
 
 /* ------------------------------------------------------------------ */
@@ -246,12 +249,156 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 interface Props { token: string }
 
+/* ------------------------------------------------------------------ */
+/*  Geographic Section Sub-component                                   */
+/* ------------------------------------------------------------------ */
+
+const COUNTRY_FLAGS: Record<string, string> = {
+    'IN': '🇮🇳', 'US': '🇺🇸', 'GB': '🇬🇧', 'AE': '🇦🇪', 'SG': '🇸🇬', 'AU': '🇦🇺',
+    'CA': '🇨🇦', 'DE': '🇩🇪', 'FR': '🇫🇷', 'JP': '🇯🇵', 'CN': '🇨🇳', 'HK': '🇭🇰',
+    'NL': '🇳🇱', 'PK': '🇵🇰', 'BD': '🇧🇩', 'NZ': '🇳🇿', 'ZA': '🇿🇦', 'KE': '🇰🇪',
+    'NG': '🇳🇬', 'MY': '🇲🇾', 'ID': '🇮🇩', 'TH': '🇹🇭', 'PH': '🇵🇭', 'VN': '🇻🇳',
+    'KR': '🇰🇷', 'SA': '🇸🇦', 'QA': '🇶🇦', 'KW': '🇰🇼', 'BH': '🇧🇭', 'OM': '🇴🇲',
+}
+
+function GeographicSection({ data }: { data: AnalyticsData }) {
+    const [selectedPage, setSelectedPage] = useState<string>('')
+    const [geoTab, setGeoTab] = useState<'countries' | 'cities'>('countries')
+
+    const topCountries = data.topCountries || []
+    const topCities = data.topCities || []
+    const pageGeo = data.pageGeo || {}
+
+    const pagesWithGeo = Object.keys(pageGeo).filter(p => pageGeo[p]?.length > 0)
+    const currentPageGeo = selectedPage ? (pageGeo[selectedPage] || []) : []
+
+    const maxCountryViews = topCountries[0]?.views || 1
+    const maxCityViews = topCities[0]?.views || 1
+
+    const hasGeoData = topCountries.length > 0 || topCities.length > 0
+
+    return (
+        <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6 mb-8">
+            <div className="flex items-center gap-2 mb-5">
+                <MapPin className="h-5 w-5 text-intelligence" />
+                <h2 className="text-lg font-semibold text-white">Geographic Analytics</h2>
+            </div>
+
+            {!hasGeoData ? (
+                <div className="py-12 text-center">
+                    <Globe className="h-12 w-12 text-gray-700 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm">Geographic data will appear as visitors browse the site.</p>
+                    <p className="text-gray-600 text-xs mt-1">Country & city data is captured via Cloudflare on production.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Left: Country / City Tabs */}
+                    <div>
+                        <div className="flex rounded-xl bg-gray-800 border border-gray-700 p-1 mb-4 w-fit">
+                            <button onClick={() => setGeoTab('countries')}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                    geoTab === 'countries' ? 'bg-intelligence text-obsidian' : 'text-gray-400 hover:text-white'
+                                }`}>Countries</button>
+                            <button onClick={() => setGeoTab('cities')}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                    geoTab === 'cities' ? 'bg-intelligence text-obsidian' : 'text-gray-400 hover:text-white'
+                                }`}>Cities</button>
+                        </div>
+
+                        {geoTab === 'countries' ? (
+                            <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                                {topCountries.length === 0 ? (
+                                    <p className="text-gray-500 text-sm py-6 text-center">No country data yet</p>
+                                ) : topCountries.map((item, i) => (
+                                    <div key={i} className="flex items-center gap-3">
+                                        <span className="text-lg w-7 flex-shrink-0">
+                                            {COUNTRY_FLAGS[item.country] || '🌐'}
+                                        </span>
+                                        <span className="text-sm text-gray-300 flex-1 truncate">{item.country}</span>
+                                        <span className="text-sm font-semibold text-white">{item.views.toLocaleString()}</span>
+                                        <div className="w-24 h-1.5 rounded-full bg-gray-800 overflow-hidden flex-shrink-0">
+                                            <div className="h-full rounded-full bg-intelligence"
+                                                style={{ width: `${Math.round((item.views / maxCountryViews) * 100)}%` }} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                                {topCities.length === 0 ? (
+                                    <p className="text-gray-500 text-sm py-6 text-center">No city data yet</p>
+                                ) : topCities.map((item, i) => (
+                                    <div key={i} className="flex items-center gap-3">
+                                        <span className="text-lg w-7 flex-shrink-0">
+                                            {COUNTRY_FLAGS[item.country] || '🌐'}
+                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm text-gray-300 truncate">{item.city}</p>
+                                            <p className="text-xs text-gray-600 truncate">{item.country}</p>
+                                        </div>
+                                        <span className="text-sm font-semibold text-white">{item.views.toLocaleString()}</span>
+                                        <div className="w-24 h-1.5 rounded-full bg-gray-800 overflow-hidden flex-shrink-0">
+                                            <div className="h-full rounded-full bg-purple-500"
+                                                style={{ width: `${Math.round((item.views / maxCityViews) * 100)}%` }} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Right: Per-Page Geo Breakdown */}
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <p className="text-sm text-gray-400">Views by location per page</p>
+                        </div>
+                        {pagesWithGeo.length === 0 ? (
+                            <p className="text-gray-500 text-sm py-6 text-center">No per-page geo data yet</p>
+                        ) : (
+                            <>
+                                <select
+                                    value={selectedPage}
+                                    onChange={e => setSelectedPage(e.target.value)}
+                                    className="w-full mb-4 px-3 py-2 rounded-xl bg-gray-800 border border-gray-700 text-sm text-gray-200 focus:outline-none focus:border-intelligence"
+                                >
+                                    <option value="">— Select a page / article / blog —</option>
+                                    {pagesWithGeo.map(p => (
+                                        <option key={p} value={p}>{p}</option>
+                                    ))}
+                                </select>
+
+                                {selectedPage && currentPageGeo.length > 0 ? (
+                                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                                        {currentPageGeo.map((g, i) => (
+                                            <div key={i} className="flex items-center gap-3 py-1.5 border-b border-gray-800/50">
+                                                <span className="text-base w-6 flex-shrink-0">
+                                                    {COUNTRY_FLAGS[g.country] || '🌐'}
+                                                </span>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm text-gray-300">{g.city || g.country}</p>
+                                                    {g.city && <p className="text-xs text-gray-600">{g.country}</p>}
+                                                </div>
+                                                <span className="text-sm font-semibold text-intelligence">{g.views.toLocaleString()}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : selectedPage ? (
+                                    <p className="text-gray-500 text-sm py-4 text-center">No geo data for this page yet</p>
+                                ) : null}
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
 export default function AnalyticsDashboard({ token }: Props) {
     const [data, setData] = useState<AnalyticsData | null>(null)
     const [loading, setLoading] = useState(true)
     const [range, setRange] = useState(7)
     const [refreshing, setRefreshing] = useState(false)
-    const [mounted, setMounted] = useState(false)
 
     const load = async (days: number) => {
         try {
@@ -260,8 +407,7 @@ export default function AnalyticsDashboard({ token }: Props) {
         } catch { /* ignore */ }
     }
 
-    useEffect(() => { setMounted(true) }, [])
-    useEffect(() => { setLoading(true); load(range).finally(() => setLoading(false)) }, [range])
+    useEffect(() => { load(range).finally(() => setLoading(false)) }, [range])
 
     const refresh = async () => { setRefreshing(true); await load(range); setRefreshing(false) }
 
@@ -287,7 +433,8 @@ export default function AnalyticsDashboard({ token }: Props) {
 
     /* ---------- Derived ---------- */
     const chartData = (data.dailyStats || []).map(d => ({ ...d, label: fmtDate(d.date) }))
-    const hasChartData = mounted && chartData.length > 0
+    // Fix: don't block on `mounted` – charts only render client-side anyway (recharts)
+    const hasChartData = chartData.length > 0 && chartData.some(d => d.pageviews > 0 || d.visitors > 0)
 
     const platformEntries = Object.entries(data.platforms || data.sources || {})
         .filter(([, v]) => v > 0)
@@ -433,7 +580,7 @@ export default function AnalyticsDashboard({ token }: Props) {
                 {/* Platform Bar Chart */}
                 <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6">
                     <SectionTitle>Traffic by Platform</SectionTitle>
-                    {!mounted || platformEntries.length === 0 ? (
+                    {platformEntries.length === 0 ? (
                         <p className="text-gray-500 text-sm py-10 text-center">No platform data yet</p>
                     ) : (
                         <div className="h-72">
@@ -654,6 +801,9 @@ export default function AnalyticsDashboard({ token }: Props) {
                     </div>
                 )}
             </div>
+
+            {/* ===== Geographic Analytics ===== */}
+            <GeographicSection data={data} />
 
             {/* ===== Engagement Metrics + Device Breakdown ===== */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

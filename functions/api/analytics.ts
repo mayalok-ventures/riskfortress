@@ -29,6 +29,21 @@ function getDateKey(date?: Date): string {
   return d.toISOString().split('T')[0]
 }
 
+// Extract geo info from Cloudflare request object
+function getGeoInfo(request: Request): { country: string; city: string } {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cf = (request as any).cf
+    if (cf) {
+      return {
+        country: (cf.country as string) || 'Unknown',
+        city: (cf.city as string) || 'Unknown',
+      }
+    }
+  } catch { /* ignore */ }
+  return { country: 'Unknown', city: 'Unknown' }
+}
+
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const event = (await context.request.json()) as AnalyticsEvent
@@ -71,10 +86,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
               totalEngagement: number
               engagementCount: number
               exits: number
+              geo: Record<string, { country: string; city: string; views: number }>
             }
           >,
           contentTypeExits: {} as Record<string, number>,
           activeUsers: {} as Record<string, string>,
+          // Global geo tracking
+          countries: {} as Record<string, number>,
+          cities: {} as Record<string, { count: number; country: string }>,
         }
 
     const uniqueVisitors = stats.uniqueVisitors as string[]
@@ -90,10 +109,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         totalEngagement: number
         engagementCount: number
         exits: number
+        geo: Record<string, { country: string; city: string; views: number }>
       }
     >
     const contentTypeExits = (stats.contentTypeExits || {}) as Record<string, number>
     const activeUsers = (stats.activeUsers || {}) as Record<string, string>
+    const countries = (stats.countries || {}) as Record<string, number>
+    const cities = (stats.cities || {}) as Record<string, { count: number; country: string }>
 
     switch (event.type) {
       case 'pageview': {
@@ -130,6 +152,23 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           stats.devices = devices
         }
 
+        // --- Geographic tracking ---
+        const { country, city } = getGeoInfo(context.request)
+
+        // Global country count
+        if (country && country !== 'Unknown') {
+          countries[country] = (countries[country] || 0) + 1
+        }
+
+        // Global city count
+        if (city && city !== 'Unknown') {
+          if (!cities[city]) {
+            cities[city] = { count: 0, country }
+          }
+          cities[city].count++
+        }
+
+        // Per-page geo tracking
         const path = event.path as string
         if (!pages[path]) {
           pages[path] = {
@@ -140,9 +179,23 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             totalEngagement: 0,
             engagementCount: 0,
             exits: 0,
+            geo: {},
           }
         }
         pages[path].views++
+
+        // Store geo data per page
+        if (country && country !== 'Unknown') {
+          const geoKey = `${country}__${city !== 'Unknown' ? city : ''}`
+          if (!pages[path].geo) pages[path].geo = {}
+          if (!pages[path].geo[geoKey]) {
+            pages[path].geo[geoKey] = { country, city: city !== 'Unknown' ? city : '', views: 0 }
+          }
+          pages[path].geo[geoKey].views++
+        }
+
+        stats.countries = countries
+        stats.cities = cities
         break
       }
 
@@ -199,6 +252,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             totalEngagement: 0,
             engagementCount: 0,
             exits: 0,
+            geo: {},
           }
         }
 
@@ -274,6 +328,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         todayPageviews: number
       }
       totalShares: number
+      // Geographic data
+      topCountries: Array<{ country: string; views: number }>
+      topCities: Array<{ city: string; country: string; views: number }>
+      pageGeo: Record<string, Array<{ country: string; city: string; views: number }>>
     } = {
       dates: [],
       totalPageviews: 0,
@@ -296,6 +354,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       deviceBreakdown: { mobile: 0, tablet: 0, desktop: 0 },
       previousPeriod: { totalPageviews: 0, uniqueVisitors: 0, uniqueSessions: 0, todayPageviews: 0 },
       totalShares: 0,
+      topCountries: [],
+      topCities: [],
+      pageGeo: {},
     }
 
     // returningVisitors aggregated separately (not using uniqueVisitors set)
@@ -314,11 +375,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         totalEngagement: number
         engagementCount: number
         exits: number
+        geo: Record<string, { country: string; city: string; views: number }>
       }
     > = {}
 
     const shareAggregates: Record<string, { count: number; title: string; contentType: string; platforms: Record<string, number> }> = {}
     const allPlatforms: Record<string, number> = {}
+    const allCountries: Record<string, number> = {}
+    const allCities: Record<string, { count: number; country: string }> = {}
     let totalEngagementMs = 0
     let totalEngagementCount = 0
 
@@ -357,6 +421,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
             totalEngagement: number
             engagementCount: number
             exits: number
+            geo?: Record<string, { country: string; city: string; views: number }>
           }
           if (!pageAggregates[path]) {
             pageAggregates[path] = {
@@ -367,6 +432,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
               totalEngagement: 0,
               engagementCount: 0,
               exits: 0,
+              geo: {},
             }
           }
           pageAggregates[path].views += pageData.views
@@ -379,6 +445,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
           totalEngagementMs += pageData.totalEngagement
           totalEngagementCount += pageData.engagementCount
+
+          // Aggregate per-page geo
+          for (const [geoKey, geoData] of Object.entries(pageData.geo || {})) {
+            if (!pageAggregates[path].geo[geoKey]) {
+              pageAggregates[path].geo[geoKey] = { country: geoData.country, city: geoData.city, views: 0 }
+            }
+            pageAggregates[path].geo[geoKey].views += geoData.views
+          }
         }
 
         for (const [type, count] of Object.entries(
@@ -412,6 +486,23 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         stats.deviceBreakdown.mobile += dayDevices.mobile || 0
         stats.deviceBreakdown.tablet += dayDevices.tablet || 0
         stats.deviceBreakdown.desktop += dayDevices.desktop || 0
+
+        // Aggregate global countries
+        for (const [country, count] of Object.entries(
+          (parsed.countries as Record<string, number>) || {}
+        )) {
+          allCountries[country] = (allCountries[country] || 0) + (count as number)
+        }
+
+        // Aggregate global cities
+        for (const [city, data] of Object.entries(
+          (parsed.cities as Record<string, { count: number; country: string }>) || {}
+        )) {
+          if (!allCities[city]) {
+            allCities[city] = { count: 0, country: data.country }
+          }
+          allCities[city].count += data.count
+        }
 
         if (i === 0) {
           const now = Date.now()
@@ -452,7 +543,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 
     // Bounce rate: sessions with only 1 pageview / total sessions
-    // Approximate from daily data: sessions where visitor had only 1 page
     const totalExits = Object.values(pageAggregates).reduce((s, p) => s + p.exits, 0)
     if (allSessions.size > 0) {
       stats.bounceRate = Math.round((totalExits / allSessions.size) * 100)
@@ -499,6 +589,28 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       .slice(0, 20)
 
     stats.platforms = allPlatforms
+
+    // Geographic stats — top 20 countries and cities
+    stats.topCountries = Object.entries(allCountries)
+      .map(([country, views]) => ({ country, views }))
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 20)
+
+    stats.topCities = Object.entries(allCities)
+      .map(([city, data]) => ({ city, country: data.country, views: data.count }))
+      .sort((a, b) => b.views - a.views)
+      .slice(0, 20)
+
+    // Per-page geo breakdown — top 10 pages by views, top 10 geo per page
+    stats.pageGeo = {}
+    for (const [path, data] of Object.entries(pageAggregates)) {
+      const topGeo = Object.values(data.geo || {})
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 10)
+      if (topGeo.length > 0) {
+        stats.pageGeo[path] = topGeo
+      }
+    }
 
     // Today's pageviews (dailyStats[0] is today before reverse)
     if (stats.dailyStats.length > 0) {
