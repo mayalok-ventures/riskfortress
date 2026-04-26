@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+Allow: /dossiers/
+Disallow: /dossiers/_placeholder/
 Disallow: /secure-intake/
 Disallow: /api/
 Disallow: /rf-admin/

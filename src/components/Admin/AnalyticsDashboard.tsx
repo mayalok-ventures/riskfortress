@@ -400,6 +400,7 @@ export default function AnalyticsDashboard({ token }: Props) {
     const [error, setError] = useState<string | null>(null)
     const [range, setRange] = useState(7)
     const [refreshing, setRefreshing] = useState(false)
+    const [chartsReady, setChartsReady] = useState(false)
 
     const load = async (days: number) => {
         setError(null)
@@ -421,6 +422,17 @@ export default function AnalyticsDashboard({ token }: Props) {
     }
 
     useEffect(() => { load(range).finally(() => setLoading(false)) }, [range])
+
+    // Recharts ResponsiveContainer needs the DOM to be fully laid out before it can
+    // measure its parent's width.  Defer chart rendering by one frame so the flex
+    // layout is resolved and the container has a non-zero width.
+    useEffect(() => {
+        if (!loading && data) {
+            const id = requestAnimationFrame(() => setChartsReady(true))
+            return () => cancelAnimationFrame(id)
+        }
+        setChartsReady(false)
+    }, [loading, data])
 
     const refresh = async () => { setRefreshing(true); await load(range); setRefreshing(false) }
 
@@ -562,9 +574,13 @@ export default function AnalyticsDashboard({ token }: Props) {
                     <div className="h-72 flex items-center justify-center">
                         <p className="text-gray-500 text-sm">No trend data yet for this period</p>
                     </div>
+                ) : !chartsReady ? (
+                    <div className="h-72 flex items-center justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin text-gray-600" />
+                    </div>
                 ) : (
-                <div className="h-72">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div style={{ width: '100%', height: 288 }}>
+                    <ResponsiveContainer width="100%" height={288}>
                         <AreaChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -10 }}>
                             <defs>
                                 <linearGradient id="gradViews" x1="0" y1="0" x2="0" y2="1">
@@ -601,9 +617,13 @@ export default function AnalyticsDashboard({ token }: Props) {
                     <SectionTitle>Traffic by Platform</SectionTitle>
                     {platformEntries.length === 0 ? (
                         <p className="text-gray-500 text-sm py-10 text-center">No platform data yet</p>
+                    ) : !chartsReady ? (
+                        <div className="h-72 flex items-center justify-center">
+                            <Loader2 className="h-6 w-6 animate-spin text-gray-600" />
+                        </div>
                     ) : (
-                        <div className="h-72">
-                            <ResponsiveContainer width="100%" height="100%">
+                        <div style={{ width: '100%', height: 288 }}>
+                            <ResponsiveContainer width="100%" height={288}>
                                 <BarChart data={platformEntries.slice(0, 10).map(([name, value]) => ({ name, value }))}
                                     layout="vertical" margin={{ top: 0, right: 10, bottom: 0, left: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" horizontal={false} />
