@@ -70,8 +70,10 @@ export default function TermsPage() {
         <hr style={S.hr} />
 
         {/* II */}
-        <h2 style={S.h2}>Article II — Intellectual Property Rights</h2>
-        <p style={S.p}>All work product produced by RiskFortress — including but not limited to Intelligence Dossiers, Risk Maps, Threat Assessments, Macro-Financial Forensic Reports, Engagement Templates, Algorithmic Frameworks, Analytical Methodologies, and Software Tools — constitutes the exclusive intellectual property of RiskFortress and is protected under the Indian Copyright Act, 1957, the Patents Act, 1970, and applicable trade secret law.</p>
+        <h2 style={S.h2}>Article II — Intellectual Property &amp; Confidentiality of Methodologies</h2>
+        <h3 style={S.h3}>2.1 — Exclusive Ownership by Mayalok Ventures</h3>
+        <p style={S.p}>All forensic methodologies, proprietary AI and machine-learning algorithms, threat-detection models, scoring frameworks, prompt libraries, training pipelines, intelligence dossiers, risk maps, threat assessments, macro-financial forensic reports, engagement templates, analytical playbooks, and software tools created, deployed, or refined by RiskFortress — whether developed prior to, during, or after any Client engagement — remain the <strong style={S.gold}>exclusive intellectual property of Mayalok Ventures</strong> and its RiskFortress operating arm. Such property is protected under the Indian Copyright Act, 1957, the Patents Act, 1970, the Designs Act, 2000, the Trade Marks Act, 1999, and applicable trade-secret and confidentiality law in every jurisdiction in which Client operates.</p>
+        <h3 style={S.h3}>2.2 — License Grant</h3>
         <p style={S.p}>Upon receipt of full payment per the applicable Statement of Work, Client is granted a <strong>limited, non-exclusive, non-transferable, non-sublicensable, revocable license</strong> for internal business use only. This license expressly excludes:</p>
         <ul style={S.ul}>
           <li style={S.li}>Reproduction, distribution, or publication of any work product in whole or in part;</li>
@@ -101,8 +103,12 @@ export default function TermsPage() {
         <p style={S.p}>The Client expressly acknowledges that RiskFortress&rsquo;s services constitute intelligence and risk advisory — not guarantees, insurance, or absolute protection against threats, losses, or adverse outcomes. The Client assumes full responsibility for all decisions made, actions taken, or actions not taken based on any RiskFortress deliverable.</p>
         <h3 style={S.h3}>3(d) — Client Infrastructure Responsibility</h3>
         <p style={S.p}>The Client is solely and exclusively responsible for their own cybersecurity posture, IT infrastructure security, access controls, employee security hygiene, and operational security protocols. RiskFortress&rsquo;s liability does not extend — under any circumstances — to losses, damages, or adverse outcomes arising from the Client&rsquo;s own infrastructure failures, negligence, failure to implement RiskFortress&rsquo;s recommended security measures, insider threats, or third-party breaches of Client systems.</p>
-        <h3 style={S.h3}>3(e) — Scope of Limitation</h3>
-        <p style={S.p}>The limitations and exclusions set forth in this Article III apply to the fullest extent permitted by applicable Indian law and survive termination of this Agreement.</p>
+        <h3 style={S.h3}>3(e) — Zero-Day Vulnerabilities &amp; Subsequent Breach Cap</h3>
+        <div style={S.box}>
+          <p style={{...S.p, marginBottom:0}}>The Client expressly acknowledges that no intelligence audit, penetration assessment, or threat-model exercise — however rigorously conducted — can identify the totality of presently-unknown (&ldquo;<strong style={S.gold}>zero-day</strong>&rdquo;) vulnerabilities, novel adversary tradecraft, or future exploit vectors. RiskFortress&rsquo;s aggregate liability for any undetected zero-day vulnerability, latent defect in any audited system, or any subsequent breach, intrusion, or compromise occurring after delivery of an intelligence product is <strong style={S.gold}>capped at the actual service fee paid for that specific engagement</strong>, and shall not extend to any incidental, consequential, regulatory, reputational, or third-party damages arising therefrom.</p>
+        </div>
+        <h3 style={S.h3}>3(f) — Scope of Limitation</h3>
+        <p style={S.p}>The limitations and exclusions set forth in this Article III apply to the fullest extent permitted by applicable Indian law and survive termination of this Agreement. They reflect a deliberate allocation of risk and form an essential basis of the bargain between the parties; the fees charged would be materially higher absent these limitations.</p>
 
         <hr style={S.hr} />
 
@@ -152,9 +158,21 @@ export default function TermsPage() {
         <hr style={S.hr} />
 
         {/* VIII */}
-        <h2 style={S.h2}>Article VIII — Force Majeure (Acts of God)</h2>
-        <p style={S.p}>Neither party shall be liable for delays or failures in performance resulting from causes beyond that party&rsquo;s reasonable control, including but not limited to: natural disasters, floods, earthquakes, fire, acts of war, civil unrest, terrorism, state-sponsored cyber warfare, distributed denial-of-service attacks, government-mandated internet shutdowns, pandemic or epidemic, changes in applicable law or government orders, or failure of critical third-party infrastructure.</p>
-        <p style={S.p}>The affected party shall notify the other in writing within five (5) business days of the onset of the force majeure event. If the force majeure event continues for a period exceeding ninety (90) days, either party may terminate this Agreement without liability upon written notice, except for payment obligations for services already rendered.</p>
+        <h2 style={S.h2}>Article VIII — Service Level Expectations &amp; Force Majeure</h2>
+        <h3 style={S.h3}>8.1 — Service Level Expectations</h3>
+        <p style={S.p}>RiskFortress shall use commercially reasonable efforts to deliver intelligence services in accordance with the timelines, scope, and quality standards specified in the applicable Statement of Work. Unless explicitly designated as a binding service-level commitment in writing, the following operate as expectations — not warranties:</p>
+        <ul style={S.ul}>
+          <li style={S.li}><strong>(a) Intake Acknowledgement:</strong> All qualified intake submissions are reviewed and acknowledged within forty-eight (48) business hours.</li>
+          <li style={S.li}><strong>(b) Engagement Onboarding:</strong> Formal Statement of Work issuance within seven (7) business days of qualification.</li>
+          <li style={S.li}><strong>(c) Interim Reporting:</strong> Mid-engagement intelligence checkpoints at intervals defined per Statement of Work, typically not exceeding fourteen (14) business days.</li>
+          <li style={S.li}><strong>(d) Final Deliverable:</strong> Per the timeline expressly stipulated in the Statement of Work, subject to dependencies on Client information, third-party data sources, and adversary environmental shifts.</li>
+          <li style={S.li}><strong>(e) Platform Availability:</strong> Secure client portal availability target of 99.5% measured monthly, excluding scheduled maintenance windows and Force Majeure events.</li>
+          <li style={S.li}><strong>(f) Incident Response:</strong> Critical engagement-impacting incidents acknowledged within four (4) hours; remediation plan within twenty-four (24) hours.</li>
+        </ul>
+        <p style={S.p}>Failure to meet a non-binding expectation does not constitute breach of this Agreement and does not give rise to any claim, fee adjustment, or liability beyond the limitations set forth in Article III.</p>
+        <h3 style={S.h3}>8.2 — Force Majeure (Acts of God &amp; Sovereign Risk)</h3>
+        <p style={S.p}>Neither party shall be liable for delays or failures in performance resulting from causes beyond that party&rsquo;s reasonable control, including but not limited to: natural disasters, floods, earthquakes, fire, acts of war, civil unrest, terrorism, state-sponsored cyber warfare, nation-state APT campaigns, distributed denial-of-service attacks, supply-chain compromise of upstream technology providers, government-mandated internet shutdowns, pandemic or epidemic, changes in applicable law or government orders, sanctions regimes, or failure of critical third-party infrastructure (cloud, telecommunications, payment rails, or registry systems).</p>
+        <p style={S.p}>The affected party shall notify the other in writing within five (5) business days of the onset of the force majeure event, and shall use commercially reasonable efforts to mitigate impact and resume performance. If the force majeure event continues for a period exceeding ninety (90) days, either party may terminate this Agreement without liability upon written notice, except for payment obligations for services already rendered.</p>
 
         <hr style={S.hr} />
 
@@ -190,7 +208,7 @@ export default function TermsPage() {
         <div style={S.box}>
           <p style={{...S.p, marginBottom:'12px'}}><strong style={S.gold}>BY ENGAGING RISKFORTRESS SERVICES</strong> — through execution of a Statement of Work, submission of a secure intake form, making any advance payment, or providing written confirmation of engagement — the Client unconditionally acknowledges that they have read, understood, and agree to be legally bound by all terms of this Master Service Agreement.</p>
           <p style={{...S.p, marginBottom:'12px'}}>The Client further warrants that: (a) they possess full legal authority to enter into this Agreement and bind their organization; (b) no representation, promise, or warranty outside this Agreement has induced their acceptance; and (c) all information provided to RiskFortress is true, complete, and accurate to the best of their knowledge.</p>
-          <p style={{...S.p, marginBottom:0, color:'#888', fontSize:'13px'}}>For queries regarding this Agreement, contact: <a href="mailto:[email protected]" style={{color:'#C9A84C'}}>[email protected]</a></p>
+          <p style={{...S.p, marginBottom:0, color:'#888', fontSize:'13px'}}>For queries regarding this Agreement, contact: <a href="mailto:legal@riskfortress.in" style={{color:'#C9A84C'}}>legal@riskfortress.in</a> &nbsp;|&nbsp; Compliance escalations: <a href="mailto:compliance@mayalok.com" style={{color:'#C9A84C'}}>compliance@mayalok.com</a></p>
         </div>
 
         <hr style={S.hr} />

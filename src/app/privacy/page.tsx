@@ -109,9 +109,10 @@ export default function PrivacyPage() {
         <h2 style={s.h2}>Article V — Data Processing, Localization &amp; AI Usage</h2>
         <h3 style={s.h3}>5(a) — Compliance Standards</h3>
         <p style={s.p}>All data processing operations comply with the Digital Personal Data Protection (DPDP) Act 2023, the Information Technology Act 2000 (as amended), IT (SPDI) Rules 2011, and maintain SOC2-grade operational expectations for data handling, access control, and audit trails.</p>
-        <h3 style={s.h3}>5(b) — Absolute AI Training Prohibition</h3>
+        <h3 style={s.h3}>5(b) — Zero-Disclosure Clause &amp; Absolute AI Training Prohibition</h3>
         <div style={s.infoBlock}>
-          <p style={{...s.p, marginBottom: 0}}><strong style={s.highlight}>UNCONDITIONAL PROHIBITION:</strong> No Client forensic data, network intelligence logs, intelligence reports, engagement communications, analytical outputs, or any confidential data of any nature whatsoever will EVER be used — directly or indirectly — to train, fine-tune, benchmark, evaluate, or otherwise improve any internal or third-party artificial intelligence, machine learning, large language model, or automated decision-making system. This prohibition is absolute, unconditional, irrevocable, and survives indefinitely beyond the termination of any engagement.</p>
+          <p style={{...s.p, marginBottom: '12px'}}><strong style={s.highlight}>ZERO-DISCLOSURE ARCHITECTURE:</strong> All Client data — including Confidential Client Threat Models, Enterprise Telemetry Data, intake submissions, engagement communications, forensic artifacts, and analytical outputs — is processed within strictly siloed, single-tenant logical environments. Client data <strong>is never aggregated, pooled, anonymised-and-released, sold, syndicated, brokered, shared with marketing partners, used for benchmarking against other clients, or disclosed to any third party</strong> for any commercial, analytical, or research purpose whatsoever.</p>
+          <p style={{...s.p, marginBottom: 0}}><strong style={s.highlight}>UNCONDITIONAL AI-TRAINING PROHIBITION:</strong> No Client forensic data, network intelligence logs, intelligence reports, engagement communications, analytical outputs, prompts, or derivative artifacts of any nature whatsoever will EVER be used — directly or indirectly — to train, fine-tune, benchmark, evaluate, RLHF, distill, or otherwise improve any internal or third-party artificial intelligence, machine learning, large language model, foundation model, embedding model, or automated decision-making system. This prohibition is absolute, unconditional, irrevocable, and survives indefinitely beyond the termination of any engagement.</p>
         </div>
         <h3 style={s.h3}>5(c) — Role-Based Access Control (RBAC)</h3>
         <p style={s.p}>Client data is accessible exclusively to personnel with a direct, documented operational need on the specific engagement for which the data was collected. RiskFortress maintains:</p>
@@ -128,10 +129,17 @@ export default function PrivacyPage() {
 
         {/* ARTICLE VI */}
         <h2 style={s.h2}>Article VI — Data Retention &amp; Digital Shredding</h2>
-        <h3 style={s.h3}>6.1 — Retention Period</h3>
-        <p style={s.p}>Client data is retained for the shorter of: (a) seven (7) years from the date of collection, consistent with the Limitation Act, 1963; or (b) the date of contractual termination plus thirty (30) days for orderly closure. Thereafter, data is subject to certified digital destruction.</p>
-        <h3 style={s.h3}>6.2 — Air-Gapped Storage &amp; Secure Deletion</h3>
-        <p style={s.p}>Sensitive intelligence artifacts are stored in air-gapped, encrypted repositories using AES-256 encryption at rest. Digital shredding employs DoD 5220.22-M or equivalent multi-pass overwrite standards, ensuring data is irrecoverable post-deletion.</p>
+        <h3 style={s.h3}>6.1 — Retention Period (Tiered)</h3>
+        <ul style={s.ul}>
+          <li style={s.li}><strong>(a) Confidential Client Threat Models:</strong> Retained only for the active duration of the engagement plus thirty (30) days post-termination for orderly handover. Thereafter, threat-model artifacts are cryptographically purged from primary, replica, and backup storage tiers.</li>
+          <li style={s.li}><strong>(b) Enterprise Telemetry Data &amp; Network Intelligence Logs:</strong> Retained for a maximum of ninety (90) days from collection in operational systems, after which they are aggregated into immutable forensic-evidence packages (where contractually required) or securely destroyed.</li>
+          <li style={s.li}><strong>(c) Final Intelligence Reports &amp; Chain-of-Custody Records:</strong> Retained for seven (7) years consistent with the Limitation Act, 1963, solely to defend the integrity of past deliverables.</li>
+          <li style={s.li}><strong>(d) Statutory &amp; Tax Records:</strong> Retained per the minimum periods mandated under Indian tax, corporate, and AML statutes.</li>
+          <li style={s.li}><strong>(e) Marketing &amp; Website Logs:</strong> Aggregated, non-identifying analytics retained for a maximum of twenty-four (24) months.</li>
+        </ul>
+        <h3 style={s.h3}>6.2 — Encryption, Air-Gapped Storage &amp; Cryptographic Purge</h3>
+        <p style={s.p}>All Client artifacts are encrypted in transit using TLS 1.3 (or higher) and at rest using <strong>AES-256-GCM</strong> with per-engagement key isolation. Threat models, telemetry payloads, and forensic evidence are stored in air-gapped, hardware-segregated repositories with strict break-glass access controls. Decryption keys are managed under a Hardware Security Module (HSM) policy with quorum-controlled custody.</p>
+        <p style={s.p}>Systematic destruction follows a multi-stage protocol: (i) cryptographic erasure of per-engagement keys (rendering ciphertext unrecoverable); (ii) DoD 5220.22-M / NIST SP 800-88 Rev.1 multi-pass overwrite of underlying media where applicable; (iii) propagation of deletion across replicas, backups, snapshots, and disaster-recovery tiers; (iv) issuance of a signed Certificate of Destruction within ten (10) business days of completion.</p>
         <h3 style={s.h3}>6.3 — Certificate of Destruction</h3>
         <p style={s.p}>Upon completion of the retention period or Client request for erasure, RiskFortress issues a formal Certificate of Destruction confirming secure deletion of all Client data from active systems, archives, and backups within the technically feasible scope.</p>
         <h3 style={s.h3}>6.4 — Data Breach Notification</h3>
@@ -162,7 +170,7 @@ export default function PrivacyPage() {
           <li style={s.li}><strong>(b) Legitimate Interests:</strong> Processing necessary for the legitimate interests of RiskFortress as Data Fiduciary, provided such interests do not override the fundamental rights of the Data Principal.</li>
           <li style={s.li}><strong>(c) Legal Obligations:</strong> Processing required for compliance with applicable Indian law, court orders, or regulatory obligations.</li>
         </ul>
-        <p style={s.p}>Consent may be withdrawn at any time by written notice to <strong style={s.highlight}>[email protected]</strong>. Withdrawal is effective from the date of receipt and does not affect the lawfulness of prior processing. Withdrawal requests are processed within <strong>30 days</strong> of receipt.</p>
+        <p style={s.p}>Consent may be withdrawn at any time by written notice to <strong style={s.highlight}>legal@riskfortress.in</strong> (with copy to <strong style={s.highlight}>compliance@mayalok.com</strong>). Withdrawal is effective from the date of receipt and does not affect the lawfulness of prior processing. Withdrawal requests are processed within <strong>30 days</strong> of receipt.</p>
 
         <hr style={s.divider} />
 
@@ -186,10 +194,26 @@ export default function PrivacyPage() {
           <p style={s.p}><strong style={s.highlight}>Name:</strong> Kunal Pratap Singh</p>
           <p style={s.p}><strong style={s.highlight}>Designation:</strong> Founder &amp; Data Protection Officer</p>
           <p style={s.p}><strong style={s.highlight}>Organization:</strong> RiskFortress Intelligence (A Mayalok Ventures Entity)</p>
-          <p style={s.p}><strong style={s.highlight}>Email:</strong> <a href="mailto:[email protected]" style={{color:'#C9A84C'}}>[email protected]</a></p>
+          <p style={s.p}><strong style={s.highlight}>Primary Contact:</strong> <a href="mailto:legal@riskfortress.in" style={{color:'#C9A84C'}}>legal@riskfortress.in</a></p>
+          <p style={s.p}><strong style={s.highlight}>Compliance Escalation:</strong> <a href="mailto:compliance@mayalok.com" style={{color:'#C9A84C'}}>compliance@mayalok.com</a></p>
           <p style={s.p}><strong style={s.highlight}>Address:</strong> Pari Chowk, Greater Noida, Uttar Pradesh 201310, India</p>
           <p style={{...s.p, marginBottom: 0}}><strong style={s.highlight}>Response SLA:</strong> Acknowledged within 48 hours of receipt. Resolution within 30 days.</p>
         </div>
+
+        <hr style={s.divider} />
+
+        {/* ARTICLE X-bis */}
+        <h2 style={s.h2}>Article X(A) — International Compliance &amp; GDPR Equivalency</h2>
+        <p style={s.p}>For Data Principals located in the European Economic Area, the United Kingdom, Switzerland, or any jurisdiction with substantively equivalent personal-data legislation, RiskFortress voluntarily extends the following GDPR-equivalent protections in addition to its DPDP Act 2023 obligations:</p>
+        <ul style={s.ul}>
+          <li style={s.li}><strong>10A.1 — Lawful Basis Mapping:</strong> Article 6 GDPR grounds (consent, contract, legal obligation, vital interests, public task, legitimate interests) and, where applicable, Article 9 GDPR special-category safeguards are documented per engagement.</li>
+          <li style={s.li}><strong>10A.2 — Data Subject Rights:</strong> The rights of access, rectification, erasure (&ldquo;right to be forgotten&rdquo;), restriction of processing, data portability, objection, and the right not to be subject to solely automated decision-making (Articles 15–22 GDPR) are honoured on parity with rights granted to Data Principals under the DPDP Act.</li>
+          <li style={s.li}><strong>10A.3 — Cross-Border Transfers:</strong> Any transfer of personal data outside India to a non-adequate jurisdiction is governed by EU-Commission-approved Standard Contractual Clauses (SCCs), UK International Data Transfer Addendum, or equivalent safeguard, supplemented by transfer impact assessments where required by Schrems II case law.</li>
+          <li style={s.li}><strong>10A.4 — EU Representative &amp; Lead Supervisory Authority:</strong> Where Article 27 GDPR triggers, RiskFortress will designate an EU representative and identify a lead supervisory authority on request to <strong style={s.highlight}>compliance@mayalok.com</strong>.</li>
+          <li style={s.li}><strong>10A.5 — Personal Data Breach Notification:</strong> In addition to the 72-hour DPDP notification commitment, GDPR-Article-33 breach reporting timelines apply to in-scope EEA Data Principals; affected individuals are notified without undue delay where Article 34 thresholds are met.</li>
+          <li style={s.li}><strong>10A.6 — Sector-Adjacent Frameworks:</strong> Engagements involving regulated industries reference, where contractually scoped, HIPAA, GLBA, PCI-DSS, ISO/IEC 27001, ISO/IEC 27701, and SOC 2 Type II controls.</li>
+        </ul>
+        <p style={s.p}>To the extent any provision of this Protocol affords a lower standard of protection than the DPDP Act, GDPR, or any other applicable data-protection statute, the higher statutory standard shall prevail and is deemed incorporated by reference.</p>
 
         <hr style={s.divider} />
 
