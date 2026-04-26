@@ -4,7 +4,6 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
 import { trackPageView, trackScrollDepth, trackEngagementTime, sendHeartbeat } from '@/lib/analytics'
-import { hasAnalyticsConsent } from '@/components/CookieConsent'
 
 interface AnalyticsTrackerProps {
     contentType?: string
@@ -22,9 +21,6 @@ export default function AnalyticsTracker({ contentType = 'page' }: AnalyticsTrac
         if (pathname.startsWith('/rf-admin') || pathname.includes('_placeholder')) {
             return
         }
-
-        // Respect cookie consent — skip analytics if user declined
-        if (!hasAnalyticsConsent()) return
 
         prevPathRef.current = pathname
         
