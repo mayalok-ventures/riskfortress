@@ -1,6 +1,6 @@
 'use client'
 
-import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, Share2, Eye } from 'lucide-react'
+import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, Share2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -47,7 +47,6 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
     const [accessDenied, setAccessDenied] = useState(false)
     const [emailVerified, setEmailVerified] = useState(false)
     const [showEmailModal, setShowEmailModal] = useState(false)
-    const [showStructuredView, setShowStructuredView] = useState(false)
 
     const cleanPath = pathname?.replace(/\/$/, '') || ''
     const actualSlug = cleanPath.split('/').filter(Boolean).pop() || initialSlug
@@ -319,63 +318,29 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                     </div>
                 )}
 
-                {content.htmlContent && (
-                    <div className="mb-6">
-                        <button
-                            onClick={() => setShowStructuredView(!showStructuredView)}
-                            className={`inline-flex items-center space-x-2 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all ${
-                                showStructuredView
-                                    ? 'bg-intelligence text-obsidian shadow-lg shadow-intelligence/20'
-                                    : 'bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white'
-                            }`}
-                        >
-                            <Eye className="h-4 w-4" />
-                            <span>Structured View</span>
-                        </button>
-
-                        {showStructuredView && (() => {
-                            const htmlStr = content.htmlContent || ''
-                            const isFullDoc = /^\s*<!doctype\s+html[\s>]/i.test(htmlStr) || /^\s*<html[\s>]/i.test(htmlStr)
-                            const iframeSrc = isFullDoc
-                                ? htmlStr
-                                : `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1a1a1a;padding:32px;line-height:1.7;font-size:16px;}h1{font-size:2em;font-weight:700;margin:0.67em 0;}h2{font-size:1.5em;font-weight:700;margin:0.75em 0;}h3{font-size:1.25em;font-weight:600;margin:0.83em 0;}p{margin-bottom:1em;}ul{list-style:disc;padding-left:1.5em;margin-bottom:1em;}ol{list-style:decimal;padding-left:1.5em;margin-bottom:1em;}li{margin-bottom:0.5em;}blockquote{border-left:4px solid #D4AF37;padding:12px 16px;margin:1em 0;border-radius:0 8px 8px 0;background:#f9f9f9;}a{color:#1155CC;text-decoration:underline;}code{background:#f0f0f0;padding:0.2em 0.4em;border-radius:4px;font-size:0.9em;}pre{background:#1a1a2e;color:#e0e0e0;padding:1em;border-radius:8px;overflow-x:auto;margin:1em 0;}pre code{background:none;padding:0;}img{max-width:100%;height:auto;border-radius:8px;}table{width:100%;border-collapse:collapse;margin:1em 0;}th,td{border:1px solid #ccc;padding:8px 12px;text-align:left;}th{background:#f5f5f5;font-weight:600;}hr{border:none;border-top:2px solid #e0e0e0;margin:2em 0;}</style></head><body>${htmlStr}</body></html>`
-                            return (
-                            <div className="mt-4 rounded-2xl border border-intelligence/20 overflow-hidden">
-                                <div className="px-5 py-3 bg-intelligence/10 border-b border-intelligence/20">
-                                    <span className="text-sm font-semibold text-intelligence uppercase tracking-wider">Structured View</span>
-                                </div>
-                                <iframe
-                                    srcDoc={iframeSrc}
-                                    className="w-full border-0 rounded-b-2xl"
-                                    style={{ minHeight: '600px', background: isFullDoc ? '#0a0c10' : '#fff' }}
-                                    sandbox="allow-same-origin allow-scripts allow-popups"
-                                    title="Structured View"
-                                    onLoad={(e) => {
-                                        const iframe = e.target as HTMLIFrameElement
-                                        const resize = () => {
-                                            try {
-                                                if (iframe.contentDocument?.documentElement) {
-                                                    const h = Math.max(600, iframe.contentDocument.documentElement.scrollHeight + 48)
-                                                    iframe.style.height = h + 'px'
-                                                }
-                                            } catch { /* sandbox restriction */ }
-                                        }
-                                        resize()
-                                        setTimeout(resize, 300)
-                                        setTimeout(resize, 1000)
-                                        setTimeout(resize, 3000)
-                                    }}
-                                />
-                            </div>
-                            )
-                        })()}
-                    </div>
-                )}
-
-                <article id={content.id} className="prose prose-invert prose-lg max-w-none">
+                {/* Main article body — prefer htmlContent (rich text from admin), fall back to content */}
+                <article id={content.id} className="prose prose-invert prose-lg max-w-none mb-8">
                     <div
-                        className="text-gray-300 leading-relaxed [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-white [&>h1]:mt-8 [&>h1]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h2]:mt-8 [&>h2]:mb-4 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:text-white [&>h3]:mt-6 [&>h3]:mb-3 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>li]:mb-2 [&>blockquote]:border-l-4 [&>blockquote]:border-intelligence [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-400 [&>a]:text-intelligence [&>a]:hover:underline [&>code]:bg-gray-800 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>pre]:bg-gray-900 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto"
-                        dangerouslySetInnerHTML={{ __html: content.content }}
+                        className="text-gray-300 leading-relaxed
+                            [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-white [&>h1]:mt-8 [&>h1]:mb-4
+                            [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h2]:mt-8 [&>h2]:mb-4
+                            [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:text-white [&>h3]:mt-6 [&>h3]:mb-3
+                            [&>h4]:text-lg [&>h4]:font-semibold [&>h4]:text-gray-100 [&>h4]:mt-4 [&>h4]:mb-2
+                            [&>p]:mb-4 [&>p]:leading-relaxed
+                            [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4
+                            [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4
+                            [&>li]:mb-2
+                            [&>blockquote]:border-l-4 [&>blockquote]:border-intelligence [&>blockquote]:pl-4 [&>blockquote]:py-1 [&>blockquote]:italic [&>blockquote]:text-gray-400 [&>blockquote]:my-4
+                            [&>a]:text-intelligence [&>a]:hover:underline
+                            [&>code]:bg-gray-800 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>code]:text-sm [&>code]:text-champagne
+                            [&>pre]:bg-gray-900 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>pre]:mb-4
+                            [&>img]:rounded-xl [&>img]:max-w-full [&>img]:my-6
+                            [&>hr]:border-gray-700 [&>hr]:my-8
+                            [&>table]:w-full [&>table]:border-collapse [&>table]:mb-4
+                            [&_th]:border [&_th]:border-gray-700 [&_th]:bg-gray-800 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:text-sm
+                            [&_td]:border [&_td]:border-gray-700 [&_td]:px-3 [&_td]:py-2 [&_td]:text-sm
+                            [&>strong]:text-white [&>b]:text-white"
+                        dangerouslySetInnerHTML={{ __html: content.htmlContent || content.content }}
                     />
                 </article>
 
@@ -398,8 +363,7 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                     </div>
                 )}
 
-                {/* Related Articles */}
-                <RelatedArticles currentSlug={actualSlug} currentType={content.type} />
+
 
                 {/* Share Buttons */}
                 <div className="mt-12 pt-8 border-t border-gray-800">
@@ -439,6 +403,9 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                         <span>Back to All Dossiers</span>
                     </Link>
                 </div>
+
+                {/* Related Intelligence — always at the very bottom */}
+                <RelatedArticles currentSlug={actualSlug} currentType={content.type} />
             </div>
         </div>
     )
