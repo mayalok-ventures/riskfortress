@@ -69,11 +69,39 @@ export default function RelatedArticles({ currentSlug, currentType }: RelatedArt
     if (!currentSlug || currentSlug === '_placeholder') return
     let cancelled = false
     setLoading(true)
-    fetch(`/api/content/related?slug=${encodeURIComponent(currentSlug)}&limit=5`)
-      .then((r) => r.ok ? r.json() : [])
-      .then((data: RelatedItem[]) => { if (!cancelled) setItems(data || []) })
-      .catch(() => { if (!cancelled) setItems([]) })
-      .finally(() => { if (!cancelled) setLoading(false) })
+
+    const fallbackToRecent = async (): Promise<RelatedItem[]> => {
+      try {
+        const r = await fetch('/api/content?published=true')
+        if (!r.ok) return []
+        const all: RelatedItem[] = await r.json()
+        return (Array.isArray(all) ? all : [])
+          .filter((c) => c.slug && c.slug !== currentSlug && c.slug !== '_placeholder')
+          .sort((a, b) => +new Date(b.publishedAt || 0) - +new Date(a.publishedAt || 0))
+          .slice(0, 5)
+      } catch {
+        return []
+      }
+    }
+
+    ;(async () => {
+      let data: RelatedItem[] = []
+      try {
+        const r = await fetch(`/api/content/related?slug=${encodeURIComponent(currentSlug)}&limit=5`)
+        if (r.ok) {
+          const json = await r.json()
+          if (Array.isArray(json)) data = json
+        }
+      } catch {
+        /* swallow — fallback below */
+      }
+      if (!data.length) data = await fallbackToRecent()
+      if (!cancelled) {
+        setItems(data)
+        setLoading(false)
+      }
+    })()
+
     return () => { cancelled = true }
   }, [currentSlug])
 

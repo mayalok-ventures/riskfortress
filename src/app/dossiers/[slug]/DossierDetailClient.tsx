@@ -1,6 +1,6 @@
 'use client'
 
-import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, Share2 } from 'lucide-react'
+import { Shield, Lock, FileText, Building, Cpu, ArrowLeft, Calendar, User, Tag, MapPin, Share2, BookOpen, Code2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -47,6 +47,7 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
     const [accessDenied, setAccessDenied] = useState(false)
     const [emailVerified, setEmailVerified] = useState(false)
     const [showEmailModal, setShowEmailModal] = useState(false)
+    const [viewMode, setViewMode] = useState<'reading' | 'structured'>('reading')
 
     const cleanPath = pathname?.replace(/\/$/, '') || ''
     const actualSlug = cleanPath.split('/').filter(Boolean).pop() || initialSlug
@@ -318,31 +319,107 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                     </div>
                 )}
 
-                {/* Main article body — prefer htmlContent (rich text from admin), fall back to content */}
-                <article id={content.id} className="prose prose-invert prose-lg max-w-none mb-8">
-                    <div
-                        className="text-gray-300 leading-relaxed
-                            [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-white [&>h1]:mt-8 [&>h1]:mb-4
-                            [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h2]:mt-8 [&>h2]:mb-4
-                            [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:text-white [&>h3]:mt-6 [&>h3]:mb-3
-                            [&>h4]:text-lg [&>h4]:font-semibold [&>h4]:text-gray-100 [&>h4]:mt-4 [&>h4]:mb-2
-                            [&>p]:mb-4 [&>p]:leading-relaxed
-                            [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4
-                            [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4
-                            [&>li]:mb-2
-                            [&>blockquote]:border-l-4 [&>blockquote]:border-intelligence [&>blockquote]:pl-4 [&>blockquote]:py-1 [&>blockquote]:italic [&>blockquote]:text-gray-400 [&>blockquote]:my-4
-                            [&>a]:text-intelligence [&>a]:hover:underline
-                            [&>code]:bg-gray-800 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>code]:text-sm [&>code]:text-champagne
-                            [&>pre]:bg-gray-900 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>pre]:mb-4
-                            [&>img]:rounded-xl [&>img]:max-w-full [&>img]:my-6
-                            [&>hr]:border-gray-700 [&>hr]:my-8
-                            [&>table]:w-full [&>table]:border-collapse [&>table]:mb-4
-                            [&_th]:border [&_th]:border-gray-700 [&_th]:bg-gray-800 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:text-sm
-                            [&_td]:border [&_td]:border-gray-700 [&_td]:px-3 [&_td]:py-2 [&_td]:text-sm
-                            [&>strong]:text-white [&>b]:text-white"
-                        dangerouslySetInnerHTML={{ __html: content.htmlContent || content.content }}
-                    />
-                </article>
+                {/* Main article body — Reading View (default) shows the plain content
+                    the author entered; Structured View shows the rich HTML from admin. */}
+                {(() => {
+                    const plain = (content.content || '').trim()
+                    const html = (content.htmlContent || '').trim()
+                    const hasBoth = !!plain && !!html
+                    // Effective mode: if both exist honour user toggle; otherwise auto-pick
+                    const effectiveMode = hasBoth
+                        ? viewMode
+                        : html
+                          ? 'structured'
+                          : 'reading'
+
+                    // Reading view: render plain text/markdown-ish content with paragraphs
+                    const readingHtml = plain
+                        .split(/\n{2,}/)
+                        .map((para) => {
+                            const safe = para
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
+                                .replace(/\n/g, '<br/>')
+                            return `<p>${safe}</p>`
+                        })
+                        .join('')
+
+                    return (
+                        <>
+                            {hasBoth && (
+                                <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
+                                    <div className="inline-flex items-center rounded-full border border-gray-800 bg-gray-900/60 p-1 backdrop-blur">
+                                        <button
+                                            type="button"
+                                            onClick={() => setViewMode('reading')}
+                                            className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all ${
+                                                effectiveMode === 'reading'
+                                                    ? 'bg-intelligence text-gray-950 shadow-md'
+                                                    : 'text-gray-400 hover:text-white'
+                                            }`}
+                                            aria-pressed={effectiveMode === 'reading'}
+                                        >
+                                            <BookOpen className="h-3.5 w-3.5" />
+                                            Reading View
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setViewMode('structured')}
+                                            className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all ${
+                                                effectiveMode === 'structured'
+                                                    ? 'bg-champagne text-gray-950 shadow-md'
+                                                    : 'text-gray-400 hover:text-white'
+                                            }`}
+                                            aria-pressed={effectiveMode === 'structured'}
+                                        >
+                                            <Code2 className="h-3.5 w-3.5" />
+                                            Structured View
+                                        </button>
+                                    </div>
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-600">
+                                        {effectiveMode === 'reading'
+                                            ? 'Plain narrative as authored'
+                                            : 'Rich-formatted HTML render'}
+                                    </span>
+                                </div>
+                            )}
+
+                            <article
+                                id={content.id}
+                                className="prose prose-invert prose-lg max-w-none mb-8"
+                            >
+                                <div
+                                    className="text-gray-300 leading-relaxed
+                                        [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:text-white [&>h1]:mt-8 [&>h1]:mb-4
+                                        [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-white [&>h2]:mt-8 [&>h2]:mb-4
+                                        [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:text-white [&>h3]:mt-6 [&>h3]:mb-3
+                                        [&>h4]:text-lg [&>h4]:font-semibold [&>h4]:text-gray-100 [&>h4]:mt-4 [&>h4]:mb-2
+                                        [&>p]:mb-4 [&>p]:leading-relaxed
+                                        [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4
+                                        [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4
+                                        [&>li]:mb-2
+                                        [&>blockquote]:border-l-4 [&>blockquote]:border-intelligence [&>blockquote]:pl-4 [&>blockquote]:py-1 [&>blockquote]:italic [&>blockquote]:text-gray-400 [&>blockquote]:my-4
+                                        [&>a]:text-intelligence [&>a]:hover:underline
+                                        [&>code]:bg-gray-800 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded [&>code]:text-sm [&>code]:text-champagne
+                                        [&>pre]:bg-gray-900 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto [&>pre]:mb-4
+                                        [&>img]:rounded-xl [&>img]:max-w-full [&>img]:my-6
+                                        [&>hr]:border-gray-700 [&>hr]:my-8
+                                        [&>table]:w-full [&>table]:border-collapse [&>table]:mb-4
+                                        [&_th]:border [&_th]:border-gray-700 [&_th]:bg-gray-800 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:text-sm
+                                        [&_td]:border [&_td]:border-gray-700 [&_td]:px-3 [&_td]:py-2 [&_td]:text-sm
+                                        [&>strong]:text-white [&>b]:text-white"
+                                    dangerouslySetInnerHTML={{
+                                        __html:
+                                            effectiveMode === 'structured'
+                                                ? html || readingHtml
+                                                : readingHtml || html,
+                                    }}
+                                />
+                            </article>
+                        </>
+                    )
+                })()}
 
                 {content.images && content.images.length > 0 && (
                     <div className="mt-12">
