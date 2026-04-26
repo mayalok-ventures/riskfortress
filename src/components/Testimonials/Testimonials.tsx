@@ -1,25 +1,7 @@
 'use client'
 
 import { MotionDiv } from '@/lib/motion'
-import { Shield, Eye, Lock } from 'lucide-react'
-
-const valueProps = [
-    {
-        icon: Shield,
-        title: 'Beyond Compliance',
-        description: 'Traditional risk management reacts to threats. We predict them — identifying the fractures in governance, regulation, and market structure that precede catastrophic loss.',
-    },
-    {
-        icon: Eye,
-        title: 'Forensic Foresight',
-        description: 'Our intelligence methodology combines statutory forensics, macro-financial analysis, and geo-environmental mapping to deliver foresight that no single discipline can provide.',
-    },
-    {
-        icon: Lock,
-        title: 'Absolute Confidentiality',
-        description: 'Every engagement is protected by military-grade encryption and zero-retention protocols. Our advisors\' identities are as rigorously protected as our clients\' assets.',
-    },
-]
+import { Lock, EyeOff } from 'lucide-react'
 
 export default function Testimonials() {
     return (
@@ -27,33 +9,50 @@ export default function Testimonials() {
             <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-gray-950" />
 
             <div className="container relative z-10 mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-light mb-6">
-                        <span className="text-white">Why</span>{' '}
-                        <span className="text-champagne">RiskFortress</span>
-                    </h2>
-                    <p className="text-xl text-gray-400 max-w-3xl mx-auto font-light">
-                        Preserving generational wealth through absolute foresight.
-                    </p>
-                </div>
+                <div className="max-w-4xl mx-auto">
+                    {/* Section heading */}
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center space-x-3 px-5 py-2.5 border border-champagne/20 mb-8">
+                            <EyeOff className="h-3.5 w-3.5 text-champagne" />
+                            <span className="text-xs tracking-[0.25em] uppercase text-champagne font-light">
+                                Client Confidentiality Protocol
+                            </span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-light mb-6">
+                            <span className="text-white">Absolute</span>{' '}
+                            <span className="text-champagne">Embargo.</span>
+                        </h2>
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {valueProps.map((prop, index) => (
-                        <MotionDiv
-                            key={prop.title}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, delay: index * 0.05 }}
-                            viewport={{ once: true, amount: 0.1 }}
-                            className="p-8 rounded-2xl glass-morphism border border-gray-800 hover:border-champagne/30 transition-all"
-                        >
-                            <div className="p-3 rounded-xl bg-champagne/10 inline-block mb-6">
-                                <prop.icon className="h-8 w-8 text-champagne" />
+                    {/* Central Confidentiality Statement */}
+                    <MotionDiv
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        viewport={{ once: true, amount: 0.1 }}
+                        className="p-12 border border-champagne/15 bg-champagne/[0.03] text-center"
+                    >
+                        <Lock className="h-8 w-8 text-champagne mx-auto mb-8 opacity-60" />
+                        <p className="text-lg text-gray-300 font-light leading-relaxed max-w-3xl mx-auto">
+                            Due to the highly sensitive nature of our enterprise intelligence and valuation
+                            protection services, all client identities, audit parameters, and threat models
+                            are strictly embargoed. We operate on a zero-disclosure architecture.
+                        </p>
+                        <div className="mt-10 pt-8 border-t border-white/5 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                            <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Client Identity</p>
+                                <p className="text-champagne font-light">Permanently Withheld</p>
                             </div>
-                            <h3 className="text-xl font-semibold text-white mb-4">{prop.title}</h3>
-                            <p className="text-gray-400 leading-relaxed">{prop.description}</p>
-                        </MotionDiv>
-                    ))}
+                            <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Audit Parameters</p>
+                                <p className="text-champagne font-light">Classified</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Threat Models</p>
+                                <p className="text-champagne font-light">Zero-Retention</p>
+                            </div>
+                        </div>
+                    </MotionDiv>
                 </div>
             </div>
         </section>

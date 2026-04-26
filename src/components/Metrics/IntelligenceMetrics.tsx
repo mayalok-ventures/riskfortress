@@ -1,16 +1,32 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Shield, Eye, Lock, Target } from 'lucide-react'
+import { Shield, TrendingDown, Zap, Lock } from 'lucide-react'
 
 import AnimateOnScroll from '@/components/AnimateOnScroll'
 import { staggerContainer, scaleIn } from '@/lib/animations'
 
 const pillars = [
-    { icon: Shield, title: 'Absolute Discretion', subtitle: 'Every engagement is confidential by design' },
-    { icon: Eye, title: 'Predictive Intelligence', subtitle: 'We identify crises before they become catastrophes' },
-    { icon: Lock, title: '₹100Cr+ Threshold', subtitle: 'We only engage where the stakes are existential' },
-    { icon: Target, title: '1% Fee Model', subtitle: 'Aligned incentives — we succeed only when you don\'t lose' },
+    {
+        icon: Shield,
+        title: 'Enterprise Value Protection',
+        subtitle: 'Engineered for high-margin SaaS & Hybrid Consulting',
+    },
+    {
+        icon: TrendingDown,
+        title: 'Forensic Architecture',
+        subtitle: 'Identifying silent valuation killers before they strike',
+    },
+    {
+        icon: Zap,
+        title: 'Deployment Speed',
+        subtitle: 'Rapid infrastructure securization, zero operational drag',
+    },
+    {
+        icon: Lock,
+        title: 'Zero-Disclosure Architecture',
+        subtitle: 'Client identities & threat models strictly embargoed',
+    },
 ]
 
 export default function IntelligenceMetrics() {

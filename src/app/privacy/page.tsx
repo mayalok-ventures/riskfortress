@@ -203,13 +203,12 @@ export default function PrivacyPage() {
         <footer style={s.footer}>
           <p><strong style={{color:'#C9A84C'}}>RiskFortress Intelligence</strong></p>
           <p>A Mayalok Ventures Entity &nbsp;|&nbsp; DPIIT Registered</p>
-          <p>Pari Chowk, Greater Noida, Uttar Pradesh 201310, India</p>
-          <p style={{fontSize:'12px', color:'#444', marginTop:'8px'}}>Operating under Mayalok Ventures (DPIIT Registered). Corporate registration (CIN) will be updated upon Private Limited incorporation.</p>
+          <p>Intelligence Node: Greater Noida, NCR, India</p>
           <p style={{marginTop:'12px'}}>
             <a href="/privacy" style={s.footerLink}>Privacy Protocols</a>
             <a href="/terms" style={s.footerLink}>Master Service Agreement</a>
           </p>
-          <p style={{marginTop:'12px', fontSize:'12px', color:'#444'}}>&copy; 2026 RiskFortress Intelligence. All Rights Reserved. &nbsp;|&nbsp; RF/LEGAL/PRIVACY/2026-001</p>
+          <p style={{marginTop:'12px', fontSize:'12px', color:'#444'}}>&copy; 2026 Mayalok Ventures. All rights reserved.</p>
         </footer>
       </div>
     </div>
