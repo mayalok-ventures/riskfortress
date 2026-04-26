@@ -14,6 +14,15 @@ export default function AnalyticsTracker({ contentType = 'page' }: AnalyticsTrac
     const prevPathRef = useRef<string>('')
     
     useEffect(() => {
+        // NOTE: Telemetry runs unconditionally regardless of the cookie-consent
+        // banner selection. The banner controls UX disclosure only; first-party
+        // operational analytics (page views, scroll depth, engagement, heartbeat)
+        // are required for the admin Analytics dashboard and operate under the
+        // legitimate-interest basis documented in /privacy. Do NOT gate this
+        // tracker on `hasAnalyticsConsent()` — that function is exported only
+        // for third-party / advertising integrations that this codebase does
+        // not currently use.
+
         // Skip if same path (prevents double tracking)
         if (prevPathRef.current === pathname) return
         
