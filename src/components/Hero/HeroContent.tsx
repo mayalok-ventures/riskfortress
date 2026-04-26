@@ -117,7 +117,7 @@ export default function Hero() {
                                     className="group px-10 py-5 bg-champagne text-obsidian font-medium tracking-widest uppercase text-sm transition-all hover:bg-champagne-light inline-flex items-center space-x-4"
                                 >
                                     <Eye className="h-4 w-4" />
-                                    <span>Request a Discrete Consultation</span>
+                                    <span>Request Confidential Audit</span>
                                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                 </Link>
                             </motion.div>

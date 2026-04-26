@@ -551,7 +551,7 @@ ${htmlContent ? '<div class="content html-section">' + htmlContent + '</div>' : 
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
                                     className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm placeholder-gray-500 focus:border-intelligence focus:outline-none"
-                                    placeholder="e.g. Mumbai, Maharashtra"
+                                    placeholder="e.g. Greater Noida, NCR"
                                 />
                             </div>
                         </div>

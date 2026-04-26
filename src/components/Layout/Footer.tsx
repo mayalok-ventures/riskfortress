@@ -158,7 +158,7 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <span className="text-gray-500 text-sm">New Delhi, India</span>
+                                        <span className="text-gray-500 text-sm">Intelligence Node: Greater Noida, NCR, India</span>
                                     </li>
                                 </>
                             )}
@@ -171,10 +171,10 @@ export default function Footer() {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
                         <div>
                             <p className="text-xs text-gray-600">
-                                © {new Date().getFullYear()} RiskFortress. All rights reserved.
+                                © 2026 Mayalok Ventures. All rights reserved.
                             </p>
                             <p className="text-xs text-gray-700 mt-1">
-                                A Mayalok Ventures Entity · DPIIT Registered · Greater Noida, Delhi NCR
+                                RiskFortress · A Mayalok Ventures Entity · Intelligence Node: Greater Noida, NCR
                             </p>
                             <p className="text-xs text-gray-700 mt-1">
                                 Research published in{' '}
