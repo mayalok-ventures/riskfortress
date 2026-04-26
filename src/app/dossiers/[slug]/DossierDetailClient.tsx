@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 
 import ExportPDFButton from '@/components/ExportPDFButton'
 import ProfessionalEmailModal from '@/components/ProfessionalEmailModal'
+import RelatedArticles from '@/components/RelatedArticles'
 import { trackShare } from '@/lib/analytics'
 import { getContentBySlug, type ContentItem } from '@/lib/content'
 
@@ -396,6 +397,9 @@ export default function DossierDetailClient({ slug: initialSlug }: { slug: strin
                         </div>
                     </div>
                 )}
+
+                {/* Related Articles */}
+                <RelatedArticles currentSlug={actualSlug} currentType={content.type} />
 
                 {/* Share Buttons */}
                 <div className="mt-12 pt-8 border-t border-gray-800">
