@@ -273,6 +273,14 @@ function buildSSRPage(item: Record<string, unknown>, slug: string): string {
       border-radius: 8px;
       padding: 1.75rem;
     }
+    .structured-frame {
+      width: 100%;
+      min-height: 720px;
+      border: 1px solid rgba(200,169,110,0.18);
+      border-radius: 8px;
+      background: #faf7f1;
+      display: block;
+    }
 
     .keywords-section {
       margin-top: 3rem;
@@ -345,9 +353,9 @@ function buildSSRPage(item: Record<string, unknown>, slug: string): string {
       <div class="structured-divider">
         <span class="structured-label">Structured View</span>
       </div>
-      <div class="article-body structured-body">
-        ${structuredHtml}
-      </div>
+      ${/^\s*(?:<!doctype\s+html[\s>]|<html[\s>])/i.test(structuredHtml)
+        ? `<iframe class="structured-frame" srcdoc="${escapeHtml(structuredHtml)}" sandbox="allow-same-origin allow-popups" loading="lazy" title="Structured view"></iframe>`
+        : `<div class="article-body structured-body">${structuredHtml}</div>`}
     </section>` : ''}
 
     ${keywords.length > 0 ? `
@@ -369,6 +377,26 @@ function buildSSRPage(item: Record<string, unknown>, slug: string): string {
     // Signal to React that SSR content is available
     window.__RF_SSR__ = true;
     window.__RF_SLUG__ = ${escapeJson(slug)};
+
+    // Auto-resize the structured-view iframe so it grows to fit its full content
+    (function () {
+      var f = document.querySelector('iframe.structured-frame');
+      if (!f) return;
+      function fit() {
+        try {
+          var doc = f.contentDocument || (f.contentWindow && f.contentWindow.document);
+          if (!doc || !doc.documentElement) return;
+          var h = Math.max(720, doc.documentElement.scrollHeight + 32);
+          f.style.height = h + 'px';
+        } catch (e) { /* cross-origin: leave default min-height */ }
+      }
+      f.addEventListener('load', function () {
+        fit();
+        setTimeout(fit, 250);
+        setTimeout(fit, 1000);
+      });
+      window.addEventListener('resize', fit);
+    })();
   </script>
 </body>
 </html>`
