@@ -24,6 +24,129 @@ function escapeJson(str: string): string {
   return JSON.stringify(str)
 }
 
+// Rewrite the placeholder HTML so each case URL gets unique meta tags
+// (title, description, OG, Twitter, canonical, JSON-LD) without exposing body content.
+function rewriteCasePlaceholder(
+  baseResponse: Response,
+  item: Record<string, unknown>,
+  slug: string
+): Response {
+  const title = String(item.title || 'Intelligence Dossier')
+  const summary = String(item.summary || 'Confidential RiskFortress intelligence dossier — access restricted.')
+  const author = String(item.author || 'RiskFortress Intelligence Team')
+  const keywords = Array.isArray(item.keywords) ? (item.keywords as string[]) : []
+  const thumbnailRaw = item.thumbnail ? String(item.thumbnail) : ''
+  const thumbnail = thumbnailRaw
+    ? (thumbnailRaw.startsWith('http') ? thumbnailRaw : `${SITE_URL}${thumbnailRaw}`)
+    : `${SITE_URL}/og-image.png`
+  const publishedAt = String(item.publishedAt || item.createdAt || '')
+  const updatedAt = String(item.updatedAt || publishedAt)
+  const canonicalUrl = `${SITE_URL}/dossiers/${slug}/`
+  const fullTitle = `${title} | Intelligence Dossier | RiskFortress`
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description: summary,
+    author: { '@type': 'Organization', name: author },
+    publisher: {
+      '@type': 'Organization',
+      name: 'RiskFortress India',
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/og-image.png` },
+    },
+    datePublished: publishedAt,
+    dateModified: updatedAt,
+    image: thumbnail,
+    keywords: keywords.join(', '),
+    isAccessibleForFree: false,
+    hasPart: { '@type': 'WebPageElement', isAccessibleForFree: false, cssSelector: '.case-body' },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+    url: canonicalUrl,
+  }
+
+  // Block to append into <head> with all unique meta + JSON-LD
+  const headInjection = `
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="${escapeHtml(title)}" />
+    <meta property="og:description" content="${escapeHtml(summary)}" />
+    <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
+    <meta property="og:image" content="${escapeHtml(thumbnail)}" />
+    <meta property="og:site_name" content="RiskFortress India" />
+    <meta property="og:locale" content="en_IN" />
+    ${publishedAt ? `<meta property="article:published_time" content="${escapeHtml(publishedAt)}" />` : ''}
+    ${updatedAt ? `<meta property="article:modified_time" content="${escapeHtml(updatedAt)}" />` : ''}
+    ${keywords.map((k) => `<meta property="article:tag" content="${escapeHtml(k)}" />`).join('\n    ')}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escapeHtml(title)}" />
+    <meta name="twitter:description" content="${escapeHtml(summary)}" />
+    <meta name="twitter:image" content="${escapeHtml(thumbnail)}" />
+    <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
+  `
+
+  // HTMLRewriter is provided by the Cloudflare Workers/Pages runtime
+  const rewriter = new HTMLRewriter()
+    .on('title', {
+      element(el) {
+        el.setInnerContent(fullTitle)
+      },
+    })
+    .on('meta[name="description"]', {
+      element(el) {
+        el.setAttribute('content', summary)
+      },
+    })
+    .on('meta[name="keywords"]', {
+      element(el) {
+        if (keywords.length) el.setAttribute('content', keywords.join(', '))
+      },
+    })
+    .on('meta[name="robots"]', {
+      element(el) {
+        // Cases are email-gated — keep them out of search indexes,
+        // but follow links so the site graph still gets crawled.
+        el.setAttribute('content', 'noindex, follow')
+      },
+    })
+    .on('meta[name="googlebot"]', {
+      element(el) {
+        el.setAttribute('content', 'noindex, follow')
+      },
+    })
+    .on('link[rel="canonical"]', {
+      element(el) {
+        el.setAttribute('href', canonicalUrl)
+      },
+    })
+    // Replace any pre-existing OG/Twitter tags emitted by Next.js so they don't conflict.
+    .on('meta[property^="og:"]', {
+      element(el) {
+        el.remove()
+      },
+    })
+    .on('meta[name^="twitter:"]', {
+      element(el) {
+        el.remove()
+      },
+    })
+    .on('head', {
+      element(el) {
+        el.append(headInjection, { html: true })
+      },
+    })
+
+  const transformed = rewriter.transform(baseResponse)
+
+  return new Response(transformed.body, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=300, s-maxage=600, stale-while-revalidate=3600',
+      'X-Robots-Tag': 'noindex, follow',
+    },
+  })
+}
+
 function formatDateDisplay(dateStr: string | undefined): string {
   if (!dateStr) return ''
   try {
@@ -445,18 +568,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const item = { id: doc.id, ...doc.data() } as Record<string, unknown>
     const type = String(item.type || '')
 
-    // Cases are email-gated — serve the placeholder so client-side handles the gate
+    // Cases are email-gated — serve the placeholder shell, but inject UNIQUE
+    // meta tags (title/description/OG/Twitter/canonical/JSON-LD) so every case URL
+    // has its own social-share preview & search representation. Body stays gated.
     if (type === 'case') {
       try {
         const placeholderUrl = new URL('/dossiers/_placeholder/', url.origin)
         const response = await context.env.ASSETS.fetch(placeholderUrl)
-        return new Response(response.body, {
-          status: 200,
-          headers: {
-            'Content-Type': 'text/html; charset=utf-8',
-            'Cache-Control': 'public, max-age=60, s-maxage=300',
-          },
-        })
+        return rewriteCasePlaceholder(response, item, slug)
       } catch {
         return new Response('Not Found', { status: 404 })
       }
