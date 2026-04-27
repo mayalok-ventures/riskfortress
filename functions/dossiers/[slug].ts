@@ -45,7 +45,11 @@ function buildSSRPage(item: Record<string, unknown>, slug: string): string {
   const keywords = Array.isArray(item.keywords) ? (item.keywords as string[]) : []
   const publishedAt = String(item.publishedAt || item.createdAt || '')
   const updatedAt = String(item.updatedAt || publishedAt)
-  const htmlContent = String(item.htmlContent || item.content || '')
+  // Two separate fields from the admin panel:
+  //   - `content`     => rich-text "Text Article" body (always shown)
+  //   - `htmlContent` => optional raw HTML "Structured View" (shown after the text)
+  const textContent = String(item.content || '')
+  const structuredHtml = String(item.htmlContent || '')
   const canonicalUrl = `${SITE_URL}/dossiers/${slug}/`
   const type = String(item.type || 'article')
 
@@ -239,6 +243,37 @@ function buildSSRPage(item: Record<string, unknown>, slug: string): string {
     }
     .article-body pre code { background: none; padding: 0; color: inherit; }
 
+    .structured-view {
+      margin-top: 3rem;
+      padding-top: 2rem;
+    }
+    .structured-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .structured-divider::before,
+    .structured-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(200,169,110,0.18);
+    }
+    .structured-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #c8a96e;
+    }
+    .structured-body {
+      background: rgba(200,169,110,0.04);
+      border: 1px solid rgba(200,169,110,0.12);
+      border-radius: 8px;
+      padding: 1.75rem;
+    }
+
     .keywords-section {
       margin-top: 3rem;
       padding-top: 1.5rem;
@@ -302,9 +337,18 @@ function buildSSRPage(item: Record<string, unknown>, slug: string): string {
 
     ${summary ? `<div class="summary-block">${escapeHtml(summary)}</div>` : ''}
 
-    <article class="article-body">
-      ${htmlContent}
-    </article>
+    ${textContent ? `<article class="article-body" id="text-article">
+      ${textContent}
+    </article>` : ''}
+
+    ${structuredHtml ? `<section class="structured-view" id="structured-view" aria-label="Structured View">
+      <div class="structured-divider">
+        <span class="structured-label">Structured View</span>
+      </div>
+      <div class="article-body structured-body">
+        ${structuredHtml}
+      </div>
+    </section>` : ''}
 
     ${keywords.length > 0 ? `
     <div class="keywords-section">
